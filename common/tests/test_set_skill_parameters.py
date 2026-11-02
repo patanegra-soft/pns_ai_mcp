@@ -42,7 +42,7 @@ class TestSetSkillParameters(TransactionCase):
                 '    codes = codes\n'
                 'except NameError:\n'
                 '    codes = None\n'
-                'result = 1'
+                'result = {"data": [], "__return_direct__": True}'
             ),
         }
         vals.update(extra)
