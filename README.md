@@ -1,14 +1,17 @@
-# AI Engine (pns_ai_mcp) — native Odoo AI for integrators
+# AI Engine (pns_ai_mcp)
 
 ![Native Odoo AI for integrators](static/description/banner.png)
 
-The AI Engine runs inside your client's Odoo. Providers, agents, knowledge
-and approvals are Odoo records, and the agents live in plain Odoo modules.
-Open source, nothing to license. Odoo **14.0** and **19.0**.
+**[English](#english) · [Español](#español)**
 
-*Español más abajo.*
+## English
 
-## The pain
+**Native Odoo AI for integrators.** The AI Engine runs inside your client's
+Odoo. Providers, agents, knowledge and approvals are Odoo records, and the
+agents live in plain Odoo modules. Open source, nothing to license. Odoo
+**14.0** and **19.0**.
+
+### The pain
 
 **You want native Odoo AI for every client: open source, built on modules, with no licences.**
 Not a service on the side that you connect client by client. An AI that
@@ -21,7 +24,7 @@ client already runs. Here the agents live in plain Odoo modules.
 | **02 — What if the AI writes in production?** | Its code runs in a read-only sandbox. To change anything it proposes a plan, and a person approves it. |
 | **03 — A closed prompt that does not know your client?** | Contexts are edited and extended inside Odoo: their vocabulary, their rules, their habits. |
 
-## What you get
+### What you get
 
 **Agents that are Odoo**
 - An agent is a record that a module brings with it. Install the module and the agent is there; uninstall it and it goes.
@@ -55,7 +58,7 @@ client already runs. Here the agents live in plain Odoo modules.
 - A plain Odoo module: no external server to run.
 - Same module at every client on a supported series.
 
-## Getting started
+### Getting started
 
 1. **Install.** Clone the `14.0` or `19.0` branch of `pns_ai_mcp` and `pns_base` into the addons path and install the AI Engine from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
 2. **Become AI administrator.** *Settings → Users*: give yourself **AI Administrator**. Log out and back in.
@@ -64,14 +67,66 @@ client already runs. Here the agents live in plain Odoo modules.
 
 **Done.** Point Cursor (or any MCP client) at `https://<your-odoo>/mcp` with the key in the `X-MCP-API-Key` header.
 
-<details>
-<summary><strong>Español</strong></summary>
+### For IT staff
 
-## IA nativa de Odoo para instaladores
+#### Repository layout
 
-El Motor de IA corre dentro del Odoo de tu cliente. Proveedores, agentes,
-conocimiento y aprobaciones son registros de Odoo, y los agentes viven en
-módulos normales de Odoo. Código abierto, nada que licenciar. Odoo **14.0** y **19.0**.
+`main` is one tree for every series. A flat branch (`14.0`, `19.0`) is that tree built for one series, ready for the addons path.
+
+| Path | Contents |
+| :--- | :--- |
+| `common/` | Version-agnostic code, skills, contexts, data, Apps sheet |
+| `stacks/owl1/pns_ai_mcp/` | Odoo 14 |
+| `stacks/owl2/pns_ai_mcp/` | Odoo 15 and later |
+
+The installer overlays `common/` then the stack; a stack file with the same
+path wins. Edit agnostic files only in `common/`. Build a flat module with
+`./install_flat.sh 19.0 /path/to/addons`. Domain UI helpers: `utils/mcp_ui.py`.
+
+Python: do not add `requests` or `reportlab` (Odoo already ships them).
+`pns_base` needs no extra pip. On 14, use a current `openpyxl` (old wheels
+break with recent NumPy).
+
+#### Odoo versions
+
+| Series | Status |
+| :--- | :--- |
+| 14.0, 19.0 | Tested. Flat branch published. |
+| 15.0 – 18.0 | `install_flat.sh` builds them and warns that they are not tested yet. |
+| 13.0 and older | Not supported. |
+
+Odoo 13 has no OWL, which the AI chat is built on. Odoo 8 to 12 run on a
+Python older than 3.7, which the engine needs. The suite keeps two stacks
+(`owl1` for 14.0, `owl2` for 15.0 and later).
+
+#### Tests
+
+| Where you are | What runs |
+| :--- | :--- |
+| `main` | `python -m pytest unit_tests`, with no Odoo. Then the Odoo tests, after `./install_flat.sh 19.0 <dir>`. |
+| A flat branch (`14.0`, `19.0`) | The Odoo tests in `tests/`. The unit tests live on `main`. |
+
+```bash
+odoo-bin -d <db> -i pns_ai_mcp --test-enable --stop-after-init --test-tags /pns_ai_mcp
+```
+
+### License, marks, training
+
+Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
+PATANEGRA Soft™ and PAAP™ (Patanegra Application Agent Protocol, which this
+engine implements) are trademarks of PATANEGRA Soft SL; the license does
+not grant them. TDM / AI training is allowed (TDMRep `tdm-reservation = 0`).
+
+Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.md](CONTRIBUTING.md).
+
+---
+
+## Español
+
+**IA nativa de Odoo para instaladores.** El Motor de IA corre dentro del Odoo
+de tu cliente. Proveedores, agentes, conocimiento y aprobaciones son registros
+de Odoo, y los agentes viven en módulos normales de Odoo. Código abierto, nada
+que licenciar. Odoo **14.0** y **19.0**.
 
 ### El dolor
 
@@ -129,58 +184,55 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 
 **Listo.** Apunta Cursor (o cualquier cliente MCP) a `https://<tu-odoo>/mcp` con la clave en la cabecera `X-MCP-API-Key`.
 
-</details>
+### Para el equipo de IT
 
----
+#### Estructura del repositorio
 
-## For developers
+`main` es un solo árbol para todas las versiones. Una rama plana (`14.0`, `19.0`) es ese árbol construido para una versión, listo para el addons path.
 
-### Repository layout
-
-`main` is one tree for every series. A flat branch (`14.0`, `19.0`) is that tree built for one series, ready for the addons path.
-
-| Path | Contents |
+| Ruta | Contenido |
 | :--- | :--- |
-| `common/` | Version-agnostic code, skills, contexts, data, Apps sheet |
+| `common/` | Código común a todas las versiones, skills, contextos, datos, ficha de Apps |
 | `stacks/owl1/pns_ai_mcp/` | Odoo 14 |
-| `stacks/owl2/pns_ai_mcp/` | Odoo 15 and later |
+| `stacks/owl2/pns_ai_mcp/` | Odoo 15 y siguientes |
 
-The installer overlays `common/` then the stack; a stack file with the same
-path wins. Edit agnostic files only in `common/`. Build a flat module with
-`./install_flat.sh 19.0 /path/to/addons`. Domain UI helpers: `utils/mcp_ui.py`.
+El instalador copia `common/` y encima la pila; si un fichero está en los dos,
+gana el de la pila. Lo común se edita solo en `common/`. El módulo plano de
+una versión se construye con `./install_flat.sh 19.0 /ruta/a/addons`.
+Utilidades de interfaz del dominio: `utils/mcp_ui.py`.
 
-Python: do not add `requests` or `reportlab` (Odoo already ships them).
-`pns_base` needs no extra pip. On 14, use a current `openpyxl` (old wheels
-break with recent NumPy).
+Python: no añadas `requests` ni `reportlab` (ya vienen con Odoo). `pns_base`
+no necesita nada de pip. En la 14, usa un `openpyxl` reciente (los antiguos
+fallan con NumPy moderno).
 
-### Odoo versions
+#### Versiones de Odoo
 
-| Series | Status |
+| Versión | Estado |
 | :--- | :--- |
-| 14.0, 19.0 | Tested. Flat branch published. |
-| 15.0 – 18.0 | `install_flat.sh` builds them and warns that they are not tested yet. |
-| 13.0 and older | Not supported. |
+| 14.0, 19.0 | Probadas. Rama plana publicada. |
+| 15.0 – 18.0 | `install_flat.sh` las construye y avisa de que aún no están probadas. |
+| 13.0 y anteriores | No soportadas. |
 
-Odoo 13 has no OWL, which the AI chat is built on. Odoo 8 to 12 run on a
-Python older than 3.7, which the engine needs. The suite keeps two stacks
-(`owl1` for 14.0, `owl2` for 15.0 and later).
+Odoo 13 no tiene OWL, sobre el que está hecho el chat. De Odoo 8 a 12 usan un
+Python anterior al 3.7, que es el que necesita el motor. La suite mantiene dos
+pilas (`owl1` para la 14.0 y `owl2` para la 15.0 y siguientes).
 
-### Tests
+#### Tests
 
-| Where you are | What runs |
+| Dónde estás | Qué se ejecuta |
 | :--- | :--- |
-| `main` | `python -m pytest unit_tests`, with no Odoo. Then the Odoo tests, after `./install_flat.sh 19.0 <dir>`. |
-| A flat branch (`14.0`, `19.0`) | The Odoo tests in `tests/`. The unit tests live on `main`. |
+| `main` | `python -m pytest unit_tests`, sin Odoo. Después los tests de Odoo, tras `./install_flat.sh 19.0 <dir>`. |
+| Una rama plana (`14.0`, `19.0`) | Los tests de Odoo en `tests/`. Los unitarios viven en `main`. |
 
 ```bash
 odoo-bin -d <db> -i pns_ai_mcp --test-enable --stop-after-init --test-tags /pns_ai_mcp
 ```
 
-## License, marks, training
+### Licencia, marcas, entrenamiento
 
-Apache-2.0 — see [LICENSE](LICENSE) and [NOTICE](NOTICE).
-PATANEGRA Soft™ and PAAP™ (Patanegra Application Agent Protocol, which this
-engine implements) are trademarks of PATANEGRA Soft SL; the license does
-not grant them. TDM / AI training is allowed (TDMRep `tdm-reservation = 0`).
+Apache-2.0: ver [LICENSE](LICENSE) y [NOTICE](NOTICE).
+PATANEGRA Soft™ y PAAP™ (Patanegra Application Agent Protocol, que implementa
+este motor) son marcas de PATANEGRA Soft SL; la licencia no las concede. Se
+permite la minería de textos y el entrenamiento de IA (TDMRep `tdm-reservation = 0`).
 
-Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.md](CONTRIBUTING.md).
+Seguridad: [SECURITY.md](SECURITY.md). Errores, ideas y preguntas: [CONTRIBUTING.md](CONTRIBUTING.md).
