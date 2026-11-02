@@ -5,7 +5,7 @@
 
 {
     'name': 'AI Engine',
-    'version': '3.1.909',
+    'version': '3.1.910',
     'category': 'Patanegra AI',
     'summary': 'Agent engine for Odoo apps: PAAP roles, providers, skills, governed writes',
     'description': """
