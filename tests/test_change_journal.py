@@ -7,6 +7,7 @@ import uuid
 from odoo import SUPERUSER_ID, api
 from odoo.exceptions import UserError
 from odoo.tests import tagged, TransactionCase
+from odoo.tools import mute_logger
 
 from odoo.addons.pns_ai_mcp.controllers.safe_plan import execute_safe_plan
 from odoo.addons.pns_ai_mcp.tests._helpers import (
@@ -134,6 +135,7 @@ class TestChangeJournal(TransactionCase):
         op.action_cancel()
         self.assertEqual(self.env['ai.change.journal'].search_count([]), before)
 
+    @mute_logger('odoo.addons.pns_ai_mcp.models.safe_operation')
     def test_failed_execute_journals_outside_rollback(self):
         field = self.env['ir.model.fields'].search([
             ('model', '=', 'res.partner'),

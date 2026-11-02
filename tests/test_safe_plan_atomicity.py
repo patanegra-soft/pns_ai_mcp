@@ -25,6 +25,7 @@ from unittest.mock import patch
 from odoo import SUPERUSER_ID, api
 from odoo.exceptions import UserError
 from odoo.tests import tagged, TransactionCase
+from odoo.tools import mute_logger
 
 from odoo.addons.pns_ai_mcp.tests._helpers import (
     AI_PLAN_GROUPS,
@@ -77,6 +78,7 @@ class TestSafePlanAtomicity(TransactionCase):
             revoke_groups(env.user, self._granted)
             cr.commit()
 
+    @mute_logger('odoo.addons.pns_ai_mcp.models.safe_operation')
     def test_commit_failure_keeps_executed_false_and_no_mutation(self):
         """PAAP I8: Simulated failure of the final commit → no false 'executed'."""
         partner_name = 'pns-atomicity-fail-%s' % self.env.cr.dbname
@@ -150,6 +152,7 @@ class TestSafePlanAtomicity(TransactionCase):
         finally:
             self._cleanup(op_id, partner_name)
 
+    @mute_logger('odoo.addons.pns_ai_mcp.models.safe_operation')
     def test_failed_execute_cancels_authorization_no_replay(self):
         """PAAP I8: Invalid module.update must cancel Confirm; a later execute is a no-op."""
         op_id = None
