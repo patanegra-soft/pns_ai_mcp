@@ -148,8 +148,9 @@ class TestMcpAgent(TransactionCase):
         ], limit=1)
         self.assertTrue(agent, 'admin agent must exist')
         if not agent.provider_ids:
-            provider = self.env['ai.provider'].search([], limit=1)
-            self.assertTrue(provider, 'need at least one ai.provider for test')
+            provider = self.env['ai.provider'].search([], limit=1) or self.env['ai.provider'].create({
+                'name': 'Test provider', 'protocol': 'openai',
+            })
             self.env['ai.agent.provider'].sudo().create({
                 'agent_id': agent.id,
                 'provider_id': provider.id,
@@ -175,8 +176,9 @@ class TestMcpAgent(TransactionCase):
         """Inference must read provider credentials without exposing them in UI."""
         from odoo.addons.pns_ai_mcp.utils.compat import invalidate_recordset_fields
 
-        provider = self.env['ai.provider'].search([], limit=1)
-        self.assertTrue(provider, 'need at least one ai.provider for test')
+        provider = self.env['ai.provider'].search([], limit=1) or self.env['ai.provider'].create({
+            'name': 'Test provider', 'protocol': 'openai',
+        })
         provider.sudo().write({'api_key': 'test-secret-key'})
         invalidate_recordset_fields(provider, ['api_key'])
 

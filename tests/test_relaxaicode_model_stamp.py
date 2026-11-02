@@ -62,36 +62,33 @@ class TestRelaxAICodeModelStamp(TransactionCase):
         best = _pick_best_model_fit(self.env, candidates, partner.id, row)
         self.assertEqual(best, 'res.partner')
 
-    def test_related_models_from_product_id(self):
+    def test_related_models_from_many2one_name(self):
         code = (
-            "lines = env['sale.order.line'].search([])\n"
-            "pid = lines[0].product_id.id\n"
+            "users = env['res.users'].search([])\n"
+            "pid = users[0].partner_id.id\n"
         )
         extras = _related_models_from_code(
-            code, self.env, {'sale.order.line'},
+            code, self.env, {'res.users'},
         )
-        self.assertIn('product.product', extras)
+        self.assertIn('res.partner', extras)
 
     def test_stamp_both_sibling_lists_with_env(self):
-        product = self.env['product.product'].search([], limit=1)
-        if not product:
-            self.skipTest('no product.product')
+        partner = self.env.user.partner_id
         result = {
             'by_units': [{
-                'id': product.id,
-                'Producto': product.display_name,
-                'Unidades': 1.0,
+                'id': partner.id,
+                'Contact': partner.display_name,
+                'Units': 1.0,
             }],
             'by_amount': [{
-                'id': product.id,
-                'Producto': product.display_name,
-                'Importe': 9.0,
+                'id': partner.id,
+                'Contact': partner.display_name,
+                'Amount': 9.0,
             }],
         }
         code = (
-            "lines = env['sale.order.line'].search([])\n"
-            "Product = env['product.product']\n"
-            "p = lines[:1].product_id\n"
+            "users = env['res.users'].search([])\n"
+            "p = users[:1].partner_id\n"
         )
         candidates = _models_from_code(code)
         candidates |= _related_models_from_code(code, self.env, candidates)
@@ -102,8 +99,8 @@ class TestRelaxAICodeModelStamp(TransactionCase):
             env=self.env,
             candidate_models=candidates,
         )
-        self.assertEqual(result['by_units'][0].get('__model'), 'product.product')
-        self.assertEqual(result['by_amount'][0].get('__model'), 'product.product')
+        self.assertEqual(result['by_units'][0].get('__model'), 'res.partner')
+        self.assertEqual(result['by_amount'][0].get('__model'), 'res.partner')
 
     def test_stamp_partners_by_display_name_when_id_collides(self):
         """Several partners: all linkable even if the id clashes with other models."""
