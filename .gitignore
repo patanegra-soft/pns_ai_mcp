@@ -1,0 +1,20 @@
+# Tenant/instance skills live in the DB (backups), not in the module.
+common/ai/skills/custom/*
+!common/ai/skills/custom/.gitkeep
+
+
+# Python bytecode (never version)
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# venv local de t.sh --unit-only
+.venv/
+.last_odoo_test.log
+docsapi/
+docs/gemini/
+docs/knowledge/*.zip
+docs/knowledge/*.json
+# Apps icons under common/static/description/ (*.png, *.svg) must stay tracked.
+# icon.svg = source matrix; icon.png = Apps/UI export. Never gitignore these.

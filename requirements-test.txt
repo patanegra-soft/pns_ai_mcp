@@ -1,0 +1,9 @@
+# unit_tests/ run with pytest, without Odoo, in a plain virtualenv
+pytest>=7.0,<9
+# The Odoo images already ship these (Odoo core requirements)
+openpyxl
+lxml
+Pillow
+requests
+# Linux has the time zone database; Windows does not
+tzdata; sys_platform == "win32"
