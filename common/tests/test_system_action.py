@@ -5,6 +5,7 @@
 from odoo import api
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged, TransactionCase
+from odoo.tools import mute_logger
 from odoo.addons.pns_ai_mcp.tests._helpers import make_user, one_cursor
 
 from odoo.addons.pns_ai_mcp.controllers.safe_plan import (
@@ -22,6 +23,13 @@ ADMIN_GROUPS = 'base.group_user,base.group_system,pns_ai_mcp.group_ai_admin'
 
 @tagged('post_install', '-at_install', 'pns_ai_mcp')
 class TestSystemTrustedActions(TransactionCase):
+
+    def setUp(self):
+        super().setUp()
+        # Odoo logs ERROR when existing rows keep NULL in a column made required.
+        muted = mute_logger('odoo.schema')
+        muted.__enter__()
+        self.addCleanup(muted.__exit__, None, None, None)
 
     def _form(self, field_name='comment'):
         return self.env['ir.ui.view'].create({

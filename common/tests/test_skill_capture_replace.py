@@ -45,7 +45,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'name': command,
             'description': command,
             'content': 'old procedure',
-            'code_body': 'result = {"data": [], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
         }
         vals.update(extra)
         return env['ai.skill'].create(vals)
@@ -59,7 +59,7 @@ class TestSkillCaptureReplace(TransactionCase):
                 'except NameError:',
                 '    %s = None' % key,
             ])
-        lines.append('result = {"data": [], "__return_direct__": True}')
+        lines.append('result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}')
         return '\n'.join(lines) + '\n'
 
     def test_resolve_owned_slash_returns_existing(self):
@@ -144,7 +144,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'skill_name': '',
             'description': 'help',
             'procedure': 'proc',
-            'code_body': 'result = {"data": [], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
             'from_chat': True,
         })
         with self.assertRaises(UserError) as err:
@@ -163,13 +163,13 @@ class TestSkillCaptureReplace(TransactionCase):
             'skill_name': 'Replaced',
             'description': 'new hint',
             'procedure': 'new procedure',
-            'code_body': 'result = {"data": [{"n": 99}], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>99</p>", "__return_direct__": True}',
             'existing_skill_id': skill.id,
             'from_chat': True,
         })
         wiz.action_create_draft()
         skill.invalidate_cache()
-        self.assertEqual(skill.code_body, 'result = {"data": [{"n": 99}], "__return_direct__": True}')
+        self.assertEqual(skill.code_body, 'result = {"formatted_text": "<p>99</p>", "__return_direct__": True}')
         self.assertEqual(skill.content, 'new procedure')
         self.assertEqual(skill.name, 'Replaced')
         self.assertEqual(skill.owner_id, self.user_a)
@@ -186,7 +186,7 @@ class TestSkillCaptureReplace(TransactionCase):
             '    periodo = periodo\n'
             'except NameError:\n'
             '    periodo = None\n'
-            'result = {"data": [], "__return_direct__": True}\n'
+            'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}\n'
         )
         wiz = self.env['ai.skill.capture.wizard'].with_user(
             self.user_a,
@@ -360,7 +360,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'skill_name': 'None',
             'description': 'help',
             'procedure': 'proc',
-            'code_body': 'result = {"data": [], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
             'existing_skill_id': skill.id,
             'from_chat': True,
         })
@@ -431,7 +431,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'name': 'Fill missing',
             'description': 'Fill missing',
             'content': 'procedure',
-            'code_body': 'result = {"data": [], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
             'owner_id': self.user_a.id,
             'param_schema': '{"desde_hasta":{"type":"string","label":"Period","desc":"YYYY"}}',
         })
@@ -526,7 +526,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'skill_name': 'Unread',
             'description': 'help',
             'procedure': 'proc',
-            'code_body': 'result = {"data": [], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
             'param_prose': 'codes is a CSV of short codes',
             'existing_skill_id': skill.id,
             'from_chat': True,
@@ -552,7 +552,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'skill_name': 'Adapt',
             'description': 'help',
             'procedure': 'proc',
-            'code_body': 'result = {"data": [], "__return_direct__": True}',
+            'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
             'param_schema': skill.param_schema,
             'existing_skill_id': skill.id,
             'from_chat': True,
