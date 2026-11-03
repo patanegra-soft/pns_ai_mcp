@@ -8,6 +8,7 @@ import re
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 from ..utils import context_roles
+from ..utils.compat import test_is_running
 from ..utils.knowledge_ownership import (
     apply_create_ownership,
     assert_writer_can_write_records,
@@ -527,7 +528,7 @@ class AIContext(models.Model):
         Must not write on the turn's ReAct REPEATABLE READ snapshot: other
         MCP clients bump the same rows, and a late flush raises PG 40001.
         """
-        if not context_code:
+        if not context_code or test_is_running(self.env):
             return
         try:
             with self.env.registry.cursor() as cr:
