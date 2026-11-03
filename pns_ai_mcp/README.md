@@ -1,4 +1,4 @@
-# AI Engine (pns_ai_mcp)
+# PNS AI Engine (pns_ai_mcp)
 
 ![Native Odoo AI for consultants](static/description/banner.png)
 
@@ -60,7 +60,7 @@ client already runs. Here the agents live in plain Odoo modules.
 
 ### Getting started
 
-1. **Install.** Clone the `14.0` or `19.0` branch of `pns_ai_mcp` and `pns_base` into the addons path and install the AI Engine from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
+1. **Install.** Clone the `14.0` or `19.0` branch of `pns_ai_mcp` and `pns_base` into the addons path and install **PNS AI Engine** from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
 2. **Become AI administrator.** *Settings → Users*: give yourself **AI Administrator**. Log out and back in.
 3. **Get your API key.** *AI Engine → Security → Users*: your row, tick **AI Conversational** and press **Generate API Key**.
 4. **Add a provider.** *AI Engine → Connections → Providers*: protocol, endpoint, API key and model, with the **Conversation** role.
@@ -217,7 +217,7 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 
 ### Puesta en marcha
 
-1. **Instala.** Clona la rama `14.0` o `19.0` de `pns_ai_mcp` y de `pns_base` en el addons path e instala el Motor de IA desde Aplicaciones. En Odoo 14, antes, `pip install "openpyxl>=3.1.2"`.
+1. **Instala.** Clona la rama `14.0` o `19.0` de `pns_ai_mcp` y de `pns_base` en el addons path e instala **PNS AI Engine** desde Aplicaciones. En Odoo 14, antes, `pip install "openpyxl>=3.1.2"`.
 2. **Hazte administrador de IA.** *Ajustes → Usuarios*: date **IA Administrador**. Sal y vuelve a entrar.
 3. **Saca tu clave API.** *Motor de IA → Seguridad → Usuarios*: tu fila, marca **IA Conversacional** y pulsa **Generar Clave API**.
 4. **Pon un proveedor.** *Motor de IA → Conexiones → Proveedores*: protocolo, dirección, clave API y modelo, con el rol **Conversación**.

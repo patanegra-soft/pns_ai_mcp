@@ -4,8 +4,9 @@
 # Odoo reads this file with ast.literal_eval — no module docstring before `{`.
 
 {
-    'name': 'AI Engine',
-    'version': '3.1.914',
+    'name': 'PNS AI Engine',
+    'version': '19.0.3.1.915',
+    'images': ['static/description/banner.png'],
     'category': 'Patanegra AI',
     'summary': 'Agent engine for Odoo apps: PAAP roles, providers, skills, governed writes',
     'description': """
@@ -24,7 +25,7 @@
         - Extensible skills and domain knowledge per module
     """,
     'author': 'PATANEGRA Soft',
-    'website': '/pns_ai_mcp/static/description/index.html',
+    'website': 'https://github.com/patanegra-soft/pns_ai_mcp',
     # Apache License 2.0 — see LICENSE file
     'license': 'Other OSI approved licence',
     'depends': ['web', 'pns_base'],
