@@ -5,7 +5,7 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '3.1.915',
+    'version': '3.1.916',
     'category': 'Patanegra AI',
     'summary': 'Agent engine for Odoo apps: PAAP roles, providers, skills, governed writes',
     'description': """
