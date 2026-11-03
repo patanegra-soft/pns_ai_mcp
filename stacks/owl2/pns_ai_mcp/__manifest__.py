@@ -4,8 +4,8 @@
 # Odoo reads this file with ast.literal_eval — no module docstring before `{`.
 
 {
-    'name': 'AI Engine',
-    'version': '3.1.914',
+    'name': 'PNS AI Engine',
+    'version': '3.1.915',
     'category': 'Patanegra AI',
     'summary': 'Agent engine for Odoo apps: PAAP roles, providers, skills, governed writes',
     'description': """
