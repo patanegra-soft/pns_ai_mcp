@@ -60,10 +60,11 @@ client already runs. Here the agents live in plain Odoo modules.
 
 ### Getting started
 
-1. **Install.** Clone the `14.0` or `19.0` branch of `pns_ai_mcp` and `pns_base` into the addons path and install **PNS AI Engine** from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
+1. **Install.** Want the chat too? Install [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#getting-started) instead; it brings this module. For the engine alone, clone the `14.0` or `19.0` branch of `pns_base` and `pns_ai_mcp`, add each clone to `addons_path` and install **PNS AI Engine** from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
 2. **Become AI administrator.** *Settings → Users*: give yourself **AI Administrator**. Log out and back in.
 3. **Get your API key.** *AI Engine → Security → Users*: your row, tick **AI Conversational** and press **Generate API Key**.
 4. **Add a provider.** *AI Engine → Connections → Providers*: protocol, endpoint, API key and model, with the **Conversation** role.
+   Or start from a ready one: `static/examples/providers/` has OpenRouter, OVH, OpenAI, Anthropic and Lemonade, with no key. *Settings → AI Engine → Import configuration*, pick the file, then type your key in each provider.
 
 **Done.** Point Cursor (or any MCP client) at `https://<your-odoo>/mcp` with the key in the `X-MCP-API-Key` header. Example below, in *Connecting an MCP client*.
 
@@ -217,10 +218,11 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 
 ### Puesta en marcha
 
-1. **Instala.** Clona la rama `14.0` o `19.0` de `pns_ai_mcp` y de `pns_base` en el addons path e instala **PNS AI Engine** desde Aplicaciones. En Odoo 14, antes, `pip install "openpyxl>=3.1.2"`.
+1. **Instala.** ¿Quieres también el chat? Instala [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#puesta-en-marcha); trae este módulo. Solo el motor: clona la rama `14.0` o `19.0` de `pns_base` y de `pns_ai_mcp`, añade cada clon al `addons_path` e instala **PNS AI Engine** desde Aplicaciones. En Odoo 14, antes, `pip install "openpyxl>=3.1.2"`.
 2. **Hazte administrador de IA.** *Ajustes → Usuarios*: date **IA Administrador**. Sal y vuelve a entrar.
 3. **Saca tu clave API.** *Motor de IA → Seguridad → Usuarios*: tu fila, marca **IA Conversacional** y pulsa **Generar Clave API**.
 4. **Pon un proveedor.** *Motor de IA → Conexiones → Proveedores*: protocolo, dirección, clave API y modelo, con el rol **Conversación**.
+   O parte de uno hecho: en `static/examples/providers/` están OpenRouter, OVH, OpenAI, Anthropic y Lemonade, sin clave. *Ajustes → Motor de IA → Importar configuración*, eliges el fichero y escribes tu clave en cada proveedor.
 
 **Listo.** Apunta Cursor (o cualquier cliente MCP) a `https://<tu-odoo>/mcp` con la clave en la cabecera `X-MCP-API-Key`. Ejemplo más abajo, en *Conectar un cliente MCP*.
 
