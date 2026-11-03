@@ -65,9 +65,31 @@ client already runs. Here the agents live in plain Odoo modules.
 3. **Get your API key.** *AI Engine → Security → Users*: your row, tick **AI Conversational** and press **Generate API Key**.
 4. **Add a provider.** *AI Engine → Connections → Providers*: protocol, endpoint, API key and model, with the **Conversation** role.
 
-**Done.** Point Cursor (or any MCP client) at `https://<your-odoo>/mcp` with the key in the `X-MCP-API-Key` header.
+**Done.** Point Cursor (or any MCP client) at `https://<your-odoo>/mcp` with the key in the `X-MCP-API-Key` header. Example below, in *Connecting an MCP client*.
 
 ### For IT staff
+
+#### Connecting an MCP client
+
+In Cursor, add the server to `~/.cursor/mcp.json` (all projects) or to
+`.cursor/mcp.json` (one project). Other MCP clients take the same two
+things: the URL and the header.
+
+```json
+{
+  "mcpServers": {
+    "my-client-odoo": {
+      "url": "https://odoo.example.com/mcp",
+      "headers": {
+        "X-MCP-API-Key": "<your-api-key>"
+      }
+    }
+  }
+}
+```
+
+The key is the one from step 3 and reads with that user's rights. One key
+per person; do not commit the file with the key in it.
 
 #### Repository layout
 
@@ -92,8 +114,24 @@ break with recent NumPy).
 | Series | Status |
 | :--- | :--- |
 | 14.0, 19.0 | Tested. Flat branch published. |
-| 15.0 – 18.0 | `install_flat.sh` builds them and warns that they are not tested yet. |
+| 15.0 – 18.0 | Not tested, by people or by CI. No branch published. |
 | 13.0 and older | Not supported. |
+
+**15.0 to 18.0.** There is no branch to clone. Build the flat module
+yourself from `main`, which has the code for every series (`owl2` for 15.0
+and later). Do the same for `pns_base`:
+
+```bash
+git clone https://github.com/patanegra-soft/pns_base.git
+git clone https://github.com/patanegra-soft/pns_ai_mcp.git
+cd pns_base   && ./install_flat.sh 17.0 /path/to/addons && cd ..
+cd pns_ai_mcp && ./install_flat.sh 17.0 /path/to/addons
+```
+
+The script warns that the series is not tested. Nobody has run the engine
+on these series, so try it on a test database first and run the Odoo
+tests there (see *Tests*). If it works, or does not, tell us
+([CONTRIBUTING.md](CONTRIBUTING.md)).
 
 Odoo 13 has no OWL, which the AI chat is built on. Odoo 8 to 12 run on a
 Python older than 3.7, which the engine needs. The suite keeps two stacks
@@ -122,6 +160,8 @@ Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.m
 ---
 
 ## Español
+
+![IA nativa de Odoo para consultores](static/description/banner_es.png)
 
 **IA nativa de Odoo para consultores.** El Motor de IA corre dentro del Odoo
 de tu cliente. Proveedores, agentes, conocimiento y aprobaciones son registros
@@ -182,9 +222,31 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 3. **Saca tu clave API.** *Motor de IA → Seguridad → Usuarios*: tu fila, marca **IA Conversacional** y pulsa **Generar Clave API**.
 4. **Pon un proveedor.** *Motor de IA → Conexiones → Proveedores*: protocolo, dirección, clave API y modelo, con el rol **Conversación**.
 
-**Listo.** Apunta Cursor (o cualquier cliente MCP) a `https://<tu-odoo>/mcp` con la clave en la cabecera `X-MCP-API-Key`.
+**Listo.** Apunta Cursor (o cualquier cliente MCP) a `https://<tu-odoo>/mcp` con la clave en la cabecera `X-MCP-API-Key`. Ejemplo más abajo, en *Conectar un cliente MCP*.
 
 ### Para el equipo de IT
+
+#### Conectar un cliente MCP
+
+En Cursor, añade el servidor a `~/.cursor/mcp.json` (todos los proyectos) o a
+`.cursor/mcp.json` (un proyecto). Los demás clientes MCP piden lo mismo: la
+dirección y la cabecera.
+
+```json
+{
+  "mcpServers": {
+    "odoo-de-mi-cliente": {
+      "url": "https://odoo.example.com/mcp",
+      "headers": {
+        "X-MCP-API-Key": "<tu-clave-api>"
+      }
+    }
+  }
+}
+```
+
+La clave es la del paso 3 y lee con los permisos de ese usuario. Una clave
+por persona; no subas a git el fichero con la clave dentro.
 
 #### Estructura del repositorio
 
@@ -210,8 +272,24 @@ fallan con NumPy moderno).
 | Versión | Estado |
 | :--- | :--- |
 | 14.0, 19.0 | Probadas. Rama plana publicada. |
-| 15.0 – 18.0 | `install_flat.sh` las construye y avisa de que aún no están probadas. |
+| 15.0 – 18.0 | Sin probar, ni por personas ni por el CI. Sin rama publicada. |
 | 13.0 y anteriores | No soportadas. |
+
+**De la 15.0 a la 18.0.** No hay rama que clonar. Construye tú el módulo
+plano desde `main`, que tiene el código de todas las versiones (`owl2` para
+la 15.0 y siguientes). Lo mismo con `pns_base`:
+
+```bash
+git clone https://github.com/patanegra-soft/pns_base.git
+git clone https://github.com/patanegra-soft/pns_ai_mcp.git
+cd pns_base   && ./install_flat.sh 17.0 /ruta/a/addons && cd ..
+cd pns_ai_mcp && ./install_flat.sh 17.0 /ruta/a/addons
+```
+
+El script avisa de que esa versión no está probada. Nadie ha usado el motor
+en estas versiones: pruébalo antes en una base de pruebas y pasa ahí los
+tests de Odoo (ver *Tests*). Si funciona, o si no, cuéntanoslo
+([CONTRIBUTING.md](CONTRIBUTING.md)).
 
 Odoo 13 no tiene OWL, sobre el que está hecho el chat. De Odoo 8 a 12 usan un
 Python anterior al 3.7, que es el que necesita el motor. La suite mantiene dos
