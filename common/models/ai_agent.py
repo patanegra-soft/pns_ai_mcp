@@ -10,6 +10,7 @@ from odoo.exceptions import UserError
 
 from ..utils import mcp_ui
 from ..utils import context_roles
+from ..utils.compat import test_is_running
 from ..utils.import_export_guard import ensure_ai_admin
 from ..utils.ai_agent_registry import MCP_BARE_AGENT_CODE_DEFAULT
 from ..utils.portable_io import export_record_dict
@@ -1392,6 +1393,8 @@ class AIAgent(models.Model):
     def _persist_cache_isolated(self, content, user_locale, signature):
         """Write cache in an isolated cursor (short commit) to avoid
         serialization failures in long SSE transactions."""
+        if test_is_running(self.env):
+            return
         try:
             with self.env.registry.cursor() as ncr:
                 ncr.execute(

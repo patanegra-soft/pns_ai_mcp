@@ -8,8 +8,14 @@ import uuid
 from odoo.exceptions import UserError
 from odoo.tests import tagged, TransactionCase
 
-from odoo.addons.pns_ai_mcp.tests._helpers import ensure_test_agents
-from odoo.addons.pns_ai_mcp.utils.compat import user_add_group, user_has_group_direct
+from odoo.addons.pns_ai_mcp.tests._helpers import create_test_user, ensure_test_agents
+from odoo.addons.pns_ai_mcp.utils.skill_code_prefix import (
+    DEFAULT_SKILL_CODE_PREFIX,
+    DEFAULT_SKILL_COMMAND_PREFIX,
+    ICP_SKILL_CODE_PREFIX,
+    ICP_SKILL_COMMAND_PREFIX,
+)
+from odoo.addons.pns_ai_mcp.utils.compat import invalidate_recordset_fields
 
 
 @tagged('post_install', '-at_install', 'pns_ai_mcp')
@@ -17,21 +23,17 @@ class TestSkillCaptureReplace(TransactionCase):
 
     def setUp(self):
         super().setUp()
+        # The instance may carry its own slash prefixes and language; the
+        # tests name skills and read messages as a clean database does.
+        self.env = self.env(context=dict(self.env.context, lang='en_US'))
+        ICP = self.env['ir.config_parameter'].sudo()
+        ICP.set_param(ICP_SKILL_CODE_PREFIX, DEFAULT_SKILL_CODE_PREFIX)
+        ICP.set_param(ICP_SKILL_COMMAND_PREFIX, DEFAULT_SKILL_COMMAND_PREFIX)
         ensure_test_agents(self.env)
         self.writer_group = self.env.ref('pns_ai_mcp.group_ai_writer')
-        demo = self.env.ref('base.user_demo', raise_if_not_found=False)
-        if not demo:
-            self.skipTest('base.user_demo no instalado — se evita create res.users')
-        self.user_a = demo
-        if not user_has_group_direct(self.user_a, self.writer_group):
-            user_add_group(self.user_a, self.writer_group)
-        self.user_b = self.env['res.users'].search([
-            ('share', '=', False),
-            ('id', 'not in', [self.env.uid, self.user_a.id]),
-            ('active', '=', True),
-        ], limit=1)
-        if self.user_b and not user_has_group_direct(self.user_b, self.writer_group):
-            user_add_group(self.user_b, self.writer_group)
+        writers = [self.env.ref('base.group_user').id, self.writer_group.id]
+        self.user_a = create_test_user(self.env, prefix='pns_capture_a', groups=writers)
+        self.user_b = create_test_user(self.env, prefix='pns_capture_b', groups=writers)
         self._uid = uuid.uuid4().hex[:8]
 
     def _slash(self, stem):
@@ -99,8 +101,6 @@ class TestSkillCaptureReplace(TransactionCase):
         self.assertIn('the catalog', str(err.exception))
 
     def test_resolve_other_owner_is_blocked(self):
-        if not self.user_b:
-            self.skipTest('hace falta un segundo usuario interno además de demo')
         skill = self._create_owned(
             self.env(user=self.user_a), 'other',
             owner_id=self.user_a.id,
@@ -114,8 +114,6 @@ class TestSkillCaptureReplace(TransactionCase):
         self.assertNotIn('old procedure', msg)
 
     def test_allocate_other_owner_names_holder(self):
-        if not self.user_b:
-            self.skipTest('hace falta un segundo usuario interno además de demo')
         skill = self._create_owned(
             self.env(user=self.user_a), 'alloc',
             owner_id=self.user_a.id,
@@ -168,7 +166,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(skill.code_body, 'result = {"formatted_text": "<p>99</p>", "__return_direct__": True}')
         self.assertEqual(skill.content, 'new procedure')
         self.assertEqual(skill.name, 'Replaced')
@@ -200,7 +198,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         schema = json.loads(skill.param_schema)
         self.assertEqual(list(schema), ['periodo'])
         self.assertIn('periodo=', skill.arg_hint)
@@ -226,7 +224,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(json.loads(skill.param_schema), {
             'codes': {'type': 'string', 'desc': 'CSV'},
         })
@@ -264,7 +262,7 @@ class TestSkillCaptureReplace(TransactionCase):
             },
             param_code_rewritten=rewritten,
         ).action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         schema = json.loads(skill.param_schema)
         self.assertIn('periodo', schema)
         self.assertEqual(schema['codes']['desc'], 'CSV of codes.')
@@ -303,7 +301,7 @@ class TestSkillCaptureReplace(TransactionCase):
             },
             param_code_rewritten=rewritten,
         ).action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         schema = json.loads(skill.param_schema)
         self.assertEqual(schema['codes']['choices_model'], 'demo.item')
         self.assertEqual(schema['codes']['choices_code'], 'x_code')
@@ -331,7 +329,7 @@ class TestSkillCaptureReplace(TransactionCase):
         wiz.with_context(param_author_extracted={
             '_reject': True,
         }).action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(json.loads(skill.param_schema), {
             'periodo': {'type': 'string', 'desc': 'YYYY-YYYY.'},
         })
@@ -365,7 +363,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertFalse(skill.param_schema)
         self.assertEqual(skill.args_policy, 'none')
 
@@ -392,7 +390,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         schema = json.loads(skill.param_schema)
         self.assertEqual(schema['periodo']['label'], 'Period')
         self.assertEqual(
@@ -407,7 +405,7 @@ class TestSkillCaptureReplace(TransactionCase):
             owner_id=self.user_a.id,
             param_schema='{"periodo":{"type":"string","desc":"YYYY-YYYY."}}',
         )
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(len(skill.param_line_ids), 1)
         self.assertEqual(skill.param_line_ids[0].key, 'periodo')
         self.assertEqual(skill.param_line_ids[0].label, 'periodo')
@@ -417,7 +415,7 @@ class TestSkillCaptureReplace(TransactionCase):
                 'desc': 'YYYY or YYYY-YYYY',
             })],
         })
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         schema = json.loads(skill.param_schema)
         self.assertEqual(schema['periodo']['label'], 'Period')
         self.assertEqual(schema['periodo']['desc'], 'YYYY or YYYY-YYYY')
@@ -437,7 +435,7 @@ class TestSkillCaptureReplace(TransactionCase):
         })
         self.assertFalse(skill.param_line_ids)
         filled = self.env['ai.skill']._fill_missing_param_lines()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertIn(skill, filled)
         self.assertEqual(skill.param_line_ids.key, 'desde_hasta')
         self.assertEqual(skill.param_line_ids.label, 'Period')
@@ -452,7 +450,7 @@ class TestSkillCaptureReplace(TransactionCase):
         skill.with_context(skip_param_line_schema=True).write({
             'param_schema': '{"mes":{"type":"string","desc":"YYYY-MM"}}',
         })
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(skill.param_line_ids.ids, line_ids)
         self.assertEqual(skill.param_line_ids.key, 'periodo')
         filled = self.env['ai.skill']._fill_missing_param_lines()
@@ -472,7 +470,7 @@ class TestSkillCaptureReplace(TransactionCase):
                 'key': 'year',
             })],
         })
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(skill.args_policy, 'default')
         self.assertIn('year', json.loads(skill.param_schema or '{}'))
 
@@ -500,7 +498,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertEqual(skill.args_policy, 'default')
 
     def test_skill_form_empty_lines_sets_none(self):
@@ -510,7 +508,7 @@ class TestSkillCaptureReplace(TransactionCase):
             param_schema='{"periodo":{"type":"string","desc":"YYYY"}}',
         )
         skill.write({'param_line_ids': [(5, 0, 0)]})
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertFalse(skill.param_schema)
         self.assertEqual(skill.args_policy, 'none')
 
@@ -527,14 +525,14 @@ class TestSkillCaptureReplace(TransactionCase):
             'description': 'help',
             'procedure': 'proc',
             'code_body': 'result = {"formatted_text": "<p>ok</p>", "__return_direct__": True}',
-            'param_prose': 'codes is a CSV of short codes',
+            'param_line_ids': self._param_lines({
+                'key': 'codes', 'desc': 'CSV of codes.', 'default': 'ABC',
+            }),
             'existing_skill_id': skill.id,
             'from_chat': True,
         })
-        wiz.with_context(param_author_extracted={
-            'codes': {'type': 'string', 'desc': 'CSV of codes.'},
-        }).action_create_draft()
-        skill.invalidate_cache()
+        wiz.action_create_draft()
+        invalidate_recordset_fields(skill, None)
         self.assertIn('codes = codes', skill.code_body)
         self.assertIn('except NameError', skill.code_body)
 
@@ -558,7 +556,7 @@ class TestSkillCaptureReplace(TransactionCase):
             'from_chat': True,
         })
         wiz.with_context(param_code_rewritten=rewritten).action_create_draft()
-        skill.invalidate_cache()
+        invalidate_recordset_fields(skill, None)
         self.assertIn('locations = locations', skill.code_body)
         self.assertEqual(json.loads(skill.param_schema), {
             'locations': {'type': 'string', 'desc': 'CSV'},

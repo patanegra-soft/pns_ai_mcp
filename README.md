@@ -1,12 +1,12 @@
 # AI Engine (pns_ai_mcp)
 
-![Native Odoo AI for integrators](common/static/description/banner.png)
+![Native Odoo AI for consultants](common/static/description/banner.png)
 
 **[English](#english) · [Español](#español)**
 
 ## English
 
-**Native Odoo AI for integrators.** The AI Engine runs inside your client's
+**Native Odoo AI for consultants.** The AI Engine runs inside your client's
 Odoo. Providers, agents, knowledge and approvals are Odoo records, and the
 agents live in plain Odoo modules. Open source, nothing to license. Odoo
 **14.0** and **19.0**.
@@ -123,7 +123,7 @@ Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.m
 
 ## Español
 
-**IA nativa de Odoo para instaladores.** El Motor de IA corre dentro del Odoo
+**IA nativa de Odoo para consultores.** El Motor de IA corre dentro del Odoo
 de tu cliente. Proveedores, agentes, conocimiento y aprobaciones son registros
 de Odoo, y los agentes viven en módulos normales de Odoo. Código abierto, nada
 que licenciar. Odoo **14.0** y **19.0**.

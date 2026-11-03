@@ -22,6 +22,24 @@ from odoo.addons.pns_base.utils.compat import (  # noqa: F401
 )
 
 
+def test_is_running(env):
+    """True while an Odoo test runs (O14 marks the thread, O19 the module).
+
+    A short side cursor that commits must not run then: it cannot see the
+    test's uncommitted rows, can wait on its locks, and a row it commits
+    breaks the class transaction's later write (PG 40001).
+    ``--test-enable`` alone stays True for the whole server life.
+    """
+    import threading
+    from odoo.modules import module as odoo_module
+    from odoo.tools import config
+    return bool(
+        (config['test_enable'] and type(env.cr).__name__ == 'TestCursor')
+        or getattr(threading.current_thread(), 'testing', False)
+        or getattr(odoo_module, 'current_test', False)
+    )
+
+
 
 def load_odoo14_assets_if_needed(env):
     """

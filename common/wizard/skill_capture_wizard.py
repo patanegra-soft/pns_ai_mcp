@@ -450,6 +450,19 @@ class AISkillCaptureWizard(models.TransientModel):
             return (prose + '\n' + leftover).strip() if prose else leftover
         return prose
 
+    def _authored_hint_within(self, schema):
+        """The authored usage example, while every key it names is in ``schema``.
+
+        A generated placeholder (``key=…``) is not authored and gives way.
+        """
+        hint = (self.arg_hint or '').strip()
+        if not hint or '…' in hint or not schema:
+            return False
+        named = re.findall(r'(?<![\w-])([A-Za-z_]\w*)=', hint)
+        if not named or not set(named) <= set(schema):
+            return False
+        return hint
+
     def _capture_param_fields(self):
         """List → schema. Empty list = no params. Help from Procedure/Code."""
         Skill = self.env['ai.skill']
@@ -531,6 +544,7 @@ class AISkillCaptureWizard(models.TransientModel):
         schema_txt = param_schema_to_json(cleaned) or False
         if cleaned:
             hint = infer_arg_hint_from_schema(cleaned) or hint
+        hint = self._authored_hint_within(cleaned) or hint
         rows = [
             row for row in rows
             if (row.get('key') or '').strip() != 'page_url'
