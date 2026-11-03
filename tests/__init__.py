@@ -3,6 +3,7 @@
 # Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
 """Odoo TransactionCase / HttpCase suite for pns_ai_mcp."""
 
+from . import _offline
 from . import test_bundle_locale
 from . import test_mcp_http
 from . import test_mcp_agent

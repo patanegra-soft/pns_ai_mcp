@@ -4,8 +4,9 @@
 """One row per AI/MCP operation (read or write). Audit trail."""
 
 from odoo import models, fields, api, SUPERUSER_ID, _
-from odoo.tools import config, html_escape
+from odoo.tools import html_escape
 from ..utils import mcp_ui
+from ..utils.compat import test_is_running
 from ..utils.import_export_guard import ensure_ai_admin
 from ..utils.portable_io import export_record_dict
 import json
@@ -712,10 +713,7 @@ class AILog(models.Model):
         Returns:
             ai.log record, or None on error (logging never breaks operations).
         """
-        # Skip only when truly inside a test (TestCursor), not merely because the
-        # server was started with --test-enable (which stays True for the whole
-        # process life and would otherwise disable the whole history).
-        if config['test_enable'] and type(self.env.cr).__name__ == 'TestCursor':
+        if test_is_running(self.env):
             return None
         try:
             _logger.info(f"TRACE_MCP: _create_log_entry START - Endpoint: {tool_name}, User: {user_id}")
