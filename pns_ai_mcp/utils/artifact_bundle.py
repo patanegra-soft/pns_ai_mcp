@@ -29,8 +29,7 @@ from .config_backup import (
 )
 from .import_export_guard import ensure_ai_admin
 
-BUNDLE_SCHEMA_VERSION = '1.1'
-BUNDLE_TYPE = 'pns.ai.artifact.bundle'
+BUNDLE_WHAT = 'pns.ai.artifact.bundle'
 
 _BUNDLE_SECTION_FILES = frozenset({
     'skills.zip',
@@ -148,8 +147,7 @@ def export_bundle(
         )
 
         manifest = {
-            'type': BUNDLE_TYPE,
-            'schema_version': BUNDLE_SCHEMA_VERSION,
+            'what': BUNDLE_WHAT,
             'exported_at': _dt.datetime.utcnow().replace(microsecond=0).isoformat() + 'Z',
             'source_database': env.cr.dbname,
             'export_tag': tag,
@@ -213,10 +211,11 @@ def import_bundle(env, zip_bytes, replace_existing=True):
                         zf.read('bundle_manifest.json').decode('utf-8')
                     )
                     report['manifest'] = manifest
-                    if manifest.get('type') and manifest['type'] != BUNDLE_TYPE:
+                    what = manifest.get('what') or manifest.get('type')
+                    if what and what != BUNDLE_WHAT:
                         report['warnings'].append(_(
                             'Unexpected bundle type: %s'
-                        ) % manifest.get('type'))
+                        ) % what)
                 except Exception:
                     report['warnings'].append(_('Could not read bundle_manifest.json.'))
 

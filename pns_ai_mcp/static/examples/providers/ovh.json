@@ -1,4 +1,5 @@
 {
+  "what": "pns.ai.config.backup",
   "providers": [
     {
       "name": "OVH - Backup",
