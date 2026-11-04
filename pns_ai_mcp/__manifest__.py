@@ -5,10 +5,10 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '19.0.3.1.917',
-    'images': ['static/description/banner.png'],
-    'category': 'Patanegra AI',
-    'summary': 'Agent engine for Odoo apps: PAAP roles, providers, skills, governed writes',
+    'version': '19.0.3.1.919',
+    'images': ['static/description/banner_store.png'],
+    'category': 'Extra Tools',
+    'summary': 'Native AI engine and MCP server for Odoo: open LLM providers, a read-only sandbox, human-approved writes and agents as Odoo modules.',
     'description': """
         Patanegra AI Engine — core of the Patanegra AI stack for Odoo applications.
         Reference implementation of the Patanegra Application Agent Protocol (PAAP).
