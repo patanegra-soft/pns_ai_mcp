@@ -60,7 +60,7 @@ from .skill_code_prefix import (
 
 _logger = logging.getLogger(__name__)
 
-SCHEMA_VERSION = '1.0'
+WHAT = 'pns.ai.config.backup'
 MODULE = 'pns_ai_mcp'
 ICP_PREFIX = 'pns_ai_mcp.'
 ICP_SKILLS_SLASH_HIDDEN = 'pns_ai_mcp.skills_slash_hidden'
@@ -121,12 +121,12 @@ def export_config(env, include_secrets=False):
         include_secrets: when True include api keys / tokens (default off).
 
     Returns:
-        dict ready for ``json.dumps`` (schema-versioned).
+        dict ready for ``json.dumps``.
     """
     import datetime as _dt
 
     data = {
-        'schema_version': SCHEMA_VERSION,
+        'what': WHAT,
         'exported_at': _dt.datetime.utcnow().replace(microsecond=0).isoformat() + 'Z',
         'include_secrets': bool(include_secrets),
         'providers': _export_providers(env, include_secrets),
