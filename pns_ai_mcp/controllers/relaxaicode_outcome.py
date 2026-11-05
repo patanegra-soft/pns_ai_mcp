@@ -99,8 +99,11 @@ def _too_large_response(controller, result, code, agent_llm, context_data,
 
 
 def _link_and_picture_rows(controller, result, safe_context, code, agent_llm,
-                           context_data, phase, return_mode):
+                           context_data, phase, return_mode, env):
     """Stamp each row with its model, fill ids, collect record refs, turn base64 into URLs.
+
+    *env* is the run's real Environment, not ``safe_context['env']`` (the
+    sandbox wrapper, which the code may have rebound).
 
     Returns the reply when tabular rows lost their ids, else None.
     """
@@ -128,7 +131,7 @@ def _link_and_picture_rows(controller, result, safe_context, code, agent_llm,
             _single_model = (
                 next(iter(_code_models)) if len(_code_models) == 1 else None
             )
-            _env = safe_context.get('env')
+            _env = env
             _candidates = set(_code_models)
             _candidates |= _related_models_from_code(code, _env, _code_models)
             # Before the stamp: fill the id the LLM left out (links).
@@ -222,8 +225,10 @@ def _link_and_picture_rows(controller, result, safe_context, code, agent_llm,
     return None
 
 
-def _present_result(result, safe_context, phase, return_mode, summary):
+def _present_result(result, safe_context, phase, return_mode, summary, env):
     """Phase flags, the server-side table, and where the result goes (user or model).
+
+    *env* is the run's real Environment, not ``safe_context['env']``.
 
     Returns the reply for formatted text in Phase 1 without a flag, else None.
     """
@@ -295,7 +300,7 @@ def _present_result(result, safe_context, phase, return_mode, summary):
         )
 
         # Session locale (res.lang), not fixed US/ES defaults.
-        render_env = safe_context.get('env')
+        render_env = env
         try:
             render_ctx = (
                 render_context_from_env(render_env, result=result)

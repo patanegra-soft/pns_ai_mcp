@@ -173,10 +173,17 @@ def get_readonly_env(controller):
     The caller MUST close the cursor (rollback + close) when done; the result
     must be serialized to plain data before closing it.
     """
+    return open_readonly_env(controller._get_env_for_operation('read'))
+
+
+def open_readonly_env(base_env):
+    """Box A on its own cursor, as the user and with the context of ``base_env``.
+
+    Same contract as ``get_readonly_env``: the caller rolls back and closes it.
+    """
     from odoo import api
     from odoo.exceptions import UserError
     from ..utils.sandbox_secrets import SANDBOX_CURSOR_FLAG
-    base_env = controller._get_env_for_operation('read')
     cr = base_env.registry.cursor()
     try:
         # Must be the first real statement of the transaction.

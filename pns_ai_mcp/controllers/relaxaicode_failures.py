@@ -18,8 +18,12 @@ _logger = logging.getLogger(__name__)
 
 
 def _exec_error_response(controller, exec_error, code, safe_context, agent_llm,
-                         context_data, phase, return_mode):
-    """The reply for an exception raised while the code ran, logged on the turn."""
+                         context_data, phase, return_mode, env):
+    """The reply for an exception raised while the code ran, logged on the turn.
+
+    *env* is the run's real Environment: ``safe_context['env']`` is the
+    sandbox wrapper (no ``cr``), and the code may have rebound it.
+    """
     from odoo.exceptions import (
         AccessError, MissingError, UserError, ValidationError,
     )
@@ -139,7 +143,7 @@ def _exec_error_response(controller, exec_error, code, safe_context, agent_llm,
             )
             error_response = _keyerror_missing_model_response(
                 model_name,
-                env=safe_context.get('env'),
+                env=env,
                 locale=_locale,
             )
             _log_relaxaicode_execution(
