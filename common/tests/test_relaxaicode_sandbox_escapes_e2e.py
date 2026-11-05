@@ -65,6 +65,19 @@ ESCAPE_PAYLOADS = [
     "result = env.sudo()['ai.provider'].search([]).mapped('api_key')",
     "result = getattr(env.user, 'su' + 'do')().name",
     "result = env(su=True)['res.users'].search_count([])",
+    # ── A public name that leads to the connection (env.args, env.all, .cursor) ─
+    "result = str(type(env.args[0]))",
+    "x = getattr(env.args[0], 'exe' + 'cute')\nx('ROLLBACK')\nresult = 1",
+    "result = type(env.all[0])",
+    "try:\n    env['res.partner'].search([('create_date', '=', 'not-a-date')])\n"
+    "except Exception as e:\n    run = e.cursor.execute\n    run('ROLLBACK')\nresult = 1",
+    # ── Readers that walk attributes in C (Formatter, str.format, match) ───
+    "import string\nF = getattr(string, 'Form' + 'atter')()\n"
+    "x = getattr(F, 'get_' + 'field')('0.env.cr.execute', [env.user], {})[0]\n"
+    "x('ROLLBACK')\nresult = 1",
+    "t = '{0.e' + 'nv.cr}'\nresult = t.format(env.user)",
+    "result = str.format('{u.e' + 'nv.cr}', u=env.user)",
+    "u = env.user\nT = type(u)\nmatch u:\n    case T(env=E):\n        pass\nresult = str(E)",
 ]
 
 # Obfuscated ORM mutators: they must flag requires_write (box B) or fail

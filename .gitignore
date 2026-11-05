@@ -14,6 +14,7 @@ __pycache__/
 .last_odoo_test.log
 docsapi/
 docs/gemini/
+docs/testlog/
 docs/knowledge/*.zip
 docs/knowledge/*.json
 # Apps icons under common/static/description/ (*.png, *.svg) must stay tracked.

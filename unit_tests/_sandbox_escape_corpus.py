@@ -13,6 +13,7 @@ Each payload is a real Python-sandbox escape: class walking
 to reach process builtins, and ``string.Formatter().get_field`` to get
 internals without using '.'.
 """
+import sys
 
 # ── Payloads the AST layer (validate_relaxaicode_source_ast) MUST reject.
 # They cover LITERAL names: dunders, Formatter, imports, class, format-strings.
@@ -65,6 +66,105 @@ AST_BLOCKED = [
     "recs = env['ai.trusted.action'].search([])\nresult = [{'code': r.code} for r in recs]",
     "result = env.sudo()['ai.trusted.action'].search([])",
 ]
+
+# ── Public Environment attributes that leak the raw cursor / live environments.
+# Odoo 14 sets ``self.args = (cr, uid, context, su)`` and keeps ``env.all`` as
+# the list of live Environments — both public (no leading '_'), so a denylist
+# never covered them. ``GuardedSandboxEnv`` is an ALLOWLIST: every name here is
+# refused (regression guard for the 2026-11-04 env.args escape).
+ENV_ATTRS_BLOCKED = [
+    'args',
+    'all',
+    'cache',
+    'registry',
+    'cr',
+    'su',
+    'uid_origin',
+    'transaction',
+    'sudo',
+]
+
+# ── Env attributes the sandbox legitimately reads as the asking user.
+ENV_ATTRS_ALLOWED = [
+    'user',
+    'company',
+    'companies',
+    'context',
+    'lang',
+    'uid',
+    'ref',
+]
+
+# ── Reaching the database connection by a PUBLIC name. Each one passes the
+# AST; the run must stop it before any SQL leaves. ``search([('boom', …)])``
+# makes the test double raise like psycopg2 does: the error carries ``.cursor``.
+RUNTIME_DB_HANDLE_ESCAPES = [
+    # 2026-11-04 report: env.args / env.all hand out the cursor and the Environment.
+    "result = str(type(env.args[0]))",
+    "x = getattr(env.args[0], 'exe' + 'cute')\nx('ROLLBACK')\nx('COM' + 'MIT')\nresult = 1",
+    "import operator\noperator.methodcaller('exe' + 'cute', 'SELECT 1')(env.args[0])\nresult = 1",
+    "a = env.args\nresult = type(env.all[0])(a[0], 1, {}, True)['res.users']",
+    "result = env.cache",
+    "result = env.brand_new_attr",
+    # A database error carries the raw cursor (and its connection).
+    "try:\n    env['res.partner'].search([('boom', '=', 1)])\n"
+    "except Exception as e:\n    c = e.cursor\n    getattr(c, 'exe' + 'cute')('ROLLBACK')\nresult = 1",
+    "try:\n    env['res.partner'].search([('boom', '=', 1)])\n"
+    "except Exception as e:\n    run = e.cursor.execute\n    run('ROLLBACK')\nresult = 1",
+    "try:\n    env['res.partner'].search([('boom', '=', 1)])\n"
+    "except Exception as e:\n    result = e.cursor.connection\n",
+    "try:\n    env['res.partner'].search([('boom', '=', 1)])\n"
+    "except Exception as e:\n    import operator\n    result = operator.attrgetter('cursor')(e)\n",
+    "try:\n    env['res.partner'].search([('boom', '=', 1)])\n"
+    "except Exception as e:\n    result = [f'{e.cursor}']\n",
+    # Readers that walk attributes in C: string.Formatter, str.format, match.
+    "import string\nF = getattr(string, 'Form' + 'atter')()\n"
+    "g = getattr(F, 'get_' + 'field')\n"
+    "g('0.env.cr.execute', [env.user], {})[0]('ROLLBACK')\nresult = 1",
+    "import string\nresult = getattr(string, 'Form' + 'atter')",
+    "t = '{0.e' + 'nv.cr}'\nresult = t.format(env.user)",
+    "t = ''.join(['{0.', 'env', '.args[0]}'])\nresult = t.format(env.user)",
+    "result = '{u.env.cr}'.format_map({'u': env.user})",
+    "result = str.format('{0.e' + 'nv.cr}', env.user)",
+    "result = type('').format_map('{u.e' + 'nv.cr}', {'u': env.user})",
+    "result = ('{0:{1.e' + 'nv.cr}}').format(1, env.user)",
+    "result = getattr('{0.e' + 'nv.cr}', 'format')(env.user)",
+    "import operator\nresult = operator.methodcaller('format', env.user)('{0.e' + 'nv.cr}')",
+    "u = env.user\nT = type(u)\nmatch u:\n    case T(env=E):\n        pass\n"
+    "T2 = type(E)\nmatch E:\n    case T2(cr=C):\n        pass\n"
+    "T3 = type(C)\nmatch C:\n    case T3(execute=X):\n        X('ROLLBACK')\nresult = 1",
+]
+
+# ── Ordinary code on the same doubles: must keep working once every
+# attribute read goes through the sandbox.
+RUNTIME_ATTR_ALLOWED = [
+    "result = env.user.name",
+    "result = [r['name'] for r in env['res.partner'].search_read([], ['name'])]",
+    "result = env.with_context(active_test=False)['res.partner'].search_read([], ['name'])",
+    "x = {'a': 1}\nresult = type(x).__name__",
+    "result = '{0.name}'.format(env.user)",
+    "result = '{u.name} ({n})'.format_map({'u': env.user, 'n': 2})",
+    "result = str.format('{0.name}', env.user)",
+    "result = '{0[k]:>3} {1:.2f}'.format({'k': 'a'}, 1.5)",
+    "result = '{:.2f} {}'.format(1.5, 'x')",
+    "result = '{0:{1}}'.format(3.14159, '.2f')",
+    "t = '{0.na' + 'me}'\nresult = t.format(env.user)",
+    "result = f'{env.user.name} / {env.company.name}'",
+    "import operator\nrows = [{'n': 2}, {'n': 1}]\nresult = sorted(rows, key=operator.itemgetter('n'))[0]['n']",
+    "import operator\nresult = operator.attrgetter('name')(env.user)",
+    "import operator\nresult = operator.methodcaller('upper')('abc')",
+    "result = getattr(env.user, 'name', '')",
+    "result = env.ref('base.main_company').name",
+    "result = datetime.date(2026, 1, 2).isoformat()",
+    "d = {'k': [1, 2]}\nresult = d.get('k')",
+    "try:\n    env['res.partner'].search([('boom', '=', 1)])\n"
+    "except Exception as e:\n    result = str(e)\n",
+]
+if sys.version_info >= (3, 10):
+    RUNTIME_ATTR_ALLOWED += [
+        "v = 0\nmatch {'a': 1}:\n    case {'a': v}:\n        pass\nresult = v",
+        "s = 0\nmatch [1, 2]:\n    case [x, y]:\n        s = x + y\nresult = s",
+    ]
 
 # ── Attribute names guarded_getattr MUST reject even when they arrive already
 # resolved at runtime (name built dynamically, invisible to the AST).

@@ -21,6 +21,8 @@ from . import test_relaxaicode_render_locale
 from . import test_relaxaicode_model_stamp
 from . import test_relaxaicode_imports
 from . import test_relaxaicode_sandbox_escapes_e2e
+from . import test_skill_box_a
+from . import test_sandbox_live_handles
 from . import test_required_fields_live
 from . import test_safe_plan_atomicity
 from . import test_paap_core
