@@ -3,8 +3,11 @@
 # Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
 """Build a safe execution context for relaxaicode code."""
 
+import _string
+import ast as _ast
 import builtins as _builtins
 import operator as _operator
+import string as _string_mod
 import types as _types
 
 # SINGLE denylist of dangerous attributes, shared with the AST (validators_base.py).
@@ -15,6 +18,7 @@ import types as _types
 try:  # pragma: no cover - Odoo runtime path
     from odoo.addons.pns_ai_mcp.controllers.validators_base import (
         DANGEROUS_ATTR_NAMES,
+        DANGEROUS_FORMAT_NAMES,
         RELAXAICODE_DANGEROUS_MODULES,
         RELAXAICODE_FORBIDDEN_ORM_ATTRS,
         RELAXAICODE_ORM_WRITE_ATTRS,
@@ -35,6 +39,7 @@ except Exception:  # pragma: no cover - unit test / standalone path
     _vm = _ilu.module_from_spec(_sp)
     _sp.loader.exec_module(_vm)
     DANGEROUS_ATTR_NAMES = _vm.DANGEROUS_ATTR_NAMES
+    DANGEROUS_FORMAT_NAMES = _vm.DANGEROUS_FORMAT_NAMES
     RELAXAICODE_FORBIDDEN_ORM_ATTRS = _vm.RELAXAICODE_FORBIDDEN_ORM_ATTRS
     RELAXAICODE_ORM_WRITE_ATTRS = _vm.RELAXAICODE_ORM_WRITE_ATTRS
     RELAXAICODE_PRIVILEGE_ATTRS = _vm.RELAXAICODE_PRIVILEGE_ATTRS
@@ -64,18 +69,32 @@ except Exception:  # pragma: no cover - host unit test / standalone
 
 
 class GuardedSandboxEnv(object):
-    """Sandbox ``env``: catalogue models stay off ORM (AST + runtime).
+    """Sandbox ``env``: ALLOWLIST of what the sandbox may touch.
+
+    Default-deny, not default-allow. A denylist always misses the next public
+    attribute Odoo adds to ``Environment``: ``env.args`` is the raw
+    ``(cr, uid, context, su)`` tuple and ``env.all`` is every live Environment
+    (both public, no leading ``_``), so either one hands out the real cursor
+    without ever writing ``cr``. Only the names below are exposed; everything
+    else — ``args``, ``all``, ``cache``, ``registry``, ``uid_origin`` and any
+    future addition — raises.
 
     ``ai.api.server`` / ``ai.context`` / ``ai.skill`` /
-    ``ai.trusted.action`` are catalogues.
-    List/load knowledge via ``get_context``; skills via ``/`` in the chat;
-    external calls via ``api_call``. ``with_context`` / ``with_company``
+    ``ai.trusted.action`` are catalogues kept off the ORM (``__getitem__`` /
+    ``get``). List/load knowledge via ``get_context``; skills via ``/`` in the
+    chat; external calls via ``api_call``. ``with_context`` / ``with_company``
     return another wrapper so the gate holds down the chain. Nothing here
     changes the identity: ``sudo``, ``with_user``, ``with_env`` and
     ``env(user=…, su=…)`` raise.
     """
 
     _WRAP_METHODS = ('with_context', 'with_company')
+    # The whole public env surface the sandbox legitimately reads (as the
+    # asking user): identity, company set, locale and a record by XML id.
+    # ``__getitem__`` / ``get`` / ``__contains__`` are real methods below.
+    _ALLOWED_ENV_ATTRS = frozenset({
+        'user', 'company', 'companies', 'context', 'lang', 'uid', 'ref',
+    })
 
     def __init__(self, env):
         object.__setattr__(self, '_env', env)
@@ -109,12 +128,21 @@ class GuardedSandboxEnv(object):
             )
         if name in RELAXAICODE_PRIVILEGE_ATTRS:
             raise AttributeError(RELAXAICODE_PRIVILEGE_HINT % (name,))
-        attr = getattr(self._env, name)
-        if name in self._WRAP_METHODS and callable(attr):
-            def _wrapped(*args, **kwargs):
-                return GuardedSandboxEnv(attr(*args, **kwargs))
-            return _wrapped
-        return attr
+        if name in self._WRAP_METHODS:
+            attr = getattr(self._env, name)
+            if callable(attr):
+                def _wrapped(*args, **kwargs):
+                    return GuardedSandboxEnv(attr(*args, **kwargs))
+                return _wrapped
+            return attr
+        if name in self._ALLOWED_ENV_ATTRS:
+            return getattr(self._env, name)
+        raise AttributeError(
+            "RelaxAICode exposes only env['model'] and env.user / company / "
+            "companies / context / lang / uid / ref / with_context / "
+            "with_company; %r is not available. Read records through "
+            "env['model'].search(...)." % (name,)
+        )
 
     def __call__(self, *args, **kwargs):
         if args or set(kwargs) - {'context'}:
@@ -128,59 +156,228 @@ class GuardedSandboxEnv(object):
         return '<GuardedSandboxEnv %r>' % (self._env,)
 
 
-def guarded_getattr(obj, name, *default):
-    """Hardened `getattr` for the sandbox (box A).
+# Live database handles. Holding one is raw SQL and transaction control: a
+# ROLLBACK ends box A's READ ONLY transaction and the next one can write.
+# Matched by class over the MRO, so the attribute that led there does not
+# matter (``env.args[0]``, a psycopg2 error's ``.cursor``, the next one).
+# Module names cover Odoo 14 (``odoo.api``) and later series (``odoo.orm``).
+_DB_HANDLE_MODULES = frozenset({
+    'odoo.sql_db', 'odoo.api', 'odoo.modules.registry',
+    'odoo.orm.environments', 'odoo.orm.registry',
+    'psycopg2.extensions', 'psycopg2._psycopg',
+})
+_DB_HANDLE_CLASSES = frozenset({
+    'BaseCursor', 'Cursor', 'TestCursor', 'PsycoConnection', 'Connection',
+    'ConnectionPool', 'cursor', 'connection',
+    'Environment', 'Environments', 'Transaction', 'Cache', 'Registry',
+})
+_db_handle_by_class = {}
 
-    Closes hole H1: the AST only sees LITERAL names, so
-    `getattr(x, '__cla' + 'ss__')` dodged the static denylist. Here the
-    name is checked at RUNTIME (already resolved) against the SAME denylist,
-    plus a generic block of `__x__` dunders. Rejected:
-      · any name in DANGEROUS_ATTR_NAMES (incl. frames: f_back, tb_frame…)
-      · any `__x__` dunder (introspection of types/code/globals)
-      · ORM mutators (`create`/`write`/`unlink`/`copy`) via dynamic getattr
-      · methods that write with their own cursor (`resolve_execute`, `cleanup_*`…)
-    Public names are allowed, plus a few read-only metadata pieces
-    (`_name`, `_fields`, `__last_update`…). Any other name starting
-    with `_` is engine machinery: several open their own cursor and
-    commit, outside the scope of this read-only box.
+_DB_HANDLE_HINT = (
+    "RelaxAICode cannot reach %r: it leads to the database connection, "
+    "outside the ORM and the read-only run. Read with env['model'].search(...)."
+)
+
+
+def is_db_handle(value):
+    """True for a cursor, a connection, a raw Environment or a registry (or their class)."""
+    cls = value if isinstance(value, type) else type(value)
+    try:
+        return _db_handle_by_class[cls]
+    except KeyError:
+        pass
+    except TypeError:
+        return False
+    hit = any(
+        getattr(k, '__module__', None) in _DB_HANDLE_MODULES
+        and getattr(k, '__name__', None) in _DB_HANDLE_CLASSES
+        for k in getattr(cls, '__mro__', ())
+    )
+    if len(_db_handle_by_class) > 4096:
+        _db_handle_by_class.clear()
+    _db_handle_by_class[cls] = hit
+    return hit
+
+
+def _refuse_attr_name(name, dynamic):
+    """Raise if sandbox code may not read attribute *name*.
+
+    The literal reads follow the AST rules. A dynamic name (``getattr``,
+    ``attrgetter``, ``methodcaller``) also refuses the ORM mutators and the
+    methods that write with their own cursor: the AST flags those as writes
+    only when it can see the name.
     """
-    if isinstance(name, str):
-        if blocked_private_attr(name):
-            raise AttributeError(
-                "Access to private attribute %r is not allowed in "
-                "RelaxAICode (sandbox)." % (name,)
-            )
-        if name in RELAXAICODE_PRIVILEGE_ATTRS:
-            raise AttributeError(RELAXAICODE_PRIVILEGE_HINT % (name,))
-        if name in RELAXAICODE_FORBIDDEN_ORM_ATTRS:
-            raise AttributeError(
-                "Access to attribute %r is not allowed in RelaxAICode "
-                "(external API catalogue/secrets; use api_call)." % (name,)
-            )
-        if name in RELAXAICODE_ORM_WRITE_ATTRS:
-            raise AttributeError(
-                "Access to ORM mutator %r via getattr is not allowed in RelaxAICode "
-                "(use safe_plan_request for writes)." % (name,)
-            )
-        if name in RELAXAICODE_SIDE_EFFECT_METHODS:
-            raise AttributeError(
-                "Method %r writes outside RelaxAICode's rollback and is not "
-                "allowed here (use safe_plan_request for writes)." % (name,)
-            )
-        if name in DANGEROUS_ATTR_NAMES:
-            raise AttributeError(
-                "Access to attribute %r is not allowed in RelaxAICode (sandbox)." % (name,)
-            )
-        if len(name) >= 5 and name.startswith('__') and name.endswith('__'):
-            raise AttributeError(
-                "Access to dunder attribute %r is not allowed in RelaxAICode (sandbox)." % (name,)
-            )
+    if blocked_private_attr(name):
+        raise AttributeError(
+            "Access to private attribute %r is not allowed in "
+            "RelaxAICode (sandbox)." % (name,)
+        )
+    if name in RELAXAICODE_PRIVILEGE_ATTRS:
+        raise AttributeError(RELAXAICODE_PRIVILEGE_HINT % (name,))
+    if name in RELAXAICODE_FORBIDDEN_ORM_ATTRS:
+        raise AttributeError(
+            "Access to attribute %r is not allowed in RelaxAICode "
+            "(external API catalogue/secrets; use api_call)." % (name,)
+        )
+    if dynamic and name in RELAXAICODE_ORM_WRITE_ATTRS:
+        raise AttributeError(
+            "Access to ORM mutator %r via getattr is not allowed in RelaxAICode "
+            "(use safe_plan_request for writes)." % (name,)
+        )
+    if dynamic and name in RELAXAICODE_SIDE_EFFECT_METHODS:
+        raise AttributeError(
+            "Method %r writes outside RelaxAICode's rollback and is not "
+            "allowed here (use safe_plan_request for writes)." % (name,)
+        )
+    if name in DANGEROUS_ATTR_NAMES:
+        raise AttributeError(
+            "Access to attribute %r is not allowed in RelaxAICode (sandbox)." % (name,)
+        )
+    if name in DANGEROUS_FORMAT_NAMES:
+        raise AttributeError(
+            "%r (string.Formatter) is not allowed in RelaxAICode: it reads "
+            "attributes outside the sandbox. Use f-strings or '{}'.format()." % (name,)
+        )
+    if len(name) >= 5 and name.startswith('__') and name.endswith('__'):
+        raise AttributeError(
+            "Access to dunder attribute %r is not allowed in RelaxAICode (sandbox)." % (name,)
+        )
+
+
+def _read_attr(obj, name, default):
+    if is_db_handle(obj):
+        raise AttributeError(_DB_HANDLE_HINT % (name,))
+    if name in _STR_FORMAT_METHODS and (
+            isinstance(obj, str)
+            or (isinstance(obj, type) and issubclass(obj, str))):
+        return _guarded_str_format(obj, name)
     value = getattr(obj, name, *default)
     if isinstance(value, _types.ModuleType):
         raise AttributeError(
             "Access to module %r is not allowed in RelaxAICode (sandbox)." % (name,)
         )
+    if is_db_handle(value):
+        raise AttributeError(_DB_HANDLE_HINT % (name,))
     return value
+
+
+def guarded_getattr(obj, name, *default):
+    """The sandbox ``getattr``: a name built at run time, checked once resolved.
+
+    Same rules as a literal read, plus the ORM mutators and the methods that
+    commit on their own cursor. Public names and a few read-only metadata
+    pieces (``_name``, ``_fields``, ``__last_update``…) pass. Neither the
+    object read from nor the value returned may be a database handle.
+    """
+    if isinstance(name, str):
+        _refuse_attr_name(name, dynamic=True)
+    return _read_attr(obj, name, default)
+
+
+def sandbox_attr(obj, name):
+    """Every literal ``obj.name`` read in sandbox code (``compile_sandbox``).
+
+    The AST only sees names; this sees the object. A public name that leads
+    to the database (``env.args``, an exception's ``.cursor``) is refused
+    here whatever it is called.
+    """
+    if name == '__name__' and isinstance(obj, type):
+        return obj.__name__
+    _refuse_attr_name(name, dynamic=False)
+    return _read_attr(obj, name, ())
+
+
+_STR_FORMAT_METHODS = frozenset({'format', 'format_map'})
+
+
+class _SandboxFormatter(_string_mod.Formatter):
+    """``str.format`` whose ``{0.a}`` / ``{0[k]}`` fields read like sandbox code.
+
+    The builtin walks the field's attributes in C, past ``sandbox_attr``.
+    """
+
+    def get_field(self, field_name, args, kwargs):
+        first, rest = _string.formatter_field_name_split(field_name)
+        obj = self.get_value(first, args, kwargs)
+        for is_attr, key in rest:
+            obj = sandbox_attr(obj, key) if is_attr else obj[key]
+        return obj, first
+
+
+_SANDBOX_FORMATTER = _SandboxFormatter()
+
+
+def _template_reads_fields(template):
+    for _text, field, spec, _conv in _SANDBOX_FORMATTER.parse(template):
+        if field and ('.' in field or '[' in field):
+            return True
+        if spec and _template_reads_fields(spec):
+            return True
+    return False
+
+
+def _guarded_str_format(obj, name):
+    """``format`` / ``format_map`` of a string (or of ``str`` itself) for the sandbox."""
+    if isinstance(obj, type):
+        def _unbound(template, *args, **kwargs):
+            if not isinstance(template, str):
+                raise TypeError('%s.%s needs a string' % (obj.__name__, name))
+            return _guarded_str_format(template, name)(*args, **kwargs)
+        return _unbound
+    if type(obj) is not str:
+        # A str subclass (Markup…) keeps its own escaping formatter, which
+        # also walks fields in C: plain positional / named fields only.
+        bound = getattr(obj, name)
+
+        def _plain_fields_only(*args, **kwargs):
+            if _template_reads_fields(obj):
+                raise AttributeError(
+                    "RelaxAICode: %s.%s cannot read attributes or items in "
+                    "its fields; pass the values as arguments."
+                    % (type(obj).__name__, name))
+            return bound(*args, **kwargs)
+        return _plain_fields_only
+    if name == 'format':
+        def _format(*args, **kwargs):
+            return _SANDBOX_FORMATTER.vformat(obj, args, kwargs)
+        return _format
+
+    def _format_map(mapping):
+        return _SANDBOX_FORMATTER.vformat(obj, (), mapping)
+    return _format_map
+
+
+SANDBOX_ATTR_BUILTIN = '__pns_sandbox_attr__'
+
+
+class _AttributeReadsThroughSandbox(_ast.NodeTransformer):
+    """``a.b`` (read) → ``__pns_sandbox_attr__(a, 'b')``. Stores and deletes stay."""
+
+    def visit_Attribute(self, node):
+        self.generic_visit(node)
+        if not isinstance(node.ctx, _ast.Load):
+            return node
+        call = _ast.Call(
+            func=_ast.Name(id=SANDBOX_ATTR_BUILTIN, ctx=_ast.Load()),
+            args=[node.value, _ast.Constant(value=node.attr)],
+            keywords=[],
+        )
+        return _ast.copy_location(call, node)
+
+
+def compile_sandbox(code, filename):
+    """Compile sandbox code so every attribute read goes through ``sandbox_attr``.
+
+    Run it only with a namespace from ``build_safe_context`` (it binds the
+    builtin). The reserved name may not appear in the code: whoever could
+    rebind it would read attributes unchecked.
+    """
+    if SANDBOX_ATTR_BUILTIN in code:
+        raise SyntaxError('%r is reserved by the sandbox' % (SANDBOX_ATTR_BUILTIN,))
+    tree = _ast.parse(code, filename, 'exec')
+    tree = _AttributeReadsThroughSandbox().visit(tree)
+    _ast.fix_missing_locations(tree)
+    return compile(tree, filename, 'exec')
 
 
 def guarded_import(name, *args, **kwargs):
@@ -237,7 +434,7 @@ def _module_facade_rejects(name, value):
     """Shared policy: True when a module attribute must not be exposed."""
     if blocked_private_attr(name):
         return True
-    if name in DANGEROUS_ATTR_NAMES:
+    if name in DANGEROUS_ATTR_NAMES or name in DANGEROUS_FORMAT_NAMES:
         return True
     if name in _MODULE_FACADE_FORBIDDEN_CALLABLES:
         return True
@@ -305,17 +502,37 @@ class _AttrProbe(object):
 _ATTR_PROBE = _AttrProbe()
 
 
+def _walk_attr_path(obj, path):
+    for part in path.split('.'):
+        obj = guarded_getattr(obj, part)
+    return obj
+
+
 def guarded_attrgetter(*paths):
-    """``operator.attrgetter`` whose names pass the same policy as getattr."""
+    """``operator.attrgetter`` that reads through ``guarded_getattr`` on each call.
+
+    The real one reads in C: checking the name up front would still hand
+    back whatever object sits behind it.
+    """
+    if not paths:
+        raise TypeError('attrgetter expected 1 argument, got 0')
     for path in paths:
         _check_attr_path(path)
-    return _operator.attrgetter(*paths)
+
+    def _get(obj):
+        if len(paths) == 1:
+            return _walk_attr_path(obj, paths[0])
+        return tuple(_walk_attr_path(obj, path) for path in paths)
+    return _get
 
 
 def guarded_methodcaller(name, *args, **kwargs):
-    """``operator.methodcaller`` whose name passes the same policy as getattr."""
+    """``operator.methodcaller`` that looks the method up through ``guarded_getattr``."""
     _check_attr_path(name)
-    return _operator.methodcaller(name, *args, **kwargs)
+
+    def _call(obj):
+        return guarded_getattr(obj, name)(*args, **kwargs)
+    return _call
 
 
 def safe_module(module):
@@ -432,6 +649,8 @@ def build_safe_context(controller, operation_type='read', previous_result=None, 
     # dynamic access to dangerous attributes whose name is built at
     # runtime (H1). The AST covers literals; this covers dynamic names.
     ALLOWED_BUILTINS['getattr'] = guarded_getattr
+    # Literal attribute reads, once compile_sandbox has rewritten them.
+    ALLOWED_BUILTINS[SANDBOX_ATTR_BUILTIN] = sandbox_attr
     
     # Get the Odoo env (or the injected one: box A in READ ONLY)
     env = env_override if env_override is not None else controller._get_env_for_operation(operation_type)

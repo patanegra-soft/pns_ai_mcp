@@ -47,6 +47,7 @@ from .validators_sort import (
     _is_safe_sort_key_value,
 )
 
+_MATCH_CLASS = getattr(ast, 'MatchClass', None)
 
 def validate_relaxaicode_source_ast(code):
     """
@@ -317,6 +318,15 @@ def validate_relaxaicode_source_ast(code):
                     % node.attr,
                 ), False
         
+        # `case T(attr=x)` reads the attribute in C, past the sandbox's
+        # attribute reads. Python 3.10+ only (no node on older series).
+        if _MATCH_CLASS is not None and isinstance(node, _MATCH_CLASS):
+            return False, (
+                "[PROHIBITED] Relaxaicode cannot use class patterns in "
+                "'match' (case T(...)). Use isinstance(x, T) and read the "
+                "attributes with x.attr."
+            ), False
+
         # ============================================================
         # VALIDATE USE OF DANGEROUS VARIABLES
         # ============================================================

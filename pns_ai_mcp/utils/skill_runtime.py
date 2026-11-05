@@ -153,6 +153,21 @@ def skill_code_refusal(code, skill_code='skill'):
     return ''
 
 
+def _records_onto(value, env):
+    """``value`` with every recordset moved onto ``env``.
+
+    The body ran on box A's cursor, which closes before the result is shown.
+    """
+    from odoo.models import BaseModel
+    if isinstance(value, BaseModel):
+        return value.with_env(env)
+    if isinstance(value, dict):
+        return {k: _records_onto(v, env) for k, v in value.items()}
+    if type(value) in (list, tuple, set):
+        return type(value)(_records_onto(v, env) for v in value)
+    return value
+
+
 def bootstrap_skill_code_body(env, code, arguments='', skill_code='skill',
                               extra_params=None, previous_result=None,
                               diag=None, param_schema=None):
@@ -196,7 +211,11 @@ def bootstrap_skill_code_body(env, code, arguments='', skill_code='skill',
     elif live:
         code = drop_schema_literal_assigns(code, live)
     try:
-        from ..controllers.context_builder import build_safe_context
+        from ..controllers.context_builder import (
+            build_safe_context,
+            compile_sandbox,
+        )
+        from ..controllers.controller_helpers import open_readonly_env
 
         class _Ctrl(object):
             def __init__(self, _env):
@@ -226,17 +245,23 @@ def bootstrap_skill_code_body(env, code, arguments='', skill_code='skill',
                 except Exception:
                     return 'en_US'
 
-        ctx = build_safe_context(
-            _Ctrl(env), 'read', previous_result=previous_result,
-        )
-        ctx.setdefault('previous_result', None)
-        for key, val in params.items():
-            ctx[key] = val
-        exec(
-            compile(code, '<skill:%s>' % (skill_code or 'x'), 'exec'),
-            ctx, ctx,
-        )
-        result = ctx.get('result')
+        # Box A, like relaxaicode: a READ ONLY cursor of its own, rolled back
+        # and closed here. The caller's cursor can write; the skill never holds it.
+        ro_env, ro_cr = open_readonly_env(env)
+        try:
+            ctx = build_safe_context(
+                _Ctrl(ro_env), 'read', previous_result=previous_result,
+            )
+            ctx.setdefault('previous_result', None)
+            for key, val in params.items():
+                ctx[key] = val
+            exec(compile_sandbox(code, '<skill:%s>' % (skill_code or 'x')), ctx, ctx)
+            result = _records_onto(ctx.get('result'), env)
+        finally:
+            try:
+                ro_cr.rollback()
+            finally:
+                ro_cr.close()
         if isinstance(result, dict):
             # Skill-authored help/ask cards: stamp trust so report mode can
             # paint HTML without rejecting formatted_text as sandbox junk.

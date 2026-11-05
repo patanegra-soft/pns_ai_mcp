@@ -3,13 +3,10 @@
 # Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
 """MCP tools for relaxaicode."""
 
-import logging
-
-from .context_builder import build_safe_context
+from .context_builder import build_safe_context, compile_sandbox
 from .mcp_decorators import mcp_tool
 from .relaxaicode_replies import (
     _format_error_response,
-    _log_where,
     _reject_untrusted_formatted_text,
 )
 from .relaxaicode_prepare import (
@@ -37,8 +34,6 @@ from .relaxaicode_outcome import (
     _success_response,
     _too_large_response,
 )
-
-_logger = logging.getLogger(__name__)
 
 
 @mcp_tool(
@@ -192,8 +187,7 @@ def tool_relaxaicode(
             return error_response
 
         try:
-            # Compile the code (standard Python, no transformations)
-            byte_code = compile(code, '<relaxaicode>', 'exec')
+            byte_code = compile_sandbox(code, '<relaxaicode>')
         except SyntaxError as e:
             return _format_error_response(
                 -32602,
@@ -226,16 +220,11 @@ def tool_relaxaicode(
         try:
             # CRITICAL: exec() with the same dict as globals and locals
             # makes sure assignments are stored in safe_context
-            # Check that env is reachable right before exec
-            test_env = safe_context.get('env')
-            if test_env is None:
-                _logger.error(f"[{_log_where()}] CRITICAL: env is None in safe_context before exec")
-
             exec(byte_code, safe_context, safe_context)
         except Exception as exec_error:
             return _exec_error_response(
                 controller, exec_error, code, safe_context, agent_llm,
-                context_data, phase, return_mode,
+                context_data, phase, return_mode, env=ro_env,
             )
 
         result = _result_of(safe_context)
@@ -253,12 +242,12 @@ def tool_relaxaicode(
 
         error_response = _link_and_picture_rows(
             controller, result, safe_context, code, agent_llm,
-            context_data, phase, return_mode,
+            context_data, phase, return_mode, env=ro_env,
         )
         if error_response:
             return error_response
         error_response = _present_result(
-            result, safe_context, phase, return_mode, summary,
+            result, safe_context, phase, return_mode, summary, env=ro_env,
         )
         if error_response:
             return error_response
