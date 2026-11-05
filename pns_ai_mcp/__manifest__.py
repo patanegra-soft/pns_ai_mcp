@@ -5,7 +5,7 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '19.0.3.1.925',
+    'version': '19.0.3.1.926',
     'images': ['static/description/banner_store.png'],
     'category': 'Extra Tools',
     'summary': 'Native AI engine and MCP server for Odoo: open LLM providers, a read-only sandbox, human-approved writes and agents as Odoo modules.',
