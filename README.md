@@ -58,6 +58,23 @@ client already runs. Here the agents live in plain Odoo modules.
 - A plain Odoo module: no external server to run.
 - Same module at every client on a supported series.
 
+### What it does not do
+
+- **No chat screen.** The engine has no conversation window for users. That is [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo).
+- **No writes on its own.** The AI never changes Odoo by itself. Every change is a plan that a person approves in Odoo.
+- **Four provider protocols.** OpenAI-compatible, OpenRouter, Anthropic and SystemOne (yes-or-no decisions). An API that speaks none of them does not connect.
+- **Two tested series.** 14.0 and 19.0. From 15.0 to 18.0 you build the module yourself and try it first; 13.0 and older do not run (see *Odoo versions*).
+
+### Questions
+
+**Is it an MCP server?** It includes one, in the same module. `POST /mcp` speaks Streamable HTTP. `/mcp/sse` with `/mcp/message` is for clients that only speak SSE. `/mcp/<agent>` ties the call to one agent. Three tools: `relaxaicode` (read-only Python against Odoo), `safe_plan_request` (propose a change) and `safe_plan_status` (see whether it was approved).
+
+**Where do the client's data go?** To the providers you set up, and to the outside addresses and API servers you allow. When Cursor or another MCP client connects, its own model sees what the tools return.
+
+**Do I need Chatboo?** No. The engine alone serves MCP clients. Chatboo adds the chat inside Odoo and brings the engine with it.
+
+**What is `pns_base`?** The shared layer of the PNS modules: the same screens load on Odoo 14 and 19, plus small helpers (notifications, import and export, PDF). It installs as a dependency.
+
 ### Getting started
 
 1. **Install.** Want the chat too? Install [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#getting-started) instead; it brings this module. For the engine alone, clone the `14.0` or `19.0` branch of `pns_base` and `pns_ai_mcp`, add each clone to `addons_path` and install **PNS AI Engine** from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
@@ -215,6 +232,23 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 - Apache 2.0. Sin cuota por usuario, por base de datos ni por año.
 - Un módulo de Odoo normal: sin servidor externo que mantener.
 - El mismo módulo en todos los clientes de una versión soportada.
+
+### Qué no hace
+
+- **Sin pantalla de chat.** El motor no trae ventana de conversación para los usuarios. Eso es [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo).
+- **No escribe por su cuenta.** La IA nunca cambia Odoo sola. Cada cambio es un plan que aprueba una persona en Odoo.
+- **Cuatro protocolos de proveedor.** Compatible con OpenAI, OpenRouter, Anthropic y SystemOne (decisiones de sí o no). Una API que no hable ninguno no se conecta.
+- **Dos versiones probadas.** 14.0 y 19.0. De la 15.0 a la 18.0 construyes tú el módulo y lo pruebas antes; la 13.0 y anteriores no funcionan (ver *Versiones de Odoo*).
+
+### Preguntas
+
+**¿Es un servidor MCP?** Lo incluye, en el mismo módulo. `POST /mcp` habla Streamable HTTP. `/mcp/sse` con `/mcp/message` es para clientes que solo hablan SSE. `/mcp/<agente>` ata la llamada a un agente. Tres herramientas: `relaxaicode` (Python de solo lectura contra Odoo), `safe_plan_request` (proponer un cambio) y `safe_plan_status` (ver si se aprobó).
+
+**¿Adónde van los datos del cliente?** A los proveedores que configures, y a las direcciones de fuera y servidores de API que permitas. Cuando se conecta Cursor u otro cliente MCP, su propio modelo ve lo que devuelven las herramientas.
+
+**¿Necesito Chatboo?** No. El motor solo ya sirve a clientes MCP. Chatboo añade el chat dentro de Odoo y trae el motor con él.
+
+**¿Qué es `pns_base`?** La capa común de los módulos PNS: las mismas pantallas cargan en Odoo 14 y 19, y trae utilidades pequeñas (avisos, importar y exportar, PDF). Se instala como dependencia.
 
 ### Puesta en marcha
 
