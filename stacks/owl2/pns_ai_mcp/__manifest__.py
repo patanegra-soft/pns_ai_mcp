@@ -5,7 +5,7 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '3.1.926',
+    'version': '3.1.927',
     'category': 'Extra Tools',
     'summary': 'Native AI engine and MCP server for Odoo: open LLM providers, a read-only sandbox, human-approved writes and agents as Odoo modules.',
     'description': """
@@ -24,7 +24,7 @@
         - Extensible skills and domain knowledge per module
     """,
     'author': 'PATANEGRA Soft',
-    'website': '/pns_ai_mcp/static/description/index.html',
+    'website': 'https://www.patanegra.com/ai-engine.html',
     # Apache License 2.0 — see LICENSE file
     'license': 'Other OSI approved licence',
     'depends': ['web', 'pns_base'],

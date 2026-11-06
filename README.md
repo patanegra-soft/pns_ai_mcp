@@ -2,7 +2,7 @@
 
 ![Native Odoo AI for consultants](common/static/description/banner.png)
 
-**[English](#english) · [Español](#español)**
+**[English](#english) · [Español](#español) · [www.patanegra.com](https://www.patanegra.com/ai-engine.html)**
 
 ## English
 
