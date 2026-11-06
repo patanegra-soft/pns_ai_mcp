@@ -1,19 +1,19 @@
 # PNS AI Engine (pns_ai_mcp)
 
-![Native Odoo AI for consultants](static/description/banner.png)
+![AI inside your Odoo, for consultants](static/description/banner.png)
 
 **[English](#english) · [Español](#español) · [www.patanegra.com](https://www.patanegra.com/ai-engine.html)**
 
 ## English
 
-**Native Odoo AI for consultants.** The AI Engine runs inside your client's
+**AI inside your Odoo, for consultants.** The AI Engine runs in your client's
 Odoo. Providers, agents, knowledge and approvals are Odoo records, and the
 agents live in plain Odoo modules. Open source, nothing to license. Odoo
 **14.0** and **19.0**.
 
 ### The pain
 
-**You want native Odoo AI for every client: open source, built on modules, with no licences.**
+**AI for your clients as just another module. Open source, no licences.**
 Not a service on the side that you connect client by client. An AI that
 installs, updates and uninstalls like any other module, on the Odoo the
 client already runs. Here the agents live in plain Odoo modules.
@@ -215,16 +215,16 @@ Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.m
 
 ## Español
 
-![IA nativa de Odoo para consultores](static/description/banner_es.png)
+![IA dentro de tu Odoo, para consultores](static/description/banner_es.png)
 
-**IA nativa de Odoo para consultores.** El Motor de IA corre dentro del Odoo
+**IA dentro de tu Odoo, para consultores.** El Motor de IA corre en el Odoo
 de tu cliente. Proveedores, agentes, conocimiento y aprobaciones son registros
 de Odoo, y los agentes viven en módulos normales de Odoo. Código abierto, nada
 que licenciar. Odoo **14.0** y **19.0**.
 
 ### El dolor
 
-**Quieres IA nativa de Odoo para todos tus clientes: de código abierto, basada en módulos y sin licencias.**
+**IA para tus clientes como un módulo más. Código abierto, sin licencias.**
 No un servicio al lado que conectas cliente a cliente. Una IA que se instala,
 se actualiza y se desinstala como cualquier otro módulo, en el Odoo que el
 cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.

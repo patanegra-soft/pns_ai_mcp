@@ -2,6 +2,23 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.932_owl2-3.1.932 (2026-11-06)
+
+- A skill that calls an external API over several rounds finds its earlier calls again. Since 3.1.921 its code reads from a cursor of its own, which did not see the cached responses of the same turn; it asked for them again until the rounds ran out. The cache row is now committed as soon as it is written.
+
+## owl1-3.1.931_owl2-3.1.931 (2026-11-06)
+
+- The AI-generated mark also goes on HTML and Word exports, and on Excel files written when openpyxl is not installed. Text and Markdown have no properties and stay unmarked.
+
+## owl1-3.1.930_owl2-3.1.930 (2026-11-06)
+
+- Shorter pain line in the README and the description page: "AI for your clients as just another module. Open source, no licences."
+
+## owl1-3.1.929_owl2-3.1.929 (2026-11-06)
+
+- New headline: "AI inside your Odoo, for consultants." in the README, the description page and the banners.
+- Excel and PDF files the engine writes carry a machine-readable mark that an AI system made them (EU AI Act, article 50): creator "PNS AI Engine" and the keyword "ai-generated" in the document properties. The content does not change. This covers Chatboo's Excel export too.
+
 ## owl1-3.1.928_owl2-3.1.928 (2026-11-06)
 
 - README: new "Agents, roles and chains" section (English and Spanish). It explains the two agent types, the agents the module ships, the seven provider roles and their fallback, and how the provider chain is ordered and failed over.

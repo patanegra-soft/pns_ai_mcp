@@ -98,7 +98,12 @@ class AIApiResultCache(models.Model):
 
     @api.model
     def _store(self, server, tool, arguments, body, ttl_seconds=None):
-        """Upsert a fresh cache entry. Best-effort — never breaks the turn."""
+        """Upsert a fresh cache entry. Best-effort — never breaks the turn.
+
+        Written on a cursor of its own and committed: a skill's code reads
+        the row from box A, a separate read-only cursor that never sees what
+        the turn's cursor has not committed.
+        """
         try:
             ttl = int(ttl_seconds or API_CALL_CACHE_TTL_SECONDS)
             if ttl <= 0 or body is None:
@@ -117,11 +122,13 @@ class AIApiResultCache(models.Model):
                 'fetched_at': now,
                 'expires_at': expires,
             }
-            existing = self.sudo().search([('cache_key', '=', key)], limit=1)
-            if existing:
-                existing.write(vals)
-            else:
-                self.sudo().create(vals)
+            with self.env.registry.cursor() as cr:
+                Cache = api.Environment(cr, self.env.uid, self.env.context)[self._name].sudo()
+                existing = Cache.search([('cache_key', '=', key)], limit=1)
+                if existing:
+                    existing.write(vals)
+                else:
+                    Cache.create(vals)
         except Exception:
             _logger.warning(
                 'ai.api.result.cache: store failed for %s/%s',

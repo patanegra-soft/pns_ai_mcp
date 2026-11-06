@@ -10,6 +10,8 @@ import io
 import logging
 import re
 
+from .ai_disclosure import HTML_META
+
 from .artifact_export_loader import (
     _load_formatters,
     _load_sibling,
@@ -167,11 +169,11 @@ def _as_html(rows, title, labels=None):
         )
         body_rows.append('<tr>%s</tr>' % tds)
     return (
-        '<!DOCTYPE html><html><head><meta charset="utf-8"/>'
+        '<!DOCTYPE html><html><head><meta charset="utf-8"/>%s'
         '<title>%s</title></head><body><h1>%s</h1>'
         '<table><thead><tr>%s</tr></thead><tbody>%s</tbody></table>'
         '</body></html>'
-    ) % (title_h, title_h, thead, ''.join(body_rows))
+    ) % (HTML_META, title_h, title_h, thead, ''.join(body_rows))
 
 
 _WORD_KILL_CLASS_RE = re.compile(
@@ -259,9 +261,9 @@ def _word_wrap(title, body):
     return (
         '<html xmlns:o="urn:schemas-microsoft-com:office:office" '
         'xmlns:w="urn:schemas-microsoft-com:office:word">'
-        '<head><meta charset="utf-8"/><title>%s</title>'
+        '<head><meta charset="utf-8"/>%s<title>%s</title>'
         '<style>%s</style></head><body>%s</body></html>'
-    ) % (title_h, _WORD_STYLE, body)
+    ) % (HTML_META, title_h, _WORD_STYLE, body)
 
 
 def _word_cell_html(value, key, env=None):
@@ -621,6 +623,7 @@ def _as_xlsx_openpyxl_book(specs):
                 width = _xlsx_photo_col_chars(spec, col, fmt)
             ws.column_dimensions[get_column_letter(col)].width = width
         ws.freeze_panes = 'A%d' % (header_row + 1)
+    fmt.mark_ai_workbook(wb)
     buf = io.BytesIO()
     wb.save(buf)
     return buf.getvalue()
