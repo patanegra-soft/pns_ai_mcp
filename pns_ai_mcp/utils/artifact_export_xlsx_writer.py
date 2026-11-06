@@ -15,6 +15,13 @@ from .engine_params import (
     XLSX_FLOAT_DECIMALS_MAX,
 )
 
+from .ai_disclosure import (
+    OOXML_CORE_PART,
+    OOXML_CORE_REL,
+    OOXML_CORE_TYPE,
+    OOXML_CORE_XML,
+)
+
 from .artifact_export_loader import (
     _load_formatters,
 )
@@ -452,8 +459,9 @@ def _as_xlsx_ooxml_book(specs):
         '<Relationships xmlns="%s">'
         '<Relationship Id="rId1" Type="%s/officeDocument" '
         'Target="xl/workbook.xml"/>'
+        '<Relationship Id="rId2" Type="%s" Target="%s"/>'
         '</Relationships>'
-    ) % (_XLSX_NS_PKG_REL, _XLSX_NS_OD_REL)
+    ) % (_XLSX_NS_PKG_REL, _XLSX_NS_OD_REL, OOXML_CORE_REL, OOXML_CORE_PART)
     ctypes = (
         '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
         '<Types xmlns="%s">'
@@ -463,10 +471,12 @@ def _as_xlsx_ooxml_book(specs):
         '%s'
         '<Override PartName="/xl/workbook.xml" ContentType="application/vnd.'
         'openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>'
+        '<Override PartName="/%s" ContentType="%s"/>'
         '%s</Types>'
     ) % (
         _XLSX_NS_TYPES,
         '<Default Extension="png" ContentType="image/png"/>' if images else '',
+        OOXML_CORE_PART, OOXML_CORE_TYPE,
         ''.join(override_tags),
     )
     buf = io.BytesIO()
@@ -480,6 +490,7 @@ def _as_xlsx_ooxml_book(specs):
         _put('_rels/.rels', root_rels)
         _put('xl/workbook.xml', workbook_xml)
         _put('xl/_rels/workbook.xml.rels', workbook_rels)
+        _put(OOXML_CORE_PART, OOXML_CORE_XML)
         for name, data in files:
             _put(name, data)
     return buf.getvalue()

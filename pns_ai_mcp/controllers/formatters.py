@@ -3,9 +3,23 @@
 # Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
 """Data-formatting helpers for the MCP server."""
 
+import importlib.util
 import logging
+from pathlib import Path
 
 _logger = logging.getLogger(__name__)
+
+
+def _load_ai_disclosure():
+    path = Path(__file__).resolve().parents[1] / 'utils' / 'ai_disclosure.py'
+    spec = importlib.util.spec_from_file_location('_ae_ai_disclosure', path)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+_ai = _load_ai_disclosure()
+mark_ai_workbook = _ai.mark_ai_workbook
 
 def format_data_as_excel(data, columns_config, title="Report",
                          include_row_index=True, caption=None, widths=None,
@@ -41,6 +55,7 @@ def format_excel_workbook(sheets):
             else:
                 ws = wb.create_sheet()
             _fill_excel_sheet(ws, spec)
+        mark_ai_workbook(wb)
         output = io.BytesIO()
         wb.save(output)
         output.seek(0)
@@ -561,6 +576,9 @@ def format_data_as_pdf(data, columns_config, title="Report", landscape=True,
             leftMargin=1 * cm,
             topMargin=1.4 * cm,
             bottomMargin=1 * cm,
+            creator=_ai.AI_GENERATOR,
+            keywords=_ai.AI_KEYWORD,
+            subject=_ai.AI_DESCRIPTION,
         )
 
         styles = getSampleStyleSheet()
