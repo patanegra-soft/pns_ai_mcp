@@ -58,6 +58,42 @@ client already runs. Here the agents live in plain Odoo modules.
 - A plain Odoo module: no external server to run.
 - Same module at every client on a supported series.
 
+### Agents, roles and chains
+
+**What an agent is.** Anything in Odoo that uses AI: a chat, a voice assistant, an MCP endpoint, a job that runs in the background. In the engine it is a record (*AI Engine → Agents*) with a code, its contexts, its skills and its list of providers.
+
+The natural home of an agent is the Odoo module that needs it: install the module and the agent is there; uninstall it and it goes. One module can bring more than one. This engine brings two:
+
+- **MCP Server** (`pns_ai_mcp`) serves contexts and tools to an outside client such as Cursor. The model runs in that client; Odoo answers its tool calls.
+- **AI Admin** (`pns_ai_admin`) does the engine's own jobs: writing a skill, reading an API's documentation.
+
+[Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo) brings the chat agent. An agent can also be created by hand in Odoo.
+
+**Two kinds.** *Inference*: Odoo calls the model, through the agent's providers (a chat, a voice assistant). *Endpoint*: the model is outside and Odoo only serves it (MCP).
+
+**Roles.** A role says what a provider is for. One provider can hold several.
+
+| Role | What for |
+| :--- | :--- |
+| Conversation | The ordinary text turn. A provider with no role does the same. |
+| Audio | A voice clip into text. |
+| Vision | A photo or a scanned page. |
+| Video | A video clip. |
+| Decision | A closed yes or no, with a confidence. Nobody holding it means no. |
+| Design | Lays out a page from the data of a turn. Nobody holding it: Conversation answers. |
+| Parser | A short phrase into fields, such as the arguments of a skill. A small model is enough. Nobody holding it: Conversation answers. |
+
+**The chain.** Each agent has its own providers, in the order you set. When a turn needs a role, the engine takes the providers of that agent that hold it, in that order. If one fails or stalls, the next one answers.
+
+- Each link has its own timeouts: seconds with no data, and seconds for a whole round.
+- A provider that holds only that role goes before the ones that do everything: it was chosen for that job.
+- If the chain has nobody for a role other than Conversation, the engine looks among every active provider.
+- **No external failover** ends the chain at that provider. Use it on a local model whose data must not go out.
+- A key that reached its monthly spend cap is skipped.
+- An agent with no chain uses every active provider.
+
+For example: a large model for the conversation, a small one with only Parser, and a local model at the end of the chain as backup.
+
 ### What it does not do
 
 - **No chat screen.** The engine has no conversation window for users. That is [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo).
@@ -232,6 +268,42 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 - Apache 2.0. Sin cuota por usuario, por base de datos ni por año.
 - Un módulo de Odoo normal: sin servidor externo que mantener.
 - El mismo módulo en todos los clientes de una versión soportada.
+
+### Agentes, roles y cadenas
+
+**Qué es un agente.** Cualquier cosa de Odoo que use IA: un chat, un asistente de voz, un punto MCP, un trabajo que corre por detrás. En el motor es un registro (*Motor de IA → Agentes*) con un código, sus contextos, sus skills y su lista de proveedores.
+
+Lo natural es que un agente venga con el módulo de Odoo que lo necesita: instalas el módulo y el agente está; lo desinstalas y se va. Un módulo puede traer más de uno. Este motor trae dos:
+
+- **MCP Server** (`pns_ai_mcp`) da contextos y herramientas a un cliente de fuera, como Cursor. El modelo corre en ese cliente; Odoo contesta a sus llamadas.
+- **AI Admin** (`pns_ai_admin`) hace los trabajos del propio motor: escribir un skill, leer la documentación de una API.
+
+[Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo) trae el agente del chat. También se puede crear un agente a mano en Odoo.
+
+**Dos tipos.** *Inferencia*: Odoo llama al modelo, con los proveedores del agente (un chat, un asistente de voz). *Endpoint*: el modelo está fuera y Odoo solo le sirve (MCP).
+
+**Roles.** Un rol dice para qué sirve un proveedor. Un proveedor puede tener varios.
+
+| Rol | Para qué |
+| :--- | :--- |
+| Conversación | El turno de texto normal. Un proveedor sin rol hace lo mismo. |
+| Audio | Un audio de voz a texto. |
+| Visión | Una foto o una página escaneada. |
+| Vídeo | Un vídeo. |
+| Decisión | Un sí o un no cerrado, con su confianza. Si nadie lo tiene, es no. |
+| Diseño | Maqueta una página con los datos de un turno. Si nadie lo tiene, contesta Conversación. |
+| Parser | Una frase corta a campos, como los argumentos de un skill. Basta un modelo pequeño. Si nadie lo tiene, contesta Conversación. |
+
+**La cadena.** Cada agente tiene sus proveedores, en el orden que pongas. Cuando un turno necesita un rol, el motor toma los proveedores de ese agente que lo tienen, en ese orden. Si uno falla o se queda colgado, contesta el siguiente.
+
+- Cada enlace tiene sus tiempos de espera: segundos sin datos y segundos para una ronda entera.
+- Un proveedor que solo tiene ese rol va antes que los que hacen de todo: se eligió para eso.
+- Si la cadena no tiene a nadie para un rol que no sea Conversación, el motor busca entre todos los proveedores activos.
+- **Sin failover externo** corta la cadena en ese proveedor. Sirve para un modelo local cuyos datos no deben salir.
+- Una clave que llegó a su tope de gasto del mes se salta.
+- Un agente sin cadena usa todos los proveedores activos.
+
+Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parser, y un modelo local al final de la cadena como respaldo.
 
 ### Qué no hace
 
