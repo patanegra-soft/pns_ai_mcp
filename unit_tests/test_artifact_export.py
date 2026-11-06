@@ -1472,6 +1472,7 @@ def test_xlsx_photo_is_a_picture_not_its_url(monkeypatch, writer):
             _excel_photo_col_chars = staticmethod(real_fmt._excel_photo_col_chars)
             _excel_photo_offsets = staticmethod(real_fmt._excel_photo_offsets)
             _XLSX_IMG_ROW_PT = real_fmt._XLSX_IMG_ROW_PT
+            mark_ai_workbook = staticmethod(real_fmt.mark_ai_workbook)
 
         _use_formatters(monkeypatch, _PhotosOnly)
     if writer == 'stdlib':
