@@ -2,6 +2,10 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.933_owl2-3.1.933 (2026-11-07)
+
+- The Apps subtitle says what people search for: open source, Odoo Community 14 and 19, and the models it talks to (OpenAI, Claude, Ollama or any compatible one).
+
 ## owl1-3.1.932_owl2-3.1.932 (2026-11-06)
 
 - A skill that calls an external API over several rounds finds its earlier calls again. Since 3.1.921 its code reads from a cursor of its own, which did not see the cached responses of the same turn; it asked for them again until the rounds ran out. The cache row is now committed as soon as it is written.
