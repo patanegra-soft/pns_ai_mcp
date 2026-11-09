@@ -8,7 +8,7 @@
 
 import { FormController } from "@web/views/form/form_controller";
 import { ListController } from "@web/views/list/list_controller";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 import { setUsageElementsWithFx } from "./ai_usage_chip";
 
 const MODEL = "ai.api.server";
@@ -36,7 +36,7 @@ async function runSuggestDetection(controller, resIds) {
     }
 }
 
-patch(FormController.prototype, {
+pnsPatch(FormController.prototype, "pns_ai_mcp.external_server_usage", {
     async beforeExecuteActionButton(clickParams) {
         if (
             this.props.resModel === MODEL
@@ -50,7 +50,7 @@ patch(FormController.prototype, {
     },
 });
 
-patch(ListController.prototype, {
+pnsPatch(ListController.prototype, "pns_ai_mcp.external_server_usage", {
     async beforeExecuteActionButton(clickParams) {
         if (
             this.props.resModel === MODEL

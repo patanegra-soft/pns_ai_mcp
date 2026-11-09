@@ -132,6 +132,13 @@ field[name="content"],
     cursor: pointer;
     user-select: none;
 }
+.o_pns_origin_actions,
+.o_pns_origin_filter_bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 8px;
+}
 .o_form_view .o_field_x2many {
     overflow-anchor: none;
 }

@@ -2,6 +2,18 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.972_owl2-3.1.972_owl3-3.1.972 (2026-11-09)
+
+- A confirmation card painted in the chat keeps its token while a badge counts the pending cards or the list is read again, so Confirm no longer fails with an old token. "Process this PDF" with a PDF attached works on the attachment instead of offering a download, on Odoo 20 too.
+- Vendor bills from a document work outside Europe: several taxes on the same base (GST + PST, CGST + SGST, state + county sales tax) go on one line or as a group tax, a printed withholding is kept as a negative purchase tax, a document in another currency keeps its currency and its figures, and a bill without the issuer's tax id is matched by name without a warning. When none of your taxes reproduces the printed figures, the line goes without tax and the engine names the missing one.
+- A till receipt dropped in the chat becomes a draft vendor bill too (the base worked out from the printed rate, or a question when none is printed). A card terminal slip is never booked: the engine looks for the bill of that merchant with that amount around that date and says whether it is booked and paid.
+- The words that open a knowledge pack are capped per list (generic and per language), so a long generic list no longer silently drops the words of your language.
+- Drop a supplier's bill (PDF, spreadsheet, photo or scan) in a chat that uses this engine and ask for it: the plan finds the vendor by tax id or name (or creates the contact as its first step), proposes the draft bill with one line per tax rate and the expense account from that vendor's history, and names any duplicate before proposing anything. Nothing is posted.
+- Tested and published on every series from Odoo 14.0 to 20.0, one flat branch each. Odoo 20 has its own screen stack (Owl 3).
+- Several companies: the AI reads and writes in the companies ticked in the company switcher (the active one first) or, with no screen, in the user's default company. An approved plan runs in the companies it was asked in, even if it is approved from another one.
+- AI Administrator now includes AI Conversational, but an AI Administrator who is not a Settings administrator can no longer set a Settings administrator's API key (by generating it, pasting it or importing it). The users' AI permissions travel in the export and import; the import says when it left a key out. The Roles list has Tools to export and import the roles and which providers hold each one.
+- A skill waiting for its arguments lets go when the next message is a different question, and a skill can propose a record as a form card that the person opens and saves.
+
 ## owl1-3.1.933_owl2-3.1.933 (2026-11-07)
 
 - The Apps subtitle says what people search for: open source, Odoo Community 14 and 19, and the models it talks to (OpenAI, Claude, Ollama or any compatible one).

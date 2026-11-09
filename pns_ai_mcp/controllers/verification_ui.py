@@ -140,7 +140,15 @@ class MCPVerificationUI(http.Controller):
         )
 
     @http.route('/pns_ai_mcp/verification/pending', type=JSON_ROUTE_TYPE, auth='user')
-    def pending(self, **kwargs):
-        """Read-only list of this user's pending cards (Security menu SoT)."""
-        items = request.env['ai.safe.operation'].pending_card_payloads()
+    def pending(self, peek=False, held=None, **kwargs):
+        """Read-only list of this user's pending cards (Security menu SoT).
+
+        ``peek`` is for a badge that only counts: it must not rotate the token
+        of a card already painted in the chat. ``held`` lists the cards this
+        screen already paints; only the others get a token.
+        """
+        items = request.env['ai.safe.operation'].pending_card_payloads(
+            mint_token=not peek,
+            held=held if isinstance(held, list) else None,
+        )
         return {'success': True, 'items': items}

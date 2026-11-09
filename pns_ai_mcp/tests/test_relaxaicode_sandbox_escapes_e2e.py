@@ -19,6 +19,7 @@ Safe host suite: ``./t.sh --intrusion-only``.
 import json
 
 from odoo.tests import tagged, TransactionCase
+from odoo.tools import mute_logger
 
 from odoo.addons.pns_ai_mcp.controllers.tools_relaxaicode import (
     tool_relaxaicode,
@@ -164,6 +165,8 @@ class TestRelaxAICodeSandboxEscapesE2E(TransactionCase):
             text = json.dumps(resp, default=str)
         return resp, text
 
+    # Some payloads send PostgreSQL a bad value on purpose; it logs the query.
+    @mute_logger('odoo.sql_db')
     def test_escape_payloads_fail_controlled(self):
         """PAAP I9: Escape payloads fail under control on a live registry."""
         for code in ESCAPE_PAYLOADS:

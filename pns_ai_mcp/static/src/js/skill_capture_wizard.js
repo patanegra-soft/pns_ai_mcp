@@ -7,7 +7,7 @@
  */
 
 import { FormController } from "@web/views/form/form_controller";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 import { _t } from "@web/core/l10n/translation";
 import {
     addUsage,
@@ -115,7 +115,7 @@ function bindStop(controller) {
     });
 }
 
-patch(FormController.prototype, {
+pnsPatch(FormController.prototype, "pns_ai_mcp.skill_capture_wizard", {
     async beforeExecuteActionButton(clickParams) {
         if (
             this.props.resModel === MODEL

@@ -47,7 +47,7 @@
             <field name="name">AI Administrator</field>
             <field name="comment">Full AI administration: providers, API keys, servers, users, logs, whitelist, system config.</field>
             <field name="category_id" ref="module_category_ai"/>
-            <field name="implied_ids" eval="[(4, ref('group_ai_writer')), (4, ref('group_ai_external_url')), (4, ref('group_ai_external_api'))]"/>
+            <field name="implied_ids" eval="[(4, ref('group_ai_writer')), (4, ref('group_ai_external_url')), (4, ref('group_ai_external_api')), (4, ref('group_ai_conversational'))]"/>
         </record>
 
     </data>

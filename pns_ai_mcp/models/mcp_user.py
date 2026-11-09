@@ -343,7 +343,16 @@ class MCPUser(models.Model):
                 extra_fields = set(vals.keys()) - set(filtered_vals.keys())
                 _logger.debug("MCP: Fields ignored on record create: %s", extra_fields)
             filtered_vals_list.append(filtered_vals)
-        
+        if not self.env.su:
+            for vals in filtered_vals_list:
+                if vals.get('mcp_api_key_hash') and not self._may_set_key_of(
+                    self.env['res.users'].browse(vals.get('user_id') or ()),
+                ):
+                    raise AccessError(_(
+                        'Only a Settings administrator can set the API key of '
+                        'another Settings administrator.'
+                    ))
+
         records = super(MCPUser, self).create(filtered_vals_list)
         if any(vals.get('mcp_api_key_hash') for vals in filtered_vals_list):
             records._forget_app_menu_cache()
@@ -358,7 +367,10 @@ class MCPUser(models.Model):
         if len(filtered_vals) != len(vals):
             extra_fields = set(vals.keys()) - set(filtered_vals.keys())
             _logger.debug("MCP: Fields ignored on record write: %s", extra_fields)
-        
+        # The field is readonly only on screen; an RPC write still lands here.
+        if filtered_vals.get('mcp_api_key_hash') and not self.env.su:
+            self._ensure_key_admin()
+
         result = super(MCPUser, self).write(filtered_vals)
         if 'mcp_api_key_hash' in filtered_vals:
             self._forget_app_menu_cache()
@@ -631,6 +643,7 @@ class MCPUser(models.Model):
             skip_fields={
                 'user_id', 'mcp_api_key', 'api_key', 'mcp_api_key_hash',
             },
+            key_aliases={'is_ai_admin': 'is_mcp_manager'},
         )
         warnings.extend(field_warnings)
 
@@ -646,27 +659,17 @@ class MCPUser(models.Model):
         return vals, bool(key_hash), warnings
 
     def _export_user_dict(self, include_secrets=False):
-        """Export a single user record to a portable dict using dynamic fields."""
+        """Export a single user record to a portable dict using dynamic fields.
+
+        The AI permission flags are fields with an inverse, so they travel as
+        fields and the import puts the groups back.
+        """
         try:
-            data = export_record_dict(self, skip_fields={
+            return export_record_dict(self, skip_fields={
                 'user_id',
             }, include_secrets=include_secrets)
         except Exception:
-            data = {'login': self.login or '', 'name': self.name or ''}
-        # Extra: group membership flags (not model fields but useful for portability)
-        try:
-            if self.user_id:
-                data['is_ai_admin'] = self.user_id.has_group('pns_ai_mcp.group_ai_admin')
-                data['is_ai_writer'] = self.user_id.has_group('pns_ai_mcp.group_ai_writer')
-                data['is_ai_external_url'] = self.user_id.has_group(
-                    'pns_ai_mcp.group_ai_external_url')
-                data['is_ai_external_api'] = self.user_id.has_group(
-                    'pns_ai_mcp.group_ai_external_api')
-                data['is_ai_conversational'] = self.user_id.has_group(
-                    'pns_ai_mcp.group_ai_conversational')
-        except Exception:
-            pass
-        return data
+            return {'login': self.login or '', 'name': self.name or ''}
 
     def action_export_users(self, *args, **kwargs):
         """Export all MCP users to a JSON file (asks for secrets first)."""
@@ -737,9 +740,46 @@ class MCPUser(models.Model):
     def _ensure_key_admin(self):
         if self.env.su or self.env.user._is_superuser():
             return
-        if self.env.user.has_group('pns_ai_mcp.group_ai_admin'):
-            return
-        raise AccessError(_('Only AI Administrators can manage MCP API keys.'))
+        if not self.env.user.has_group('pns_ai_mcp.group_ai_admin'):
+            raise AccessError(_('Only AI Administrators can manage MCP API keys.'))
+        for record in self:
+            if not self._may_set_key_of(record.user_id):
+                raise AccessError(_(
+                    'Only a Settings administrator can set the API key of '
+                    'another Settings administrator.'
+                ))
+
+    @api.model
+    def _may_set_key_of(self, user):
+        """Whether the caller may set *user*'s key.
+
+        A key logs in as its owner, so a Settings administrator's key is set
+        only by the system, by another Settings administrator or by that
+        same person.
+        """
+        env = self.env
+        if env.su or env.user._is_superuser() or not user or user.id == env.uid:
+            return True
+        system = env.ref('base.group_system', raise_if_not_found=False)
+        if not system or not user_has_group(user.sudo(), system):
+            return True
+        return user_has_group(env.user.sudo(), system)
+
+    @api.model
+    def _drop_key_unless_allowed(self, vals, user):
+        """Take the key out of import *vals* if the caller may not set *user*'s.
+
+        The AI permissions stay. Returns the warning for the import report,
+        or an empty string when nothing was taken out.
+        """
+        if not vals.get('mcp_api_key_hash') or self._may_set_key_of(user):
+            return ''
+        for name in ('mcp_api_key_hash', 'mcp_api_key_state', 'mcp_api_key_generated_date'):
+            vals.pop(name, None)
+        return _(
+            "%s is a Settings administrator: the API key was not imported "
+            "(only a Settings administrator can set it). The AI permissions were."
+        ) % user.login
 
     @api.model
     def _redeem_key_pin(self, raw, ip=None):

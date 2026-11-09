@@ -8,6 +8,7 @@ from odoo.exceptions import AccessError
 from odoo.tests import TransactionCase, tagged
 
 from odoo.addons.pns_ai_mcp.utils.sandbox_secrets import SANDBOX_CURSOR_FLAG
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 
 @tagged('post_install', '-at_install', 'pns_ai_mcp')
@@ -78,6 +79,8 @@ class TestSandboxSecretRead(TransactionCase):
             Param.get_param('pns_test.sandbox_token')
         with self.assertRaises(AccessError):
             Param.get_param('database.secret')
+        with self.assertRaises(AccessError):
+            Param.set_param('pns_test.sandbox_token', 'other')
         label = Param.search([('key', '=', 'pns_test.sandbox_label')])
         self.assertEqual(label.value, 'visible')
         self._forget()
@@ -86,3 +89,34 @@ class TestSandboxSecretRead(TransactionCase):
             token.value
         with self.assertRaises(AccessError):
             Param.search([('value', '=like', 'tok-%')])
+
+    def test_a_readable_parameter_does_not_open_the_secret_one(self):
+        Param = self.user_env['ir.config_parameter']
+        label = Param.search([('key', '=', 'pns_test.sandbox_label')])
+        self.assertEqual(label.value, 'visible')
+        token = Param.search([('key', '=', 'pns_test.sandbox_token')])
+        with self.assertRaises(AccessError):
+            token.value
+        with self.assertRaises(AccessError):
+            token.read(['value'])
+        both = label | token
+        with self.assertRaises(AccessError):
+            both.mapped('value')
+
+    def test_typed_readers_keep_secret_keys_out(self):
+        if ODOO_VERSION < 20:
+            self.skipTest('typed parameter readers arrive in Odoo 20')
+        Param = self.user_env['ir.config_parameter']
+        self.assertEqual(Param.get_str('pns_test.sandbox_label'), 'visible')
+        for read in (Param.get_str, Param.get_int, Param.get_float, Param.get_bool):
+            with self.assertRaises(AccessError):
+                read('pns_test.sandbox_token')
+
+    def test_typed_setters_do_not_return_a_secret(self):
+        if ODOO_VERSION < 20:
+            self.skipTest('typed parameter setters arrive in Odoo 20')
+        Param = self.user_env['ir.config_parameter']
+        for write in (Param.set_str, Param.set_int, Param.set_float,
+                      Param.set_bool, Param.set_param):
+            with self.assertRaises(AccessError):
+                write('pns_test.sandbox_token', '1')

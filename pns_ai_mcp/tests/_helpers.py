@@ -294,19 +294,20 @@ def setup_http_mcp_fixtures(cls, env):
     """
     import secrets
     from odoo import api, SUPERUSER_ID
-    from odoo.addons.pns_ai_mcp.utils.compat import NEEDS_ROOT_GET_REQUEST_PATCH
+    from odoo.addons.pns_ai_mcp.utils.compat import ODOO_VERSION
 
     if not getattr(cls, 'test_api_key', None):
         cls.test_api_key = 'pns-http-test-%s' % secrets.token_urlsafe(24)
     api_key = cls.test_api_key
 
-    if NEEDS_ROOT_GET_REQUEST_PATCH:
-        # O14: same cursor as enter_test_mode / url_open.
+    if ODOO_VERSION <= 14:
+        # O14: each test owns its cursor (no savepoint); same one as url_open.
         fix_env = env(user=SUPERUSER_ID)
         previous = _write_mcp_http_fixtures(fix_env, api_key)
         env.cr.commit()
     else:
-        # O16+: commit on the test cursor is forbidden — separate cursor with commit.
+        # O15+: the tests of a class share one cursor with a savepoint each;
+        # a commit there drops the savepoints. Separate cursor with commit.
         with env.registry.cursor() as cr:
             fix_env = api.Environment(cr, SUPERUSER_ID, {})
             previous = _write_mcp_http_fixtures(fix_env, api_key)

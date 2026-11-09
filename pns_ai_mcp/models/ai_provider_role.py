@@ -17,6 +17,11 @@ import re
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import html_escape
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
+
+from ..utils import mcp_ui
+from ..utils.config_backup import export_roles_with_holders
+from ..utils.import_export_guard import ensure_ai_admin
 
 _logger = logging.getLogger(__name__)
 
@@ -125,9 +130,15 @@ class AiProviderRole(models.Model):
         readonly=True,
     )
 
-    _sql_constraints = [
-        ('code_unique', 'unique(code)', 'A role code must be unique.'),
-    ]
+    if ODOO_VERSION >= 19:
+        _code_unique = models.Constraint(
+            'unique(code)',
+            'A role code must be unique.',
+        )
+    else:
+        _sql_constraints = [
+            ('code_unique', 'unique(code)', 'A role code must be unique.'),
+        ]
 
     @api.depends('provider_ids')
     def _compute_provider_count(self):
@@ -217,6 +228,35 @@ class AiProviderRole(models.Model):
                 'Archive it instead.'
             ))
         return super().unlink()
+
+    def action_export_roles(self, *args, **kwargs):
+        """Export every role: this database's choices and who holds it."""
+        del args, kwargs
+        ensure_ai_admin(self.env)
+        roles = self.sudo().with_context(active_test=False).search([])
+        rows = export_roles_with_holders(roles)
+        filename = mcp_ui.build_export_filename(self.env, 'ai_provider_roles', 'json')
+        attachment = mcp_ui.write_json_attachment(self.env, filename, rows)
+        return mcp_ui.open_json_export_wizard(
+            self.env,
+            dialog_title=_('Export result'),
+            summary_text=_('%s provider role(s) exported.') % len(rows),
+            count=len(rows),
+            attachment=attachment,
+        )
+
+    def action_import_roles(self, *args, **kwargs):
+        """Open the wizard that imports roles from JSON."""
+        del args, kwargs
+        ensure_ai_admin(self.env)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Import provider roles'),
+            'res_model': 'ai.import.provider.roles.wizard',
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'target': 'new',
+        }
 
     def _register_hook(self):
         res = super()._register_hook()

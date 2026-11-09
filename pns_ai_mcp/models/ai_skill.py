@@ -8,6 +8,7 @@ import re
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION, USER_ALL_GROUPS_FIELD
 from ..utils.knowledge_ownership import (
     apply_create_ownership,
     assert_writer_can_write_records,
@@ -262,9 +263,15 @@ class AISkill(models.Model):
         ondelete='set null',
         help='User who owns this skill. Empty for module/import skills.',
     )
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Skill code must be unique.'),
-    ]
+    if ODOO_VERSION >= 19:
+        _code_uniq = models.Constraint(
+            'unique(code)',
+            'Skill code must be unique.',
+        )
+    else:
+        _sql_constraints = [
+            ('code_uniq', 'unique(code)', 'Skill code must be unique.'),
+        ]
 
     @api.depends('code', 'source_module')
     @api.depends_context('composition_agent_id', 'active_id', 'active_model')
@@ -650,7 +657,7 @@ class AISkill(models.Model):
         if not self.required_group_ids:
             return True
         user = user or self.env.user
-        return bool(set(self.required_group_ids.ids) & set(user.groups_id.ids))
+        return bool(set(self.required_group_ids.ids) & set(user[USER_ALL_GROUPS_FIELD].ids))
 
     @api.model
     def list_for_agent(self, agent_code):

@@ -7,7 +7,7 @@
  */
 
 import { FormController } from "@web/views/form/form_controller";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import {
@@ -261,7 +261,7 @@ async function logUsage(controller, id, usage, status) {
     }
 }
 
-patch(FormController.prototype, {
+pnsPatch(FormController.prototype, "pns_ai_mcp.openapi_spec_generate_wizard", {
     async beforeExecuteActionButton(clickParams) {
         if (
             this.props.resModel === MODEL

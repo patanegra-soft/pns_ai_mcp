@@ -10,7 +10,7 @@ import { registry } from "@web/core/registry";
 import { Component, xml } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 import { useService } from "@web/core/utils/hooks";
 import { ListController } from "@web/views/list/list_controller";
 import { FormController } from "@web/views/form/form_controller";
@@ -43,14 +43,14 @@ function _bindSafePlanBus(controller) {
     }
 }
 
-patch(ListController.prototype, {
+pnsPatch(ListController.prototype, "pns_ai_mcp.safe_operation_action_buttons", {
     setup() {
         super.setup();
         _bindSafePlanBus(this);
     },
 });
 
-patch(FormController.prototype, {
+pnsPatch(FormController.prototype, "pns_ai_mcp.safe_operation_action_buttons", {
     setup() {
         super.setup();
         _bindSafePlanBus(this);

@@ -8,6 +8,7 @@ import logging
 from datetime import timedelta
 
 from odoo import api, fields, models
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 from ..utils.api_call_result import API_CALL_CACHE_TTL_SECONDS, cache_key_for_api_call
 
@@ -44,9 +45,15 @@ class AIApiResultCache(models.Model):
         help='After this instant the entry is stale and will be ignored / purged.',
     )
 
-    _sql_constraints = [
-        ('cache_key_unique', 'UNIQUE(cache_key)', 'A cache entry for this api_call already exists.'),
-    ]
+    if ODOO_VERSION >= 19:
+        _cache_key_unique = models.Constraint(
+            'UNIQUE(cache_key)',
+            'A cache entry for this api_call already exists.',
+        )
+    else:
+        _sql_constraints = [
+            ('cache_key_unique', 'UNIQUE(cache_key)', 'A cache entry for this api_call already exists.'),
+        ]
 
     def init(self):
         super().init()

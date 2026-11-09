@@ -9,7 +9,7 @@
 **AI inside your Odoo, for consultants.** The AI Engine runs in your client's
 Odoo. Providers, agents, knowledge and approvals are Odoo records, and the
 agents live in plain Odoo modules. Open source, nothing to license. Odoo
-**14.0** and **19.0**.
+**14.0** to **20.0**.
 
 ### The pain
 
@@ -99,7 +99,7 @@ For example: a large model for the conversation, a small one with only Parser, a
 - **No chat screen.** The engine has no conversation window for users. That is [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo).
 - **No writes on its own.** The AI never changes Odoo by itself. Every change is a plan that a person approves in Odoo.
 - **Four provider protocols.** OpenAI-compatible, OpenRouter, Anthropic and SystemOne (yes-or-no decisions). An API that speaks none of them does not connect.
-- **Two tested series.** 14.0 and 19.0. From 15.0 to 18.0 you build the module yourself and try it first; 13.0 and older do not run (see *Odoo versions*).
+- **Not before 14.0.** Tested and published from 14.0 to 20.0; 13.0 and older do not run (see *Odoo versions*).
 
 ### Questions
 
@@ -109,11 +109,11 @@ For example: a large model for the conversation, a small one with only Parser, a
 
 **Do I need Chatboo?** No. The engine alone serves MCP clients. Chatboo adds the chat inside Odoo and brings the engine with it.
 
-**What is `pns_base`?** The shared layer of the PNS modules: the same screens load on Odoo 14 and 19, plus small helpers (notifications, import and export, PDF). It installs as a dependency.
+**What is `pns_base`?** The shared layer of the PNS modules: the same screens load on Odoo 14 to 20, plus small helpers (notifications, import and export, PDF). It installs as a dependency.
 
 ### Getting started
 
-1. **Install.** Want the chat too? Install [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#getting-started) instead; it brings this module. For the engine alone, clone the `14.0` or `19.0` branch of `pns_base` and `pns_ai_mcp`, add each clone to `addons_path` and install **PNS AI Engine** from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
+1. **Install.** Want the chat too? Install [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#getting-started) instead; it brings this module. For the engine alone, clone the branch of your series (`14.0` to `20.0`) of `pns_base` and `pns_ai_mcp`, add each clone to `addons_path` and install **PNS AI Engine** from Apps. On Odoo 14, first run `pip install "openpyxl>=3.1.2"`.
 2. **Become AI administrator.** *Settings → Users*: give yourself **AI Administrator**. Log out and back in.
 3. **Get your API key.** *AI Engine → Security → Users*: your row, tick **AI Conversational** and press **Generate API Key**.
 4. **Add a provider.** *AI Engine → Connections → Providers*: protocol, endpoint, API key and model, with the **Conversation** role.
@@ -147,13 +147,14 @@ per person; do not commit the file with the key in it.
 
 #### Repository layout
 
-`main` is one tree for every series. A flat branch (`14.0`, `19.0`) is that tree built for one series, ready for the addons path.
+`main` is one tree for every series. A flat branch (`14.0` … `20.0`) is that tree built for one series, ready for the addons path.
 
 | Path | Contents |
 | :--- | :--- |
 | `common/` | Version-agnostic code, skills, contexts, data, Apps sheet |
-| `stacks/owl1/pns_ai_mcp/` | Odoo 14 |
-| `stacks/owl2/pns_ai_mcp/` | Odoo 15 and later |
+| `stacks/owl1/pns_ai_mcp/` | Odoo 14 and 15 |
+| `stacks/owl2/pns_ai_mcp/` | Odoo 16 to 19 |
+| `stacks/owl3/pns_ai_mcp/` | Odoo 20 and later |
 
 The installer overlays `common/` then the stack; a stack file with the same
 path wins. Edit agnostic files only in `common/`. Build a flat module with
@@ -167,36 +168,18 @@ break with recent NumPy).
 
 | Series | Status |
 | :--- | :--- |
-| 14.0, 19.0 | Tested. Flat branch published. |
-| 15.0 – 18.0 | Not tested, by people or by CI. No branch published. |
+| 14.0 – 20.0 | Tested. Flat branch published. |
 | 13.0 and older | Not supported. |
 
-**15.0 to 18.0.** There is no branch to clone. Build the flat module
-yourself from `main`, which has the code for every series (`owl2` for 15.0
-and later). Do the same for `pns_base`:
-
-```bash
-git clone https://github.com/patanegra-soft/pns_base.git
-git clone https://github.com/patanegra-soft/pns_ai_mcp.git
-cd pns_base   && ./install_flat.sh 17.0 /path/to/addons && cd ..
-cd pns_ai_mcp && ./install_flat.sh 17.0 /path/to/addons
-```
-
-The script warns that the series is not tested. Nobody has run the engine
-on these series, so try it on a test database first and run the Odoo
-tests there (see *Tests*). If it works, or does not, tell us
-([CONTRIBUTING.md](CONTRIBUTING.md)).
-
 Odoo 13 has no OWL, which the AI chat is built on. Odoo 8 to 12 run on a
-Python older than 3.7, which the engine needs. The suite keeps two stacks
-(`owl1` for 14.0, `owl2` for 15.0 and later).
+Python older than 3.7, which the engine needs. The suite keeps three stacks (`owl1` for 14.0 and 15.0, `owl2` for 16.0 to 19.0, `owl3` for 20.0 and later).
 
 #### Tests
 
 | Where you are | What runs |
 | :--- | :--- |
 | `main` | `python -m pytest unit_tests`, with no Odoo. Then the Odoo tests, after `./install_flat.sh 19.0 <dir>`. |
-| A flat branch (`14.0`, `19.0`) | The Odoo tests in `tests/`. The unit tests live on `main`. |
+| A flat branch (`14.0` … `20.0`) | The Odoo tests in `tests/`. The unit tests live on `main`. |
 
 ```bash
 odoo-bin -d <db> -i pns_ai_mcp --test-enable --stop-after-init --test-tags /pns_ai_mcp
@@ -220,7 +203,7 @@ Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.m
 **IA dentro de tu Odoo, para consultores.** El Motor de IA corre en el Odoo
 de tu cliente. Proveedores, agentes, conocimiento y aprobaciones son registros
 de Odoo, y los agentes viven en módulos normales de Odoo. Código abierto, nada
-que licenciar. Odoo **14.0** y **19.0**.
+que licenciar. Odoo **14.0** a **20.0**.
 
 ### El dolor
 
@@ -310,7 +293,7 @@ Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parse
 - **Sin pantalla de chat.** El motor no trae ventana de conversación para los usuarios. Eso es [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo).
 - **No escribe por su cuenta.** La IA nunca cambia Odoo sola. Cada cambio es un plan que aprueba una persona en Odoo.
 - **Cuatro protocolos de proveedor.** Compatible con OpenAI, OpenRouter, Anthropic y SystemOne (decisiones de sí o no). Una API que no hable ninguno no se conecta.
-- **Dos versiones probadas.** 14.0 y 19.0. De la 15.0 a la 18.0 construyes tú el módulo y lo pruebas antes; la 13.0 y anteriores no funcionan (ver *Versiones de Odoo*).
+- **No antes de la 14.0.** Probado y publicado de la 14.0 a la 20.0; la 13.0 y anteriores no funcionan (ver *Versiones de Odoo*).
 
 ### Preguntas
 
@@ -320,11 +303,11 @@ Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parse
 
 **¿Necesito Chatboo?** No. El motor solo ya sirve a clientes MCP. Chatboo añade el chat dentro de Odoo y trae el motor con él.
 
-**¿Qué es `pns_base`?** La capa común de los módulos PNS: las mismas pantallas cargan en Odoo 14 y 19, y trae utilidades pequeñas (avisos, importar y exportar, PDF). Se instala como dependencia.
+**¿Qué es `pns_base`?** La capa común de los módulos PNS: las mismas pantallas cargan de Odoo 14 a 20, y trae utilidades pequeñas (avisos, importar y exportar, PDF). Se instala como dependencia.
 
 ### Puesta en marcha
 
-1. **Instala.** ¿Quieres también el chat? Instala [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#puesta-en-marcha); trae este módulo. Solo el motor: clona la rama `14.0` o `19.0` de `pns_base` y de `pns_ai_mcp`, añade cada clon al `addons_path` e instala **PNS AI Engine** desde Aplicaciones. En Odoo 14, antes, `pip install "openpyxl>=3.1.2"`.
+1. **Instala.** ¿Quieres también el chat? Instala [Chatboo](https://github.com/patanegra-soft/pns_ai_chatboo#puesta-en-marcha); trae este módulo. Solo el motor: clona la rama de tu versión (de la `14.0` a la `20.0`) de `pns_base` y de `pns_ai_mcp`, añade cada clon al `addons_path` e instala **PNS AI Engine** desde Aplicaciones. En Odoo 14, antes, `pip install "openpyxl>=3.1.2"`.
 2. **Hazte administrador de IA.** *Ajustes → Usuarios*: date **IA Administrador**. Sal y vuelve a entrar.
 3. **Saca tu clave API.** *Motor de IA → Seguridad → Usuarios*: tu fila, marca **IA Conversacional** y pulsa **Generar Clave API**.
 4. **Pon un proveedor.** *Motor de IA → Conexiones → Proveedores*: protocolo, dirección, clave API y modelo, con el rol **Conversación**.
@@ -358,13 +341,14 @@ por persona; no subas a git el fichero con la clave dentro.
 
 #### Estructura del repositorio
 
-`main` es un solo árbol para todas las versiones. Una rama plana (`14.0`, `19.0`) es ese árbol construido para una versión, listo para el addons path.
+`main` es un solo árbol para todas las versiones. Una rama plana (`14.0` … `20.0`) es ese árbol construido para una versión, listo para el addons path.
 
 | Ruta | Contenido |
 | :--- | :--- |
 | `common/` | Código común a todas las versiones, skills, contextos, datos, ficha de Apps |
-| `stacks/owl1/pns_ai_mcp/` | Odoo 14 |
-| `stacks/owl2/pns_ai_mcp/` | Odoo 15 y siguientes |
+| `stacks/owl1/pns_ai_mcp/` | Odoo 14 y 15 |
+| `stacks/owl2/pns_ai_mcp/` | Odoo 16 a 19 |
+| `stacks/owl3/pns_ai_mcp/` | Odoo 20 y siguientes |
 
 El instalador copia `common/` y encima la pila; si un fichero está en los dos,
 gana el de la pila. Lo común se edita solo en `common/`. El módulo plano de
@@ -379,36 +363,18 @@ fallan con NumPy moderno).
 
 | Versión | Estado |
 | :--- | :--- |
-| 14.0, 19.0 | Probadas. Rama plana publicada. |
-| 15.0 – 18.0 | Sin probar, ni por personas ni por el CI. Sin rama publicada. |
+| 14.0 – 20.0 | Probadas. Rama plana publicada. |
 | 13.0 y anteriores | No soportadas. |
 
-**De la 15.0 a la 18.0.** No hay rama que clonar. Construye tú el módulo
-plano desde `main`, que tiene el código de todas las versiones (`owl2` para
-la 15.0 y siguientes). Lo mismo con `pns_base`:
-
-```bash
-git clone https://github.com/patanegra-soft/pns_base.git
-git clone https://github.com/patanegra-soft/pns_ai_mcp.git
-cd pns_base   && ./install_flat.sh 17.0 /ruta/a/addons && cd ..
-cd pns_ai_mcp && ./install_flat.sh 17.0 /ruta/a/addons
-```
-
-El script avisa de que esa versión no está probada. Nadie ha usado el motor
-en estas versiones: pruébalo antes en una base de pruebas y pasa ahí los
-tests de Odoo (ver *Tests*). Si funciona, o si no, cuéntanoslo
-([CONTRIBUTING.md](CONTRIBUTING.md)).
-
 Odoo 13 no tiene OWL, sobre el que está hecho el chat. De Odoo 8 a 12 usan un
-Python anterior al 3.7, que es el que necesita el motor. La suite mantiene dos
-pilas (`owl1` para la 14.0 y `owl2` para la 15.0 y siguientes).
+Python anterior al 3.7, que es el que necesita el motor. La suite mantiene tres pilas (`owl1` para la 14.0 y la 15.0, `owl2` de la 16.0 a la 19.0 y `owl3` para la 20.0 y siguientes).
 
 #### Tests
 
 | Dónde estás | Qué se ejecuta |
 | :--- | :--- |
 | `main` | `python -m pytest unit_tests`, sin Odoo. Después los tests de Odoo, tras `./install_flat.sh 19.0 <dir>`. |
-| Una rama plana (`14.0`, `19.0`) | Los tests de Odoo en `tests/`. Los unitarios viven en `main`. |
+| Una rama plana (`14.0` … `20.0`) | Los tests de Odoo en `tests/`. Los unitarios viven en `main`. |
 
 ```bash
 odoo-bin -d <db> -i pns_ai_mcp --test-enable --stop-after-init --test-tags /pns_ai_mcp

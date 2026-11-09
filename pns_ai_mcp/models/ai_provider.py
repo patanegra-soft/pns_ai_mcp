@@ -5,6 +5,7 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 from ..utils import mcp_ui
+from ..utils.compat import read_sums
 from ..utils.import_export_guard import ensure_ai_admin
 from ..utils.portable_io import export_record_dict
 import logging
@@ -1102,20 +1103,19 @@ class AIProvider(models.Model):
                 'total_tokens': 0, 'cost': 0.0, 'cost_usd': 0.0,
                 'since': start,
             }
-        groups = self.env['ai.log'].sudo().read_group(
+        row = read_sums(
+            self.env['ai.log'].sudo(),
             [
                 ('provider_id', '=', self.id),
                 ('primitive', '=', 'llm'),
                 ('timestamp', '>=', start),
             ],
             ['prompt_tokens', 'completion_tokens', 'total_tokens', 'cost_usd'],
-            [],
         )
-        row = groups[0] if groups else {}
-        prompt = int(row.get('prompt_tokens') or 0)
-        completion = int(row.get('completion_tokens') or 0)
-        total = int(row.get('total_tokens') or 0) or (prompt + completion)
-        cost = float(row.get('cost_usd') or 0.0)
+        prompt = int(row['prompt_tokens'])
+        completion = int(row['completion_tokens'])
+        total = int(row['total_tokens']) or (prompt + completion)
+        cost = float(row['cost_usd'])
         return {
             'prompt_tokens': prompt,
             'completion_tokens': completion,

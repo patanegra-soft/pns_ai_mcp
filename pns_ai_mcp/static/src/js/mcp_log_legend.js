@@ -9,7 +9,7 @@
  * Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
  */
 import { ListController } from "@web/views/list/list_controller";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 import { useService } from "@web/core/utils/hooks";
 import { useEffect } from "@odoo/owl";
 
@@ -151,7 +151,7 @@ async function refreshMcpLogChrome(component, orm) {
     return paintUsageChip(scope, summary);
 }
 
-patch(ListController.prototype, {
+pnsPatch(ListController.prototype, "pns_ai_mcp.mcp_log_legend", {
     setup() {
         super.setup(...arguments);
         const orm = useService("orm");

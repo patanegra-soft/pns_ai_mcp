@@ -9,7 +9,7 @@
  */
 import { onMounted, onWillUnmount } from "@odoo/owl";
 import { FormRenderer } from "@web/views/form/form_renderer";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 
 const TOKENS = ["own", "imported", "inserted", "extra"];
 const STORE = "pns_origin_filter_";
@@ -376,7 +376,7 @@ function bindOriginOn(el) {
     paintOriginFilter(el, flagsFor(el), false);
 }
 
-patch(FormRenderer.prototype, {
+pnsPatch(FormRenderer.prototype, "pns_ai_mcp.ai_agent_origin_filter", {
     setup() {
         super.setup();
         onMounted(() => {

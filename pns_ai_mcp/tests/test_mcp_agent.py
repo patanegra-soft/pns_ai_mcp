@@ -3,6 +3,7 @@
 # Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
 """MCP bare-agent code resolution and delete guards."""
 
+from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged, TransactionCase
 
@@ -72,7 +73,7 @@ class TestMcpAgent(TransactionCase):
         })
         with self.assertRaises(UserError):
             agent.unlink()
-        agent.with_context(_force_unlink=True).unlink()
+        agent.with_context(**{MODULE_UNINSTALL_FLAG: True}).unlink()
         self.assertFalse(agent.exists())
         self.assertFalse(link.exists())
 

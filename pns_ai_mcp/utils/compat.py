@@ -9,6 +9,7 @@ from odoo.addons.pns_base.utils.compat import (  # noqa: F401
     NEEDS_ROOT_GET_REQUEST_PATCH,
     USER_GROUPS_FIELD,
     USER_ALL_GROUPS_FIELD,
+    binary_bytes,
     locale_field_separator,
     format_login_name_line,
     invalidate_recordset_fields,
@@ -20,6 +21,22 @@ from odoo.addons.pns_base.utils.compat import (  # noqa: F401
     get_odoo_admin_groups,
     user_is_odoo_admin,
 )
+
+
+def read_sums(model, domain, field_names):
+    """Sum of each numeric field over the records in ``domain``, as a dict.
+
+    Odoo 17+ has ``_read_group(domain, groupby, aggregates)`` returning tuples
+    (in 20 the public ``read_group`` is that one too). Up to 16 the public
+    ``read_group(domain, fields, groupby)`` returns dicts.
+    """
+    if ODOO_VERSION >= 17:
+        rows = model._read_group(domain, [], ['%s:sum' % name for name in field_names])
+        values = rows[0] if rows else ()
+        return {name: value or 0 for name, value in zip(field_names, values)}
+    rows = model.read_group(domain, list(field_names), [])
+    row = rows[0] if rows else {}
+    return {name: row.get(name) or 0 for name in field_names}
 
 
 def test_is_running(env):

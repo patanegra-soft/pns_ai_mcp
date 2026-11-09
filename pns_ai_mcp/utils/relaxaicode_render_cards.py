@@ -5,6 +5,7 @@
 
 import html
 import json
+import re
 from urllib.parse import urlparse
 
 from .relaxaicode_render_base import (
@@ -76,6 +77,91 @@ def _link_banner_card_html(card):
          html.escape(_t('Open')))
 
 
+_XMLID_RE = re.compile(r'^[a-z0-9_]+\.[A-Za-z0-9_.]+$')
+_MODEL_RE = re.compile(r'^[a-z0-9_]+(\.[a-z0-9_]+)+$')
+_FIELD_RE = re.compile(r'^[a-z_][a-z0-9_]*$')
+
+
+def _form_card_payload(item):
+    """``kind=form``: a form the person opens, fills in and saves (or not).
+
+    The card carries the Odoo action (or model), the record to edit and the
+    proposed values. Nothing is written here or on the click: the host opens
+    the form and only the person's Save writes, with their own rights.
+    """
+    payload = {'kind': 'form'}
+    for key in ('title', 'subtitle'):
+        val = item.get(key)
+        if val not in (None, ''):
+            payload[key] = str(val)
+    action = str(item.get('action') or '').strip()
+    model = str(item.get('model') or '').strip()
+    if action and _XMLID_RE.match(action):
+        payload['action'] = action
+    if model and _MODEL_RE.match(model):
+        payload['model'] = model
+    if not payload.get('action') and not payload.get('model'):
+        return None
+    try:
+        res_id = int(item.get('res_id') or 0)
+    except (TypeError, ValueError):
+        res_id = 0
+    if res_id > 0:
+        payload['res_id'] = res_id
+    values = {}
+    raw_values = item.get('values')
+    if isinstance(raw_values, dict) and not res_id:
+        for key, val in raw_values.items():
+            if not (isinstance(key, str) and _FIELD_RE.match(key)):
+                continue
+            if val is None or isinstance(val, (bool, int, float)):
+                values[key] = val
+            else:
+                values[key] = str(val)
+    if values:
+        payload['values'] = values
+    lines = item.get('lines')
+    if isinstance(lines, (list, tuple)):
+        kept = [str(line) for line in lines if line not in (None, '')]
+        if kept:
+            payload['lines'] = kept[:20]
+    if not payload.get('title'):
+        payload['title'] = payload.get('action') or payload.get('model')
+    return payload
+
+
+def _form_card_html(card):
+    """Title, the person's lines, every field the form will get, and the button."""
+    parts = ['<span class="o_ai_form_card_title">%s</span>' % html.escape(card['title'])]
+    if card.get('subtitle'):
+        parts.append(
+            '<span class="o_ai_form_card_subtitle">%s</span>'
+            % html.escape(card['subtitle'])
+        )
+    if card.get('lines'):
+        parts.append('<ul class="o_ai_form_card_lines">%s</ul>' % ''.join(
+            '<li>%s</li>' % html.escape(line) for line in card['lines']
+        ))
+    if card.get('values'):
+        parts.append(
+            '<span class="o_ai_form_card_fields">%s %s</span>' % (
+                html.escape(_t('Fields filled in:')),
+                html.escape(', '.join(sorted(card['values']))),
+            )
+        )
+    label = _t('Open the record') if card.get('res_id') else _t('Open the form')
+    parts.append(
+        '<a href="#" role="button" class="o_ai_form_card_open">'
+        '<i class="fa fa-pencil-square-o" aria-hidden="true"></i> %s</a>'
+        % html.escape(label)
+    )
+    parts.append(
+        '<span class="o_ai_form_card_note">%s</span>'
+        % html.escape(_t('Nothing is saved until you press Save.'))
+    )
+    return ''.join(parts)
+
+
 def _normalize_clock_iso(iso, tz_name):
     """Load ``user_time.normalize_clock_iso`` (Odoo package or file path)."""
     try:
@@ -115,6 +201,11 @@ def collect_svg_cards(result, render_context=None):
         if not isinstance(item, dict):
             continue
         kind = str(item.get('kind') or 'fact').strip().lower() or 'fact'
+        if kind == 'form':
+            payload = _form_card_payload(item)
+            if payload:
+                out.append(payload)
+            continue
         payload = {'kind': kind}
         for key in (
             'title', 'value', 'unit', 'tz', 'iso',
@@ -175,6 +266,13 @@ def render_svg_cards_html(result, render_context=None):
         except (TypeError, ValueError):
             continue
         attr = html.escape(payload, quote=True)
+        if card.get('kind') == 'form':
+            parts.append(
+                '<div class="o_ai_svg_card o_ai_form_card" '
+                'data-ai-card="%s">%s</div>'
+                % (attr, _form_card_html(card))
+            )
+            continue
         if card.get('kind') == 'link':
             inner = _link_banner_card_html(card)
             if not inner:

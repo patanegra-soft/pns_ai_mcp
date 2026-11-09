@@ -96,8 +96,8 @@ def _is_safe_sort_key_function(node, extra_call_names=()):
     if len(args.args) != 1 or args.vararg or args.kwarg or args.kwonlyargs:
         return False
     stmts = list(node.body or [])
-    if (stmts and isinstance(stmts[0], ast.Expr)
-            and isinstance(getattr(stmts[0], 'value', None), (ast.Constant, ast.Str))):
+    # get_docstring reads Str (3.7) and Constant (3.8+) alike.
+    if ast.get_docstring(node, clean=False) is not None:
         stmts = stmts[1:]
     if len(stmts) != 1 or not isinstance(stmts[0], ast.Return):
         return False
