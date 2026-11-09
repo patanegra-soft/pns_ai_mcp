@@ -2,6 +2,10 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.973_owl2-3.1.973_owl3-3.1.973 (2026-11-09)
+
+- Banners (Apps store, README and site) show the seven supported series, 14.0 to 20.0; the old ones still said 14 and 19. Images only.
+
 ## owl1-3.1.972_owl2-3.1.972_owl3-3.1.972 (2026-11-09)
 
 - A confirmation card painted in the chat keeps its token while a badge counts the pending cards or the list is read again, so Confirm no longer fails with an old token. "Process this PDF" with a PDF attached works on the attachment instead of offering a download, on Odoo 20 too.
