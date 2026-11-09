@@ -232,6 +232,9 @@ def _xlsx_styles_xml(number_style=None):
         '<xf numFmtId="165" fontId="0" fillId="0" borderId="0" xfId="0"'
         ' applyNumberFormat="1"/>'
         '</cellXfs>'
+        '<cellStyles count="1">'
+        '<cellStyle name="Normal" xfId="0" builtinId="0"/>'
+        '</cellStyles>'
         '</styleSheet>'
     ) % (_XLSX_NS_MAIN, int_fmt, float_fmt)
 

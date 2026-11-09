@@ -2,6 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 # Copyright (C) 2026 Patanegra Soft <https://patanegra.com>
 """__model stamp: universal formula (display_name + overlap), no domain hardcode."""
+import uuid
+
 from odoo.tests import tagged, TransactionCase
 
 from odoo.addons.pns_ai_mcp.controllers.relaxaicode_models import (
@@ -19,6 +21,13 @@ from odoo.addons.pns_ai_mcp.controllers.relaxaicode_rows import (
 
 @tagged('post_install', '-at_install', 'pns_ai_mcp')
 class TestRelaxAICodeModelStamp(TransactionCase):
+
+    def _unique_partners(self, count):
+        """Backfill only fills an unambiguous label, so the names are unique."""
+        tag = uuid.uuid4().hex[:8]
+        return self.env['res.partner'].create([
+            {'name': 'ACME Backfill %s %s' % (n, tag)} for n in range(count)
+        ])
 
     def test_coerce_record_id(self):
         self.assertEqual(_coerce_record_id(12), 12)
@@ -139,10 +148,7 @@ class TestRelaxAICodeModelStamp(TransactionCase):
             _backfill_missing_record_ids,
             _stamp_models,
         )
-        Partner = self.env['res.partner']
-        partners = Partner.search([('name', '!=', False)], limit=2)
-        if len(partners) < 2:
-            self.skipTest('need ≥2 partners')
+        partners = self._unique_partners(2)
         result = {
             'data': [
                 {'Cliente': p.name, 'Importe': 10.0 * (i + 1)}
@@ -174,10 +180,7 @@ class TestRelaxAICodeModelStamp(TransactionCase):
         from odoo.addons.pns_ai_mcp.controllers.relaxaicode_models import (
             _backfill_missing_record_ids,
         )
-        Partner = self.env['res.partner']
-        partner = Partner.search([('name', '!=', False)], limit=1)
-        if not partner:
-            self.skipTest('no partner')
+        partner = self._unique_partners(1)
         result = {'data': [{'name': partner.name, 'note': 'x'}]}
         filled = _backfill_missing_record_ids(
             result,

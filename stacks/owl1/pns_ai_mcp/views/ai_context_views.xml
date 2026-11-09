@@ -14,6 +14,9 @@
             <tree string="MCP Contexts" create="1" delete="1"
                   class="o_pns_list o_pns_context_list"
                   decoration-info="context_type == 'core'">
+                <header>
+                    <button name="action_export_selected" type="object" string="Export selected to ZIP" class="btn-secondary" icon="fa-download" groups="pns_ai_mcp.group_ai_admin"/>
+                </header>
                 <field name="active" optional="show" attrs="{'readonly': [('context_type', '=', 'core')]}"/>
                 <field name="context_type" optional="show"/>
                 <field name="code" optional="show" attrs="{'readonly': [('context_type', '=', 'core')]}"/>

@@ -23,6 +23,8 @@ calls only its own hooks.
 from odoo import api, models
 from odoo.exceptions import AccessError
 
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
+
 from ..utils.sandbox_secrets import (
     cached_setting_params,
     field_is_secret,
@@ -148,18 +150,95 @@ class IrConfigParameter(models.Model):
             for key in self.sudo().mapped('key')
         )
 
-    @api.model
-    def get_param(self, key, default=False):
+    def _pns_read_param(self, read, key, default):
         if not sandbox_cursor(self.env.cr):
-            return super().get_param(key, default)
+            return read(key, default)
         if not secret_param_key(key, cached_setting_params(self.env)):
-            return super().get_param(key, default)
+            return read(key, default)
         if not self.env.su:
             raise AccessError(_PARAM_DENIED % (key,))
         # A sudo helper on the sandbox cursor must not leave the value behind.
-        value = super().get_param(key, default)
+        value = read(key, default)
         _forget_values(self)
         return value
+
+    @api.model
+    def get_param(self, key, default=False):
+        return self._pns_read_param(super().get_param, key, default)
+
+
+if ODOO_VERSION >= 20:
+
+    class BaseCheck(models.AbstractModel):
+        """Odoo 20 checks fields in check_field_access; _check_field_access is a dead alias."""
+        _inherit = 'base'
+
+        @api.model
+        def check_field_access(self, field, operation):
+            if (operation == 'read' and self._pns_sandbox_reads()
+                    and self._pns_hidden_column(field.name)):
+                self._pns_deny_column(field.name)
+            return super().check_field_access(field, operation)
+
+    class IrConfigParameterTyped(models.Model):
+        """Odoo 20 reads and sets parameters by type; none hands out a secret.
+
+        Odoo 20 also remembers per environment that a field was readable once
+        and then skips every check. Whether ``value`` is readable depends on
+        the row, so in the sandbox it is checked each time and never remembered.
+        """
+        _inherit = 'ir.config_parameter'
+
+        def _pns_row_checked(self, field, operation):
+            return (operation == 'read' and field.name == 'value'
+                    and self._pns_sandbox_reads())
+
+        @api.model
+        def has_field_access(self, field, operation):
+            if self._pns_row_checked(field, operation):
+                return self._has_field_access(field, operation)
+            return super().has_field_access(field, operation)
+
+        @api.model
+        def check_field_access(self, field, operation):
+            if self._pns_row_checked(field, operation):
+                if not self._has_field_access(field, operation):
+                    self._pns_deny_column(field.name)
+                return None
+            return super().check_field_access(field, operation)
+
+        @api.model
+        def get_str(self, key, default=''):
+            return self._pns_read_param(super().get_str, key, default)
+
+        @api.model
+        def get_int(self, key, default=0):
+            return self._pns_read_param(super().get_int, key, default)
+
+        @api.model
+        def get_float(self, key, default=0.0):
+            return self._pns_read_param(super().get_float, key, default)
+
+        @api.model
+        def get_bool(self, key, default=False):
+            return self._pns_read_param(super().get_bool, key, default)
+
+        # A setter returns the old value straight from SQL, before writing.
+        @api.model
+        def set_str(self, key, value):
+            return self._pns_read_param(super().set_str, key, value)
+
+        @api.model
+        def set_int(self, key, value):
+            return self._pns_read_param(super().set_int, key, value)
+
+        @api.model
+        def set_float(self, key, value):
+            return self._pns_read_param(super().set_float, key, value)
+
+        @api.model
+        def set_bool(self, key, value):
+            return self._pns_read_param(super().set_bool, key, value)
 
 
 class ResConfigSettings(models.TransientModel):

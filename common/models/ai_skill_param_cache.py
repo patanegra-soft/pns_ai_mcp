@@ -9,6 +9,7 @@ import logging
 from odoo import SUPERUSER_ID, api, fields, models, _
 from odoo.exceptions import ValidationError
 from odoo.tools import config
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 from ..utils.skill_runtime import (
     normalize_unresolved_key,
@@ -61,13 +62,15 @@ class AISkillParamCache(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        (
-            'skill_key_uniq',
+    if ODOO_VERSION >= 19:
+        _skill_key_uniq = models.Constraint(
             'unique(skill_id, key)',
             'This skill already has a row for that normalized phrase.',
-        ),
-    ]
+        )
+    else:
+        _sql_constraints = [
+            ('skill_key_uniq', 'unique(skill_id, key)', 'This skill already has a row for that normalized phrase.'),
+        ]
 
     @api.depends('unresolved')
     def _compute_key(self):

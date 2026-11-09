@@ -4,6 +4,7 @@ pytest>=7.0,<9
 openpyxl
 lxml
 Pillow
+reportlab
 requests
 # Linux has the time zone database; Windows does not
 tzdata; sys_platform == "win32"

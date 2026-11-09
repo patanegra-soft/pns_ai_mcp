@@ -80,7 +80,14 @@ def test_ast_literal_rejects_a_name():
 def test_no_literal_check_against_constant_alone(path):
     """``isinstance(node, ast.Constant)`` is False for every literal on 3.7."""
     src = path.read_text(encoding='utf-8')
-    assert not re.search(r'isinstance\([^()]*,\s*ast\.Constant\)', src)
+    assert not re.search(r',\s*ast\.Constant\s*\)', src)
+
+
+@pytest.mark.parametrize('path', _SHIPPED, ids=lambda p: str(p.relative_to(ROOT)))
+def test_no_37_literal_class_by_attribute(path):
+    """``ast.Str`` / ``ast.Num``… are gone in 3.14; tell them apart by type name."""
+    src = path.read_text(encoding='utf-8')
+    assert not re.search(r'\bast\.(Str|Num|Bytes|NameConstant)\b', src)
 
 
 def test_recipe_keeps_none_in_pasted_rows():

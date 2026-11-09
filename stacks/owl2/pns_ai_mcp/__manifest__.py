@@ -5,9 +5,9 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '3.1.933',
+    'version': '3.1.972',
     'category': 'Extra Tools',
-    'summary': 'Open-source AI engine and MCP server for Odoo Community 14 and 19: OpenAI, Claude, Ollama or any compatible model, read-only sandbox, every write approved by a person.',
+    'summary': 'Open-source AI engine and MCP server for Odoo Community 14 to 20: OpenAI, Claude, Ollama or any compatible model, read-only sandbox, every write approved by a person.',
     'description': """
         Patanegra AI Engine — core of the Patanegra AI stack for Odoo applications.
         Reference implementation of the Patanegra Application Agent Protocol (PAAP).
@@ -43,7 +43,6 @@
             'pns_ai_mcp/static/src/css/skill_capture_wizard.css',
             'pns_ai_mcp/static/src/js/mcp_api_key_widget.js',
             'pns_ai_mcp/static/src/js/pns_html_readonly_widget.js',
-            'pns_ai_mcp/static/src/js/mcp_log_tree.js',
             'pns_ai_mcp/static/src/js/mcp_log_form.js',
             'pns_ai_mcp/static/src/js/ai_usage_chip.js',
             'pns_ai_mcp/static/src/js/skill_capture_wizard.js',
@@ -58,6 +57,7 @@
             'pns_ai_mcp/static/src/js/mcp_user_action_buttons.js',
             'pns_ai_mcp/static/src/js/key_pin_desk.js',
             'pns_ai_mcp/static/src/js/ai_provider_action_buttons.js',
+            'pns_ai_mcp/static/src/js/ai_provider_role_action_buttons.js',
             'pns_ai_mcp/static/src/js/ai_agent_action_buttons.js',
             'pns_ai_mcp/static/src/js/whitelist_action_buttons.js',
             'pns_ai_mcp/static/src/js/external_server_action_buttons.js',
@@ -87,6 +87,8 @@
         'wizard/import_servers_wizard_views.xml',
         'wizard/import_agents_wizard_views.xml',
         'wizard/ai_provider_tools_wizard_views.xml',
+        'wizard/ai_provider_role_tools_wizard_views.xml',
+        'wizard/import_provider_roles_wizard_views.xml',
         'wizard/ai_provider_usage_wizard_views.xml',
         'wizard/import_users_wizard_views.xml',
         'wizard/import_whitelist_wizard_views.xml',

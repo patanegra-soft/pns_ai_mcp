@@ -33,12 +33,15 @@
             <!-- Tree views with Operations button (v14) -->
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/ai_agent_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/ai_provider_tree_v14.js"/>
+            <script type="text/javascript" src="/pns_ai_mcp/static/src/js/ai_provider_role_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/model_picker_dialog_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/key_pin_desk_v14.js"/>
+            <script type="text/javascript" src="/pns_ai_mcp/static/src/js/key_pin_desk_boot_o14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/mcp_user_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/mcp_context_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/mcp_skill_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/mcp_log_tree_v14.js"/>
+            <script type="text/javascript" src="/pns_ai_mcp/static/src/js/mcp_log_reload_o14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/whitelist_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/external_server_tree_v14.js"/>
             <script type="text/javascript" src="/pns_ai_mcp/static/src/js/safe_operation_tree_v14.js"/>

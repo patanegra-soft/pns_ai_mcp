@@ -347,7 +347,7 @@ def test_rewrite_uses_conversation_not_decision():
     from _load_addon import skill_source
     skill = skill_source()
     block = re.split(
-        r'\n    (?:@|def )', skill.split('def _rewrite_code_for_params', 1)[1], 1,
+        r'\n    (?:@|def )', skill.split('def _rewrite_code_for_params', 1)[1], maxsplit=1,
     )[0]
     assert "need='conversation'" in block
     assert "need='decision'" not in block

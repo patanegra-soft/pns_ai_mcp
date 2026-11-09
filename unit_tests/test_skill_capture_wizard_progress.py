@@ -66,7 +66,7 @@ def test_skill_form_authors_help_not_code():
     skill_py = skill_source()
     method = re.split(
         r'\n    (?:@|def )',
-        skill_py.split('def _author_form_help_and_params', 1)[1], 1,
+        skill_py.split('def _author_form_help_and_params', 1)[1], maxsplit=1,
     )[0]
     assert '_author_param_help' in method
     assert '_author_param_schema' in method

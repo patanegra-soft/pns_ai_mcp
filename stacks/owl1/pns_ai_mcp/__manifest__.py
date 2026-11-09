@@ -5,9 +5,9 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '3.1.933',
+    'version': '3.1.972',
     'category': 'Extra Tools',
-    'summary': 'Open-source AI engine and MCP server for Odoo Community 14 and 19: OpenAI, Claude, Ollama or any compatible model, read-only sandbox, every write approved by a person.',
+    'summary': 'Open-source AI engine and MCP server for Odoo Community 14 to 20: OpenAI, Claude, Ollama or any compatible model, read-only sandbox, every write approved by a person.',
     'description': """
         Patanegra AI Engine — core of the Patanegra AI stack for Odoo applications.
         Reference implementation of the Patanegra Application Agent Protocol (PAAP).
@@ -33,45 +33,6 @@
         # `requests`; the `openai` SDK is NOT used (there is no `import openai`).
         'python': ['openpyxl', 'reportlab', 'requests'],
     },
-    'assets': {
-        'web.assets_backend': [
-            # CSS
-            'pns_ai_mcp/static/src/css/mcp_log_tree.css',
-            'pns_ai_mcp/static/src/css/mcp_context.css',
-            'pns_ai_mcp/static/src/css/mcp_rtl.css',
-            'pns_ai_mcp/static/src/css/mcp_context_list.css',
-            'pns_ai_mcp/static/src/css/pns_list.css',
-            'pns_ai_mcp/static/src/css/skill_capture_wizard.css',
-            # Vendor libs
-            # Widgets (v14)
-            'pns_ai_mcp/static/src/js/mcp_api_key_widget_v14.js',
-            'pns_ai_mcp/static/src/js/pns_html_readonly_widget_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_iso_datetime_widget_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_json_compressed_widget_v14.js',
-            'pns_ai_mcp/static/src/js/context_window_combo_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_log_form_v14.js',
-            'pns_ai_mcp/static/src/js/ai_usage_chip_v14.js',
-            'pns_ai_mcp/static/src/js/skill_capture_wizard_v14.js',
-            'pns_ai_mcp/static/src/js/openapi_spec_generate_wizard_v14.js',
-            'pns_ai_mcp/static/src/js/external_server_usage_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_log_usage_summary_v14.js',
-            'pns_ai_mcp/static/src/js/ai_agent_origin_filter_v14.js',
-            # Tree views with Operations button (v14)
-            'pns_ai_mcp/static/src/js/ai_agent_tree_v14.js',
-            'pns_ai_mcp/static/src/js/ai_provider_tree_v14.js',
-            'pns_ai_mcp/static/src/js/model_picker_dialog_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_user_tree_v14.js',
-            'pns_ai_mcp/static/src/js/key_pin_desk_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_context_tree_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_skill_tree_v14.js',
-            'pns_ai_mcp/static/src/js/mcp_log_tree_v14.js',
-            'pns_ai_mcp/static/src/js/whitelist_tree_v14.js',
-            'pns_ai_mcp/static/src/js/external_server_tree_v14.js',
-            'pns_ai_mcp/static/src/js/safe_operation_tree_v14.js',
-            # QWeb templates
-            'pns_ai_mcp/static/src/xml/mcp_field_widgets.xml',
-        ],
-    },
     'data': [
         'views/assets.xml',
         'security/security_groups.xml',
@@ -88,6 +49,8 @@
         'wizard/import_servers_wizard_views.xml',
         'wizard/import_agents_wizard_views.xml',
         'wizard/ai_provider_tools_wizard_views.xml',
+        'wizard/ai_provider_role_tools_wizard_views.xml',
+        'wizard/import_provider_roles_wizard_views.xml',
         'wizard/ai_provider_usage_wizard_views.xml',
         'wizard/import_users_wizard_views.xml',
         'wizard/import_whitelist_wizard_views.xml',

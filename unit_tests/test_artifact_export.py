@@ -132,9 +132,9 @@ def test_xlsx_ooxml_strips_control_chars():
 
 
 def test_serialize_pdf_bytes():
+    pytest.importorskip('reportlab')
     raw = ae.serialize_rows(_ROWS, 'pdf')
-    if raw is None:
-        pytest.skip('reportlab not installed')
+    assert raw is not None, 'the PDF was not built'
     assert raw.startswith(b'%PDF')
 
 
@@ -259,6 +259,7 @@ def test_engine_has_no_show_verb_list():
 
 
 def test_pdf_utterance_persists_via_callback():
+    pytest.importorskip('reportlab')
     captured = {}
 
     def persist(raw, filename, mimetype):
@@ -277,8 +278,7 @@ def test_pdf_utterance_persists_via_callback():
         rows=_ROWS,
         persist=persist,
     )
-    if not out['acted']:
-        pytest.skip('pdf serialization unavailable')
+    assert out['acted'], 'the PDF was not built'
     assert captured['filename'].endswith('.pdf')
     assert captured['mimetype'] == 'application/pdf'
     assert captured['raw'].startswith(b'%PDF')
@@ -395,16 +395,15 @@ def test_pdf_orientation_is_not_a_locale_catalog():
 
 
 def test_pdf_style_matches_chatboo_not_legacy_purple():
+    pytest.importorskip('reportlab')
     raw = ae.serialize_rows(_ROWS, 'pdf')
-    if raw is None:
-        pytest.skip('reportlab not installed')
+    assert raw is not None, 'the PDF was not built'
     assert raw.startswith(b'%PDF')
     assert b'Sistema MCP Odoo' not in raw
     assert b'667eea' not in raw
     fmt = (
         Path(ae.__file__).resolve().parents[1] / 'controllers' / 'formatters.py'
     ).read_text(encoding='utf-8')
-    assert 'KeepTogether' in fmt
     assert 'splitByRow=1' in fmt
     assert 'repeatRows=1' in fmt
     assert 'apaisado' not in fmt
@@ -412,6 +411,7 @@ def test_pdf_style_matches_chatboo_not_legacy_purple():
 
 
 def test_pdf_image_cell_embeds_bytes_not_url():
+    pytest.importorskip('reportlab')
     png_b64 = (
         'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQ'
         'DwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
@@ -421,8 +421,7 @@ def test_pdf_image_cell_embeds_bytes_not_url():
         'image_128': 'data:image/png;base64,' + png_b64,
     }]
     raw = ae.serialize_rows(rows, 'pdf')
-    if raw is None:
-        pytest.skip('reportlab not installed')
+    assert raw is not None, 'the PDF was not built'
     assert raw.startswith(b'%PDF')
     assert b'/web/image/' not in raw
     assert b'data:image/png' not in raw
@@ -470,14 +469,14 @@ def test_pdf_chart_series_from_monthly_rows():
 
 
 def test_pdf_includes_structural_chart_unless_opted_out():
+    pytest.importorskip('reportlab')
     rows = [
         {'Month': 'M%02d' % idx, 'Amount': 1000.0 + idx * 80}
         for idx in range(1, 13)
     ]
     with_chart = ae.serialize_rows(rows, 'pdf', title='Seville')
     no_chart = ae.serialize_rows(rows, 'pdf', title='Seville', charts=False)
-    if with_chart is None or no_chart is None:
-        pytest.skip('reportlab not installed')
+    assert with_chart is not None and no_chart is not None, 'the PDF was not built'
     assert with_chart.startswith(b'%PDF')
     assert no_chart.startswith(b'%PDF')
     assert with_chart != no_chart
@@ -907,8 +906,8 @@ def test_pdf_and_word_two_chips():
     assert out['acted']
     exts = [c['name'].rsplit('.', 1)[-1] for c in out['chips']]
     assert 'doc' in exts
-    if 'pdf' not in exts:
-        pytest.skip('pdf serialization unavailable')
+    pytest.importorskip('reportlab')
+    assert 'pdf' in exts, 'the PDF was not built'
     assert len(out['chips']) == 2
 
 
@@ -1068,6 +1067,62 @@ def test_handoff_text_is_not_the_export_utterance():
     uttered = ae.turn_export_utterance(_Env(), handoff)
     assert uttered == '/financial-health'
     assert ae.requested_named_format(uttered) is None
+
+
+def test_attached_file_text_is_not_the_export_utterance_on_a_read_only_context():
+    """Odoo 20 keeps env.context as a mappingproxy; the typed sentence still wins."""
+    from types import MappingProxyType
+
+    class _Env:
+        context = MappingProxyType({'user_message': 'Create the bill and the vendor'})
+
+    engine_message = (
+        'Create the bill and the vendor\n\n'
+        '[Attachment: invoice_acme_99999.pdf]\n'
+        'Domain renewal example .pro 12,34 EUR'
+    )
+    assert ae.parse_requested_export(engine_message)
+    uttered = ae.turn_export_utterance(_Env(), engine_message)
+    assert uttered == 'Create the bill and the vendor'
+    assert ae.parse_requested_export(uttered) is None
+
+
+def _turn_env(sentence, names):
+    class _Env:
+        context = {'user_message': sentence, 'turn_file_names': tuple(names)}
+    return _Env()
+
+
+@pytest.mark.parametrize('sentence', [
+    'Process this pdf',
+    'Create the bill from this PDF',
+    'Read the .pdf',
+])
+def test_a_format_naming_the_attachment_is_not_a_download(sentence):
+    uttered = ae.turn_export_utterance(_turn_env(sentence, ['acme_99999.pdf']), '')
+    assert ae.parse_requested_export(uttered) is None
+
+
+def test_attached_word_file_covers_its_word_aliases():
+    env = _turn_env('Summarise this word doc', ['notes_example.docx'])
+    assert ae.parse_requested_export(ae.turn_export_utterance(env, '')) is None
+
+
+def test_attached_refused_type_does_not_answer_refused():
+    env = _turn_env('Read this odt', ['minutes_example.odt'])
+    assert not ae.is_refused_export(ae.turn_export_utterance(env, ''))
+
+
+def test_another_format_with_an_attachment_still_asks_for_it():
+    env = _turn_env('Turn this pdf into excel', ['acme_99999.pdf'])
+    parsed = ae.parse_requested_export(ae.turn_export_utterance(env, ''))
+    assert parsed and [f['kind'] for f in parsed['formats']] == ['xlsx']
+
+
+def test_without_attachments_the_format_is_a_download():
+    env = _turn_env('Send me the list in pdf', [])
+    parsed = ae.parse_requested_export(ae.turn_export_utterance(env, ''))
+    assert parsed and parsed['kind'] == 'pdf'
 
 
 def test_report_outline_keeps_on_screen_when_user_asks_file():

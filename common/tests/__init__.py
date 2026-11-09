@@ -36,3 +36,5 @@ from . import test_session_download
 from . import test_flow_legend
 from . import test_server_identity_detection
 from . import test_sandbox_secret_read
+from . import test_one_company_live
+from . import test_key_of_settings_admin

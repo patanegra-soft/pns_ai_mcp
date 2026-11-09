@@ -10,7 +10,6 @@ odoo.define('pns_ai_mcp.mcp_json_compressed_widget', function (require) {
     var AbstractField = require('web.AbstractField');
     var fieldRegistry = require('web.field_registry');
     var core = require('web.core');
-    var Notification = require('web.Notification');
 
     var _t = core._t;
 

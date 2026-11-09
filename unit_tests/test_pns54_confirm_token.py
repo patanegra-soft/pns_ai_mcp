@@ -48,7 +48,7 @@ def test_card_payload_mints_a_token_and_peek_does_not():
     assert "payload['confirm_token']" in card
     pend = _OP.split('def pending_card_payloads')[1].split('def action_export_operations')[0]
     assert 'mint_token=True' in pend
-    assert 'op.card_payload(mint_token=mint_token)' in pend
+    assert 'mint_token=mint_token and op.verification_id not in held' in pend
 
 
 def test_sse_card_gets_the_token_tool_json_does_not():

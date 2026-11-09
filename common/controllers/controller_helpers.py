@@ -184,6 +184,8 @@ def open_readonly_env(base_env):
     from odoo import api
     from odoo.exceptions import UserError
     from ..utils.sandbox_secrets import SANDBOX_CURSOR_FLAG
+    from ..utils.one_company import one_company_context
+    context = one_company_context(base_env)
     cr = base_env.registry.cursor()
     try:
         # Must be the first real statement of the transaction.
@@ -207,7 +209,7 @@ def open_readonly_env(base_env):
             'transaction. Retry later or contact an administrator.'
         )
     env = api.Environment(cr, base_env.uid, {
-        **dict(base_env.context or {}),
+        **context,
         'tracking_disable': True,
         'mail_notrack': True,
         'mail_create_nosubscribe': True,

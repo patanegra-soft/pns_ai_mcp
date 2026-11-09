@@ -318,6 +318,11 @@ def request_safe_plan(env, steps, title='Supervised operation',
         }
         if agent_code:
             operation_data['mcp_agent_code'] = agent_code
+        # Approved later, maybe with the switcher elsewhere: it runs where it was asked.
+        from ..utils.one_company import SCREEN_COMPANIES, screen_ids
+        screen = screen_ids((env.context or {}).get(SCREEN_COMPANIES))
+        if screen:
+            operation_data[SCREEN_COMPANIES] = screen
         session_id = resolve_session_ref(env)
         if session_id:
             operation_data['ai_session_ref'] = int(session_id)

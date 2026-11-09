@@ -17,6 +17,23 @@ def test_module_level_data_literal_error():
     assert r.module_level_data_literal_error('result = 1\n') is None
 
 
+def test_computed_literal_is_not_a_pasted_dataset():
+    code = (
+        'pairs = [\n'
+        + ''.join(
+            "    ('Fact %d', env['res.partner'].search_count([])),\n" % i
+            for i in range(11)
+        )
+        + "    ('Version', odoo_version),\n"
+        + "    ('Now', now.strftime('%Y')),\n"
+        + ']\nresult = pairs\n'
+    )
+    assert r.module_level_data_literal_error(code) is None
+    cleaned, names, _extracted = r.strip_module_level_data_literals(code)
+    assert names == []
+    assert cleaned == code
+
+
 def test_strip_module_level_data_literals_rebinds():
     code = (
         'rows = ' + repr([{'a': i} for i in range(20)]) + '\n'

@@ -30,9 +30,8 @@
 
 
     <!-- ─── Server action bindings ─────────────────────────────────────── -->
-    <!-- Global Import/Export operations are now in the Operations wizard  -->
-    <!-- (opened via JS cogMenu). Only "Export Selected" bindings remain   -->
-    <!-- here — these need record selection to work (by design).          -->
+    <!-- Global operations live in each list's Tools wizard; "Export       -->
+    <!-- selected" is a list header button. Same in every stack.            -->
     <!-- binding_model_id=False on old records clears them from cog menu.  -->
 
     <!-- pns_ai_mcp.user: clear old global bindings -->
@@ -50,12 +49,11 @@
         <field name="state">code</field>
         <field name="code">action = model.action_import_users()</field>
     </record>
-    <!-- Export Selected — keep binding -->
+    <!-- Export selected: list header button -->
     <record id="action_server_export_selected_mcp_users" model="ir.actions.server">
         <field name="name">Export selected JSON</field>
         <field name="model_id" ref="model_ai_mcp_user"/>
-        <field name="binding_model_id" ref="model_ai_mcp_user"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_model_id" eval="False"/>
         <field name="state">code</field>
         <field name="code">action = records.action_export_selected()</field>
     </record>
@@ -75,12 +73,11 @@
         <field name="state">code</field>
         <field name="code">action = model.action_import_providers()</field>
     </record>
-    <!-- Export Selected — keep binding -->
+    <!-- Export selected: list header button -->
     <record id="action_server_export_selected_ai_providers" model="ir.actions.server">
         <field name="name">Export selected JSON</field>
         <field name="model_id" ref="model_ai_provider"/>
-        <field name="binding_model_id" ref="model_ai_provider"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_model_id" eval="False"/>
         <field name="state">code</field>
         <field name="code">action = records.action_export_selected()</field>
     </record>
@@ -100,17 +97,16 @@
         <field name="state">code</field>
         <field name="code">action = model.action_import_agents()</field>
     </record>
-    <!-- Export Selected — keep binding -->
+    <!-- Export selected: list header button -->
     <record id="action_server_export_selected_ai_agents" model="ir.actions.server">
         <field name="name">Export selected JSON</field>
         <field name="model_id" ref="model_ai_agent"/>
-        <field name="binding_model_id" ref="model_ai_agent"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_model_id" eval="False"/>
         <field name="state">code</field>
         <field name="code">action = records.action_export_selected()</field>
     </record>
 
-    <!-- ai.context: clear old global bindings, keep export_selected -->
+    <!-- ai.context: clear old global bindings -->
     <record id="action_server_context_stats" model="ir.actions.server">
         <field name="name">MCP context statistics</field>
         <field name="model_id" ref="model_ai_context"/>
@@ -146,12 +142,11 @@
         <field name="state">code</field>
         <field name="code">action = model.action_open_import_selected_zip_wizard()</field>
     </record>
-    <!-- Export Selected — keep binding -->
+    <!-- Export selected: list header button -->
     <record id="action_server_context_export_selected" model="ir.actions.server">
         <field name="name">Export selected contexts to ZIP</field>
         <field name="model_id" ref="model_ai_context"/>
-        <field name="binding_model_id" ref="model_ai_context"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_model_id" eval="False"/>
         <field name="state">code</field>
         <field name="code">action = records.action_export_selected()</field>
     </record>
@@ -187,12 +182,11 @@
         <field name="state">code</field>
         <field name="code">action = model.action_import_external_servers()</field>
     </record>
-    <!-- Export Selected — keep binding -->
+    <!-- Export selected: list header button -->
     <record id="action_server_export_selected_external_servers" model="ir.actions.server">
         <field name="name">Export selected JSON</field>
         <field name="model_id" ref="model_ai_api_server"/>
-        <field name="binding_model_id" ref="model_ai_api_server"/>
-        <field name="binding_view_types">list</field>
+        <field name="binding_model_id" eval="False"/>
         <field name="state">code</field>
         <field name="code">action = records.action_export_selected()</field>
     </record>
@@ -237,7 +231,7 @@
         <field name="state">code</field>
         <field name="code">action = model.action_import_skills()</field>
     </record>
-    <!-- Export Selected — keep binding -->
+    <!-- Export selected: list header button -->
     <record id="action_server_export_selected_skills" model="ir.actions.server">
         <field name="name">Export selected skills to ZIP</field>
         <field name="model_id" ref="model_ai_skill"/>

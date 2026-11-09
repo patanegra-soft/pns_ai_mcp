@@ -19,7 +19,7 @@ def _load_method(name):
     for node in ast.walk(tree):
         if isinstance(node, ast.FunctionDef) and node.name == name:
             module = ast.Module(body=[node], type_ignores=[])
-            ns = {}
+            ns = {'USER_ALL_GROUPS_FIELD': 'all_group_ids'}
             exec(compile(module, 'ai_skill.py', 'exec'), ns)
             return ns[name]
     raise AssertionError(name + ' missing')
@@ -35,7 +35,10 @@ class _Groups:
 
 class _User:
     def __init__(self, group_ids):
-        self.groups_id = _Groups(group_ids)
+        self._fields = {'all_group_ids': _Groups(group_ids)}
+
+    def __getitem__(self, name):
+        return self._fields[name]
 
 
 class _Env:

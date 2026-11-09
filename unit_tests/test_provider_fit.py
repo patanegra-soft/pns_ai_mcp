@@ -121,9 +121,11 @@ def test_the_backup_carries_only_the_switches_of_a_role():
     root = Path(__file__).resolve().parents[1]
     backup = (root / 'common' / 'utils' / 'config_backup.py').read_text(encoding='utf-8')
     export = backup.split('def _export_provider_roles', 1)[1].split('\ndef ', 1)[0]
-    for key in ("'active': r.active", "'use_fallback': r.use_fallback",
-                "'bg_color': r.own_bg_color", "'fg_color': r.own_fg_color"):
-        assert key in export
+    assert '_role_row(r)' in export
+    row = backup.split('def _role_row', 1)[1].split('\ndef ', 1)[0]
+    for key in ("'active': role.active", "'use_fallback': role.use_fallback",
+                "'bg_color': role.own_bg_color", "'fg_color': role.own_fg_color"):
+        assert key in row
     imp = backup.split('def _import_provider_roles', 1)[1].split('\ndef ', 1)[0]
     assert '.create(' not in imp
     assert "for key in ('active', 'use_fallback') if key in row" in imp

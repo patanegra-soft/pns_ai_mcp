@@ -4,6 +4,7 @@
 """Conversational door: agent flag + user group. No product names in the helper."""
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from _load_addon import engine_source, load_module
@@ -83,8 +84,8 @@ def test_stamp_rewrites_existing_rows():
     assert 'ai_agent_admin' not in stamp
 
 
-def test_admin_does_not_imply_conversational():
-    for stack in ('owl1', 'owl2'):
+def test_admin_carries_every_ai_group():
+    for stack in ('owl1', 'owl2', 'owl3'):
         xml = (
             _ROOT / 'stacks' / stack / 'pns_ai_mcp' / 'security'
             / 'security_groups.xml'
@@ -92,7 +93,11 @@ def test_admin_does_not_imply_conversational():
         assert 'group_ai_conversational' in xml
         admin = xml.split('id="group_ai_admin"')[1]
         implied = admin.split('implied_ids')[1].split('/>')[0]
-        assert 'group_ai_conversational' not in implied
+        groups = re.findall(r'<record id="(\w+)" model="res\.groups"', xml)
+        assert 'group_ai_conversational' in groups
+        for group in groups:
+            if group != 'group_ai_admin':
+                assert "ref('%s')" % group in implied, (stack, group)
         conv_block = xml.split('id="group_ai_conversational"')[1].split(
             '<record',
         )[0]

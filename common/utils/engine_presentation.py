@@ -194,7 +194,11 @@ class PresentationMixin:
 
         Helpers that opted in see ``matched_domain_codes`` and may mark
         the turn as a page. The engine does not name those helpers.
+        A slash command's own name is not a word of the sentence: only what
+        follows it is scored.
         """
+        command = self._parse_slash_command(message)
+        sentence = command[1] if command else (message or '')
         try:
             from .domain_index import (
                 TARGET_KIND_DOMAIN, filter_entries_by_kind, match_domains,
@@ -205,7 +209,7 @@ class PresentationMixin:
             ) or []
             matched = list(
                 (match_domains(
-                    message or '',
+                    sentence,
                     filter_entries_by_kind(entries, TARGET_KIND_DOMAIN),
                 ) or {}).get('codes') or [],
             )

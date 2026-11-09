@@ -80,8 +80,9 @@ def test_ai_log_user_usage_summary_method():
     src = (_ROOT / 'common' / 'models' / 'ai_log.py').read_text(encoding='utf-8')
     assert 'def get_user_usage_summary' in src
     assert 'domain=None' in src
-    assert 'expression.AND' in src
-    assert 'read_group' in src
+    assert 'merged = base + exclude' in src
+    assert 'odoo.osv' not in src
+    assert 'read_sums(self, merged' in src
     assert 'spend_label' in src
     assert "'filtered'" in src
     assert '_USAGE_SUMMARY_EXCLUDE_ENDPOINTS' in src

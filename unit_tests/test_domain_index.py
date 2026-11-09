@@ -757,6 +757,20 @@ def test_merge_trigger_lists_dedupes_accents():
     assert 'dns' in folded
 
 
+def test_merge_trigger_lists_caps_each_list_not_the_locale():
+    """A long generic list must not push the locale words out."""
+    generic = ['generic %d' % i for i in range(di.DETECTION_TRIGGER_CAP + 5)]
+    locale = ['palabra %d' % i for i in range(di.DETECTION_TRIGGER_CAP + 5)]
+    merged = di.merge_trigger_lists(generic, locale)
+    assert merged.count('generic 0') == 1
+    assert 'generic %d' % (di.DETECTION_TRIGGER_CAP - 1) in merged
+    assert 'generic %d' % di.DETECTION_TRIGGER_CAP not in merged
+    assert 'palabra 0' in merged
+    assert 'palabra %d' % (di.DETECTION_TRIGGER_CAP - 1) in merged
+    assert 'palabra %d' % di.DETECTION_TRIGGER_CAP not in merged
+    assert len(merged) == 2 * di.DETECTION_TRIGGER_CAP
+
+
 def test_build_detection_triggers_prompt_is_json_only():
     system, user = di.build_detection_triggers_prompt(
         locale='es_ES',

@@ -24,6 +24,10 @@ from ..utils.portable_io import export_record_dict
 
 _logger = logging.getLogger(__name__)
 
+# Last lazy expiry refresh per database (time.time()). Not on the model class:
+# Odoo 18+ rejects attributes set on a registry class at run time.
+_EXPIRY_REFRESH_LAST_TS = {}
+
 
 def _hash_confirm_token(raw):
     """SHA-256 of the card token. Empty in, empty out."""
@@ -416,6 +420,7 @@ class SafeOperation(models.Model):
                 'implementation': 'standard',
                 'prefix': prefix,
                 'padding': 8,
+                'company_id': False,
             })
         else:
             vals = {}
@@ -423,6 +428,9 @@ class SafeOperation(models.Model):
                 vals['prefix'] = prefix
             if seq.padding != 8:
                 vals['padding'] = 8
+            # next_by_code only sees the active company's sequences.
+            if seq.company_id:
+                vals['company_id'] = False
             if vals:
                 seq.write(vals)
         return seq
@@ -1422,10 +1430,14 @@ class SafeOperation(models.Model):
             self._release_execute_claim(error='no_plan_steps')
             return None
         from ..utils.session_download import resolve_session_ref
+        from ..utils.one_company import SCREEN_COMPANIES, one_company_context
         session_ref = data.get('ai_session_ref') or resolve_session_ref(self.env)
         # The plan writes with the rights of whoever asked for it, not of
-        # whoever pressed confirm.
+        # whoever pressed confirm, and in the companies it was asked in.
         exec_env = self.env(user=self.user_id.id) if self.user_id else self.env
+        exec_env = exec_env(context=one_company_context(
+            exec_env, requested=data.get(SCREEN_COMPANIES) or (),
+        ))
         if session_ref:
             exec_env = exec_env(context=dict(
                 exec_env.context or {},
@@ -1903,7 +1915,6 @@ class SafeOperation(models.Model):
 
     # Throttle of the lazy refresh when opening list/form (seconds).
     _EXPIRY_REFRESH_THROTTLE_S = 15
-    _expiry_refresh_last_ts = 0.0
 
     def init(self):
         super().init()
@@ -1933,7 +1944,7 @@ class SafeOperation(models.Model):
         now_ts = time.time()
         # Throttle only on the lazy path (list/form); Tools forces it.
         if limit is not None:
-            last = type(self)._expiry_refresh_last_ts
+            last = _EXPIRY_REFRESH_LAST_TS.get(self.env.cr.dbname, 0.0)
             if now_ts - last < self._EXPIRY_REFRESH_THROTTLE_S:
                 return 0
         now = fields.Datetime.now()
@@ -1954,14 +1965,14 @@ class SafeOperation(models.Model):
         ids = [row[0] for row in cr.fetchall()]
         if not ids:
             if limit is not None:
-                type(self)._expiry_refresh_last_ts = now_ts
+                _EXPIRY_REFRESH_LAST_TS[self.env.cr.dbname] = now_ts
             return 0
         self.sudo().with_context(skip_expiry_refresh=True).browse(ids).write({
             'status': 'expired',
             'resolved_at': now,
         })
         if limit is not None:
-            type(self)._expiry_refresh_last_ts = now_ts
+            _EXPIRY_REFRESH_LAST_TS[self.env.cr.dbname] = now_ts
         _logger.info(
             'MCP: %s verification(s) marked expired (refresh, limit=%s)',
             len(ids), limit,
@@ -2052,11 +2063,14 @@ class SafeOperation(models.Model):
         return payload
 
     @api.model
-    def pending_card_payloads(self, mint_token=True):
+    def pending_card_payloads(self, mint_token=True, held=None):
         """Live pending cards for the current user. Read-only; does not create rows.
 
         ``mint_token=False`` is a count/peek: it must not rotate the card token.
+        ``held`` are the cards the screen already paints with their token: a new
+        token for them would leave the painted one behind.
         """
+        held = {str(one) for one in (held or []) if one}
         self.refresh_expiry_statuses(limit=100)
         now = fields.Datetime.now()
         ops = self.search([
@@ -2065,7 +2079,12 @@ class SafeOperation(models.Model):
             ('executed', '=', False),
             ('expires_at', '>', now),
         ], order='id desc')
-        return [op.card_payload(mint_token=mint_token) for op in ops]
+        return [
+            op.card_payload(
+                mint_token=mint_token and op.verification_id not in held,
+            )
+            for op in ops
+        ]
 
     # ── Export ────────────────────────────────────────────────────────
 

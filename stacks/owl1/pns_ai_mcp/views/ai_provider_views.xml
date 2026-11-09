@@ -85,6 +85,9 @@
         <field name="model">ai.provider</field>
         <field name="arch" type="xml">
             <tree string="Providers" class="o_pns_list o_pns_provider_list">
+                <header>
+                    <button name="action_export_selected" type="object" string="Export selected" class="btn-secondary" icon="fa-download" groups="pns_ai_mcp.group_ai_admin"/>
+                </header>
                 <field name="name" optional="show"/>
                 <field name="active" optional="show"/>
                 <field name="fit_chips_html" string="Fits" widget="pns_html_readonly" readonly="1" optional="show"/>

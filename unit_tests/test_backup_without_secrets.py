@@ -124,7 +124,8 @@ def test_user_key_hash_is_a_secret():
     user = (_ROOT / 'common' / 'models' / 'mcp_user.py').read_text(encoding='utf-8')
     assert "_pns_secret_fields = ('mcp_api_key_hash',)" in user
     assert 'def export_selected_users(users, include_secrets=False):' in _SRC
-    assert 'if include_secrets and u.mcp_api_key_hash:' in _SRC
+    assert 'u._export_user_dict(include_secrets)' in _SRC
+    assert '}, include_secrets=include_secrets)' in user
     assert 'del include_secrets' not in _SRC
     # Without the key, the import does not mark a user as having one.
     assert "vals.pop('mcp_api_key_state', None)" in user

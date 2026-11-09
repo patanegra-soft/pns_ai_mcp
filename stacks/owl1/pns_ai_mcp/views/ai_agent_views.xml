@@ -5,6 +5,9 @@
         <field name="model">ai.agent</field>
         <field name="arch" type="xml">
             <tree string="Agents" class="o_pns_list">
+                <header>
+                    <button name="action_export_selected" type="object" string="Export selected" class="btn-secondary" icon="fa-download" groups="pns_ai_mcp.group_ai_admin"/>
+                </header>
                 <field name="sequence" widget="handle"/>
                 <field name="name" optional="show"/>
                 <field name="code" optional="show"/>

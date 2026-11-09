@@ -7,6 +7,7 @@ import logging
 from odoo import api, fields, models, _
 from odoo.addons.base.models.ir_model import MODULE_UNINSTALL_FLAG
 from odoo.exceptions import UserError
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 from ..utils import mcp_ui
 from ..utils import context_roles
@@ -209,9 +210,15 @@ class AIAgent(models.Model):
         help='Hash of context write_dates used to invalidate cache.',
     )
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)', 'Agent code must be unique.'),
-    ]
+    if ODOO_VERSION >= 19:
+        _code_uniq = models.Constraint(
+            'unique(code)',
+            'Agent code must be unique.',
+        )
+    else:
+        _sql_constraints = [
+            ('code_uniq', 'unique(code)', 'Agent code must be unique.'),
+        ]
 
     def init(self):
         """Odoo 14 skips migrations/3.1.*; fossils and factory stamps run on -u."""
@@ -309,23 +316,17 @@ class AIAgent(models.Model):
 
     # ── Origin-based protections ──────────────────────────────────────
 
-    @api.model
-    def create(self, vals):
+    @api.model_create_multi
+    def create(self, vals_list):
         """Block dynamic agent creation.
 
         Only module-created agents (origin='module') are allowed.
         User-created agents are blocked because they would be orphan
         records with no technical coupling to the application.
         """
-        # Normalize: O19 passes a list, O14 passes a dict
-        if isinstance(vals, list):
-            for v in vals:
-                self._check_agent_create(v)
-            records = super().create(vals)
-            records._restore_required_context_links()
-            return records
-        self._check_agent_create(vals)
-        records = super().create(vals)
+        for vals in vals_list:
+            self._check_agent_create(vals)
+        records = super().create(vals_list)
         records._restore_required_context_links()
         return records
 
@@ -1685,10 +1686,12 @@ class AIAgentProvider(models.Model):
                 result |= super().create([vals])
         return result
 
-    _sql_constraints = [
-        (
-            'agent_provider_uniq',
+    if ODOO_VERSION >= 19:
+        _agent_provider_uniq = models.Constraint(
             'unique(agent_id, provider_id)',
             'A provider can only appear once per agent.',
-        ),
-    ]
+        )
+    else:
+        _sql_constraints = [
+            ('agent_provider_uniq', 'unique(agent_id, provider_id)', 'A provider can only appear once per agent.'),
+        ]

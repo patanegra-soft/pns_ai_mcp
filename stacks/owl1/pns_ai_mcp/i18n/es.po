@@ -760,6 +760,7 @@ msgstr "Restauración completada"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_whitelist_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_role_context_import_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_import_result_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Updated"
 msgstr "Actualizado"
 
@@ -1230,6 +1231,7 @@ msgstr "API Key generada correctamente"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_import_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_tools_reload_result_form
 #: code:addons/pns_ai_mcp/static/src/js/mcp_api_key_widget_v14.js:0
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Success"
 msgstr "Éxito"
 
@@ -1328,6 +1330,7 @@ msgstr "El archivo debe ser un .zip exportado como paquete de contextos."
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_whitelist_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_role_context_import_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_import_result_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Import result"
 msgstr "Resultado de la importación"
 
@@ -1584,6 +1587,7 @@ msgstr "Registros exportados"
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_users_wizard__filename
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_whitelist_wizard__filename
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_json_export_wizard__export_filename
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_provider_roles_wizard__filename
 msgid "File name"
 msgstr "Nombre de archivo"
 
@@ -1598,6 +1602,7 @@ msgstr "Si no está marcado, se omiten usuarios existentes, salvo si aún no tie
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_agents_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_roles_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_servers_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_wizard_form
 msgid "Upload a previously exported JSON file."
 msgstr "Subir un archivo JSON exportado previamente."
 
@@ -1805,6 +1810,20 @@ msgstr "Sobrescribir contextos coincidentes"
 #: model:ir.actions.server,name:pns_ai_mcp.action_server_export_selected_mcp_users
 msgid "Export selected JSON"
 msgstr "Exportar JSON seleccionados"
+
+#. module: pns_ai_mcp
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_agent_tree
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_tree
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_external_server_tree
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_mcp_user_tree
+msgid "Export selected"
+msgstr "Exportar seleccionados"
+
+#. module: pns_ai_mcp
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_context_tree
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_skill_tree
+msgid "Export selected to ZIP"
+msgstr "Exportar seleccionados a ZIP"
 
 #. module: pns_ai_mcp
 #: code:addons/pns_ai_mcp/wizard/__init__.py:0
@@ -2500,6 +2519,7 @@ msgstr "stdio (local)"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_safe_operation_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_whitelist_tools_wizard_form
 #: model:ir.actions.server,name:pns_ai_mcp.action_server_safe_operation_cancel
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_wizard_form
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -2681,6 +2701,8 @@ msgstr "Herramientas de Proveedores"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_tools_reload_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_whitelist_tools_wizard_form
 #: code:addons/pns_ai_mcp/utils/relaxaicode_render.py:0
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Close"
 msgstr "Cerrar"
 
@@ -2869,6 +2891,7 @@ msgstr "Administración completa de IA: proveedores, claves API, servidores, usu
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_mcp_user_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_safe_operation_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_whitelist_tools_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
 msgid "Select the operation to perform:"
 msgstr "Select the operation to perform:"
 
@@ -2902,6 +2925,7 @@ msgstr "Selecciona la operación a realizar sobre los contextos del sistema:"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_mcp_user_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_safe_operation_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_whitelist_tools_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
 msgid "Export JSON"
 msgstr "Exportar JSON"
 
@@ -2919,6 +2943,7 @@ msgstr "Exportar JSON"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_geo_cache_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_mcp_user_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_whitelist_tools_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
 msgid "Import JSON"
 msgstr "Importar JSON"
 
@@ -3014,6 +3039,7 @@ msgstr "Exportar JSON: descarga un archivo con todos los agentes actuales."
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_geo_cache_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_mcp_user_tools_wizard_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_whitelist_tools_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
 msgid "Import JSON: Open the wizard to upload a previously exported file."
 msgstr "Importar JSON: abre el asistente para subir un archivo exportado previamente."
 
@@ -3104,6 +3130,7 @@ msgstr "Subir un archivo .txt, .md, .xml o .zip"
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_servers_wizard__replace_existing
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_users_wizard__replace_existing
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_whitelist_wizard__replace_existing
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_provider_roles_wizard__replace_existing
 msgid "Replace existing"
 msgstr "Reemplazar existentes"
 
@@ -3124,6 +3151,7 @@ msgstr "Modo de importación"
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_servers_wizard__json_file
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_users_wizard__json_file
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_whitelist_wizard__json_file
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_import_provider_roles_wizard__json_file
 msgid "JSON File"
 msgstr "Archivo JSON"
 
@@ -4488,6 +4516,7 @@ msgstr "%(label)s: %(created)s creados, %(updated)s actualizados, %(skipped)s om
 
 #. module: pns_ai_mcp
 #: code:addons/pns_ai_mcp/wizard/config_backup_wizard.py:0
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Skipped"
 msgstr "Omitidos"
 
@@ -6777,6 +6806,7 @@ msgstr "Solo OSM"
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_mcp_context_tools_restore_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_import_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_tools_reload_result_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Warning"
 msgstr "Aviso"
 
@@ -7671,6 +7701,7 @@ msgstr " El registro de este worker queda actualizado; los demás, hasta reinici
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_import_result_form
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_skill_tools_reload_result_form
 #: code:addons/pns_ai_mcp/static/src/js/mcp_api_key_widget_v14.js:0
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_result_form
 msgid "Error"
 msgstr "Error"
 
@@ -9288,6 +9319,24 @@ msgstr "Solo un administrador de IA puede gestionar las claves API de MCP."
 
 #. module: pns_ai_mcp
 #: code:addons/pns_ai_mcp/models/mcp_user.py:0
+msgid ""
+"Only a Settings administrator can set the API key of another Settings "
+"administrator."
+msgstr ""
+"Solo un administrador de Ajustes puede poner la clave API de otro "
+"administrador de Ajustes."
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/models/mcp_user.py:0
+msgid ""
+"%s is a Settings administrator: the API key was not imported (only a "
+"Settings administrator can set it). The AI permissions were."
+msgstr ""
+"%s es administrador de Ajustes: la clave API no se ha importado (solo la "
+"puede poner un administrador de Ajustes). Los permisos de IA sí."
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/models/mcp_user.py:0
 msgid "Only AI Administrators can manage temporary key PINs."
 msgstr "Solo un administrador de IA puede gestionar los pines temporales de clave."
 
@@ -9615,6 +9664,7 @@ msgstr "No hay proveedor con cuota disponible este mes."
 
 #. module: pns_ai_mcp
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_config_backup_wizard_form
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_wizard_form
 msgid "Review"
 msgstr "Revisar"
 
@@ -10289,3 +10339,76 @@ msgstr "Solo el sistema puede abrir una operación supervisada."
 msgid "Changing views or fields needs the Settings administrator role."
 msgstr "Cambiar vistas o campos requiere el rol de administrador de Ajustes."
 
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/utils/relaxaicode_render_cards.py:0
+msgid "Fields filled in:"
+msgstr "Campos rellenados:"
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/utils/relaxaicode_render_cards.py:0
+msgid "Open the form"
+msgstr "Abrir el formulario"
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/utils/relaxaicode_render_cards.py:0
+msgid "Open the record"
+msgstr "Abrir el registro"
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/utils/relaxaicode_render_cards.py:0
+msgid "Nothing is saved until you press Save."
+msgstr "No se guarda nada hasta que pulses Guardar."
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/models/ai_provider_role.py:0
+msgid "%s provider role(s) exported."
+msgstr "%s rol(es) de proveedor exportado(s)."
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/models/ai_provider_role.py:0
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_wizard_form
+msgid "Import provider roles"
+msgstr "Importar roles de proveedor"
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/utils/config_backup.py:0
+msgid "Role '%(role)s': provider '%(provider)s' not found."
+msgstr "Rol «%(role)s»: no se encuentra el proveedor «%(provider)s»."
+
+#. module: pns_ai_mcp
+#: code:addons/pns_ai_mcp/utils/config_backup.py:0
+msgid "Odoo user '%s' not found; skipped."
+msgstr "No se encuentra el usuario de Odoo «%s»; se omite."
+
+#. module: pns_ai_mcp
+#. openerp-web
+#: model:ir.actions.act_window,name:pns_ai_mcp.action_provider_role_tools_wizard
+#: code:addons/pns_ai_mcp/static/src/js/ai_provider_role_tree_v14.js:0
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
+msgid "Provider Roles Tools"
+msgstr "Herramientas de Roles de proveedor"
+
+#. module: pns_ai_mcp
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_tools_wizard_form
+msgid "Export JSON: Download a file with every role, its settings and the providers that hold it."
+msgstr "Exportar JSON: descarga un archivo con todos los roles, sus ajustes y los proveedores que los tienen."
+
+#. module: pns_ai_mcp
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_wizard_form
+msgid "Roles come from their modules: a role this database does not have is skipped, never created."
+msgstr "Los roles vienen de sus módulos: un rol que esta base de datos no tiene se omite, nunca se crea."
+
+#. module: pns_ai_mcp
+#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_import_provider_roles_wizard_form
+msgid "If \"Replace existing\" is checked, each role takes the settings of the file and is held by exactly the providers it names."
+msgstr "Si «Reemplazar existentes» está marcado, cada rol toma los ajustes del archivo y lo tienen exactamente los proveedores que nombra."
+
+#. module: pns_ai_mcp
+#: model:ir.model.fields,help:pns_ai_mcp.field_ai_import_provider_roles_wizard__replace_existing
+msgid "If checked, each role takes the settings and the providers of the file. Otherwise, roles are left as they are."
+msgstr "Si está marcado, cada rol toma los ajustes y los proveedores del archivo. Si no, los roles se quedan como están."
+
+#. module: pns_ai_mcp
+#: model:ir.model,name:pns_ai_mcp.model_ai_import_provider_roles_wizard
+msgid "Wizard to import provider roles from JSON"
+msgstr "Asistente para importar roles de proveedor desde JSON"

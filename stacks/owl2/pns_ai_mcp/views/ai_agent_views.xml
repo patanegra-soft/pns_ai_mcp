@@ -64,58 +64,56 @@
                     <field name="link_show_extra" invisible="1"/>
                     <notebook>
                         <page string="Contexts" name="contexts">
-                            <div>
-                                <div class="mb-2">
-                                    <button name="action_reset_contexts_to_default" type="object"
-                                            string="⟳ Defaults" class="btn-sm btn-secondary mr-1"
-                                            confirm="Re-add own, imported and inserted contexts? Extra rows are kept."/>
-                                    <button name="action_restore_contexts_from_module" type="object"
-                                            string="⤓ Restore from module" class="btn-sm btn-secondary"
-                                            confirm="Overwrite own and imported context content from this agent's seed? Inserted and extra rows are not touched. Nothing is deleted."/>
-                                </div>
-                                <div class="mb-2 o_pns_origin_filter_bar">
-                                    <a href="#" role="button" tabindex="0" data-token="own" title="From this agent's module."
-                                          class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_own">Own</a>
-                                    <a href="#" role="button" tabindex="0" data-token="imported" title="From another module; this agent asks for it."
-                                          class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_imported">Imported</a>
-                                    <a href="#" role="button" tabindex="0" data-token="inserted" title="From another module; that module puts it in this agent."
-                                          class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_inserted">Inserted</a>
-                                    <a href="#" role="button" tabindex="0" data-token="extra" title="No module manages it; a person added it."
-                                          class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_extra">Extra</a>
-                                </div>
-                                <field name="context_ids" nolabel="1"
-                                       context="{'composition_agent_id': id}">
-                                    <tree decoration-bf="composition_locked">
-                                        <field name="code" optional="show"/>
-                                        <field name="composition_origin" string="Origin" optional="show"/>
-                                        <field name="composition_locked" optional="show"/>
-                                        <field name="source_module" optional="show"/>
-                                        <field name="context_type" optional="show"/>
-                                        <field name="description" optional="show"/>
-                                        <field name="active" optional="show"/>
-                                    </tree>
-                                </field>
-                                <p class="text-muted">Live composition. Origin toggles filter this list without reloading; hidden rows stay on the agent. Defaults re-adds own + imported + inserted; extra stays. Restore overwrites own + imported content only. Core contexts are always present. Locked rows cannot be removed.</p>
+                            <div class="o_pns_origin_actions">
+                                <button name="action_reset_contexts_to_default" type="object"
+                                        string="⟳ Defaults" class="btn-sm btn-secondary"
+                                        confirm="Re-add own, imported and inserted contexts? Extra rows are kept."/>
+                                <button name="action_restore_contexts_from_module" type="object"
+                                        string="⤓ Restore from module" class="btn-sm btn-secondary"
+                                        confirm="Overwrite own and imported context content from this agent's seed? Inserted and extra rows are not touched. Nothing is deleted."/>
                             </div>
+                            <div class="o_pns_origin_filter_bar">
+                                <a href="#" role="button" tabindex="0" data-token="own" title="From this agent's module."
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_own">Own</a>
+                                <a href="#" role="button" tabindex="0" data-token="imported" title="From another module; this agent asks for it."
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_imported">Imported</a>
+                                <a href="#" role="button" tabindex="0" data-token="inserted" title="From another module; that module puts it in this agent."
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_inserted">Inserted</a>
+                                <a href="#" role="button" tabindex="0" data-token="extra" title="No module manages it; a person added it."
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_extra">Extra</a>
+                            </div>
+                            <field name="context_ids" nolabel="1"
+                                   context="{'composition_agent_id': id}">
+                                <tree decoration-bf="composition_locked">
+                                    <field name="code" optional="show"/>
+                                    <field name="composition_origin" string="Origin" optional="show"/>
+                                    <field name="composition_locked" optional="show"/>
+                                    <field name="source_module" optional="show"/>
+                                    <field name="context_type" optional="show"/>
+                                    <field name="description" optional="show"/>
+                                    <field name="active" optional="show"/>
+                                </tree>
+                            </field>
+                            <p class="text-muted">Live composition. Origin toggles filter this list without reloading; hidden rows stay on the agent. Defaults re-adds own + imported + inserted; extra stays. Restore overwrites own + imported content only. Core contexts are always present. Locked rows cannot be removed.</p>
                         </page>
                         <page string="Skills" name="skills">
-                            <div class="mb-2">
+                            <div class="o_pns_origin_actions">
                                 <button name="action_reset_skills_to_default" type="object"
-                                        string="⟳ Defaults" class="btn-sm btn-secondary mr-1"
+                                        string="⟳ Defaults" class="btn-sm btn-secondary"
                                         confirm="Re-add own, imported and inserted skills? Extra rows are kept."/>
                                 <button name="action_restore_skills_from_module" type="object"
                                         string="⤓ Restore from module" class="btn-sm btn-secondary"
                                         confirm="Overwrite own and imported skill content from this agent's seed? Inserted and extra rows are not touched. Nothing is deleted."/>
                             </div>
-                            <div class="mb-2 o_pns_origin_filter_bar">
+                            <div class="o_pns_origin_filter_bar">
                                 <a href="#" role="button" tabindex="0" data-token="own" title="From this agent's module."
-                                      class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_own">Own</a>
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_own">Own</a>
                                 <a href="#" role="button" tabindex="0" data-token="imported" title="From another module; this agent asks for it."
-                                      class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_imported">Imported</a>
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_imported">Imported</a>
                                 <a href="#" role="button" tabindex="0" data-token="inserted" title="From another module; that module puts it in this agent."
-                                      class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_inserted">Inserted</a>
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_inserted">Inserted</a>
                                 <a href="#" role="button" tabindex="0" data-token="extra" title="No module manages it; a person added it."
-                                      class="btn btn-sm btn-primary mr-1 o_pns_origin_filter o_pns_tok_extra">Extra</a>
+                                      class="btn btn-sm btn-primary o_pns_origin_filter o_pns_tok_extra">Extra</a>
                             </div>
                                 <field name="skill_ids" nolabel="1"
                                        context="{'composition_agent_id': id}">

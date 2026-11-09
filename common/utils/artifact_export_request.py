@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 import re
+from collections.abc import Mapping
 
 from .artifact_export_table import (
     public_columns,
@@ -163,20 +164,67 @@ def _hit_from_token(token):
     }
 
 
+def _attached_file_kinds(names):
+    """Kinds and raw extensions of the files attached to this turn."""
+    kinds = set()
+    for name in names or ():
+        if not isinstance(name, str) or '.' not in name:
+            continue
+        ext = name.rsplit('.', 1)[-1].strip().lower()
+        if not ext:
+            continue
+        kinds.add(ext)
+        _token, spec = _spec_for_ext(ext)
+        if spec:
+            kinds.add(spec['kind'])
+    return kinds
+
+
+def _token_kind(token):
+    """Kind a format token names (``excel`` → ``xlsx``), else the bare token."""
+    token = (token or '').lower().lstrip('.')
+    spec = FORMAT_SPECS.get(token)
+    if not spec:
+        _key, spec = _spec_for_ext(token)
+    return spec['kind'] if spec else token
+
+
+def drop_attached_file_formats(text, names):
+    """``text`` without the format tokens that name an attached file's type.
+
+    With a PDF attached, ``pdf`` in the sentence is the attachment, not a
+    download ask. Another type in the same sentence still asks for one.
+    """
+    if not isinstance(text, str) or not text:
+        return text if isinstance(text, str) else ''
+    kinds = _attached_file_kinds(names)
+    if not kinds:
+        return text
+
+    def _blank(match):
+        return ' ' if _token_kind(match.group(0)) in kinds else match.group(0)
+
+    for regex in (_DOT_EXT_RE, _FORMAT_RE, _REFUSE_RE):
+        text = regex.sub(_blank, text)
+    return text
+
+
 def turn_export_utterance(env, fallback=''):
     """User-typed text for format detection. Never engine-rewritten handoff.
 
     Skill bodies and report handoffs mention HTML/Markdown as *medium*;
-    those words must not spawn download cards.
+    those words must not spawn download cards. A host that attaches files
+    lists their names in ``turn_file_names``; a token naming one of those
+    types is the attachment, not a download.
     """
     ctx = getattr(env, 'context', None) or {}
-    if isinstance(ctx, dict):
-        raw = ctx.get('user_message')
-        if isinstance(raw, str) and raw.strip():
-            return raw
-    if isinstance(fallback, str):
-        return fallback
-    return ''
+    # Odoo 20's frozendict is a mappingproxy, not a dict.
+    if not isinstance(ctx, Mapping):
+        ctx = {}
+    raw = ctx.get('user_message')
+    if not (isinstance(raw, str) and raw.strip()):
+        raw = fallback if isinstance(fallback, str) else ''
+    return drop_attached_file_formats(raw, ctx.get('turn_file_names'))
 
 
 def payload_has_report_outline(payload):

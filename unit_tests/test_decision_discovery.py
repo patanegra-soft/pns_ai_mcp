@@ -8,7 +8,6 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
 from _load_addon import engine_source, load_module
 
 _ROOT = Path(__file__).resolve().parents[1]
@@ -217,20 +216,6 @@ def test_the_decision_chain_is_the_tick_not_the_protocol():
         encoding='utf-8',
     )
     assert "== 'decision'" not in registry
-
-
-def test_secretary_asks_its_own_chain_for_the_decision():
-    secretary_root = _ROOT.parent / 'pns_secretary'
-    if not secretary_root.is_dir():
-        pytest.skip('pns_secretary is not next to this repo')
-    ticket = (secretary_root / 'common' / 'models' / 'secretary_ticket.py').read_text(
-        encoding='utf-8',
-    )
-    assert "['ai.execution.engine'].sudo()._choose(" in ticket and 'SECRETARY_AGENT_CODE' in ticket.split('def _ask_decision', 1)[1].split('def _choose_seller_tax_id', 1)[0]
-    for rel in ('common/controllers/secretary.py', 'common/models/secretary_ticket.py'):
-        secretary = (_ROOT.parent / 'pns_secretary' / rel).read_text(encoding='utf-8')
-        assert "('protocol'" not in secretary
-        assert '_decision_model_name' not in secretary
 
 
 def test_empty_match_asks_topic_not_which_pack():

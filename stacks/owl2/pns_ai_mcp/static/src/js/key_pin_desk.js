@@ -7,7 +7,7 @@
  */
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
-import { patch } from "@web/core/utils/patch";
+import { pnsPatch } from "@pns_base/js/pns_patch";
 import { useService } from "@web/core/utils/hooks";
 import { ListController } from "@web/views/list/list_controller";
 import { FormController } from "@web/views/form/form_controller";
@@ -571,14 +571,14 @@ function bindPinRefresh(controller) {
     });
 }
 
-patch(ListController.prototype, {
+pnsPatch(ListController.prototype, "pns_ai_mcp.key_pin_desk", {
     setup() {
         super.setup();
         bindPinRefresh(this);
     },
 });
 
-patch(FormController.prototype, {
+pnsPatch(FormController.prototype, "pns_ai_mcp.key_pin_desk", {
     setup() {
         super.setup();
         bindPinRefresh(this);
