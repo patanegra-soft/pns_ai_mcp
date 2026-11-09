@@ -443,7 +443,7 @@ def _pdf_flowable_image(raw, max_side):
     else:
         height = max_side
         width = max_side * float(iw) / float(ih)
-    return Image(reader, width=width, height=height)
+    return Image(BytesIO(raw), width=width, height=height)
 
 
 def _pdf_paragraph(text, style):
@@ -563,7 +563,7 @@ def format_data_as_pdf(data, columns_config, title="Report", landscape=True,
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.lib.units import cm
         from reportlab.platypus import (
-            KeepTogether, SimpleDocTemplate, Spacer, Table, TableStyle,
+            SimpleDocTemplate, Spacer, Table, TableStyle,
         )
         import io
 
@@ -637,7 +637,7 @@ def format_data_as_pdf(data, columns_config, title="Report", landscape=True,
                 if raw:
                     flow = _pdf_flowable_image(raw, thumb)
                     if flow is not None:
-                        row.append(KeepTogether([flow]))
+                        row.append(flow)
                         has_image = True
                         continue
                 if _pdf_is_image_ref(value):

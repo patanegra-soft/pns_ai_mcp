@@ -333,6 +333,8 @@ def _has_presentable_payload(pres):
         or pres.get('sections') is not None
         or pres.get('tables') is not None
         or bool(pres.get('formatted_text'))
+        or bool(pres.get('card'))
+        or bool(pres.get('cards'))
     )
 
 
@@ -483,23 +485,27 @@ def render_presentation_html(presentation, env=None):
             _result_items,
             wrap_bare_images_clickable,
         )
+        from .relaxaicode_render_cards import render_svg_cards_html
         render_ctx = render_context_from_env(env, result=presentation) if env is not None else None
         ft = presentation.get('formatted_text')
+        cards = ''
+        if not (ft and 'data-ai-card' in ft):
+            cards = render_svg_cards_html(presentation, render_context=render_ctx) or ''
         if ft:
-            return wrap_bare_images_clickable(ft, env=env)
+            return wrap_bare_images_clickable(ft, env=env) + cards
         rendered = render_for_direct_return(
             presentation,
             presentation.get('summary') or '',
             render_context=render_ctx,
         )
-        if rendered:
-            return rendered
-        if _result_items(presentation) and is_tabulable(presentation):
-            return render_result_html(
+        if not rendered and _result_items(presentation) and is_tabulable(presentation):
+            rendered = render_result_html(
                 presentation,
                 presentation.get('summary') or '',
                 render_context=render_ctx,
             )
+        if rendered or cards:
+            return (rendered or '') + cards
     except Exception as exc:
         _logger.debug('render_presentation_html failed: %s', exc)
     return None

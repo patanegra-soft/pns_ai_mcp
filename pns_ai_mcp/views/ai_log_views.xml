@@ -87,15 +87,6 @@
                 <field name="primitive" string="Primitive" readonly="1" optional="hide"/>
                 <field name="category" string="Category" optional="hide"/>
                 <field name="access_mode" string="Access" readonly="1" optional="hide"/>
-                <!-- Clear-history button (tree header) -->
-                <header>
-                    <button name="%(pns_ai_mcp.action_ai_log_delete_menu_window)d"
-                            string="Clear History"
-                            type="action"
-                            class="btn-primary"
-                            groups="pns_ai_mcp.group_ai_admin,base.group_system"
-                            title="Deletes the oldest logs, keeping the most recent ones"/>
-                </header>
             </tree>
         </field>
     </record>

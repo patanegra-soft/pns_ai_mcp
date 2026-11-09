@@ -268,8 +268,10 @@ def _eval_arith(template, values):
 def _eval_node(node, env):
     if isinstance(node, ast.Name):
         return env.get(node.id)
-    if type(node).__name__ in ('Constant', 'Num'):
-        value = getattr(node, 'value', getattr(node, 'n', None))
+    # Num on 3.7, Constant from 3.8; by name, so neither touches the other's API.
+    kind = type(node).__name__
+    if kind in ('Constant', 'Num'):
+        value = node.value if kind == 'Constant' else node.n
         return float(value) if _xlsx_is_number(value) else None
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.USub, ast.UAdd)):
         inner = _eval_node(node.operand, env)

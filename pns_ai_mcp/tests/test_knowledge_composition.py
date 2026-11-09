@@ -199,7 +199,11 @@ class TestKnowledgeComposition(TransactionCase):
             info = self.env[model].with_context(lang='en_US').fields_get(
                 ['composition_origin'],
             )['composition_origin']
-            self.assertEqual(info['selection'], ORIGIN_SELECTION)
+            # Odoo 20 hands the selection back as tuples, older series as lists.
+            self.assertEqual(
+                [tuple(item) for item in info['selection']],
+                [tuple(item) for item in ORIGIN_SELECTION],
+            )
             self.assertEqual(info['string'], 'Origin')
 
     def test_composition_locked_required_code(self):

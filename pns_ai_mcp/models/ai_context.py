@@ -22,6 +22,7 @@ from ..utils.orm_domain import (
     rewrite_my_locale_domain,
 )
 import logging
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 _logger = logging.getLogger(__name__)
 
@@ -106,9 +107,15 @@ class AIContext(models.Model):
     _rec_name = 'code'
     _order = 'code'
     
-    _sql_constraints = [
-        ('code_uniq', 'unique (code)', 'Code must be unique!'),
-    ]
+    if ODOO_VERSION >= 19:
+        _code_uniq = models.Constraint(
+            'unique (code)',
+            'Code must be unique!',
+        )
+    else:
+        _sql_constraints = [
+            ('code_uniq', 'unique (code)', 'Code must be unique!'),
+        ]
 
     code = fields.Char(
         string='Code',

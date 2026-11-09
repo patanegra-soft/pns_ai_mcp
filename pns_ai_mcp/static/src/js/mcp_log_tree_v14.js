@@ -1,5 +1,5 @@
 /**
- * Clear History and Tools buttons on the ai.log list (Odoo 14).
+ * Tools button and flow legend on the ai.log list (Odoo 14).
  *
  * SPDX-License-Identifier: Apache-2.0
  * Copyright (C) 2025-2026 Patanegra Soft <https://patanegra.com>
@@ -10,7 +10,6 @@ odoo.define('pns_ai_mcp.mcp_log_tree', function (require) {
     var ListController = require('web.ListController');
     var ListRenderer = require('web.ListRenderer');
     require('web.EditableListRenderer');
-    var ActionManager = require('web.ActionManager');
     var core = require('web.core');
 
     // O14 takes an absolute `width` from the arch only as a minimum, then
@@ -47,40 +46,14 @@ odoo.define('pns_ai_mcp.mcp_log_tree', function (require) {
         renderButtons: function ($node) {
             this._super.apply(this, arguments);
             
-            // Only add the button for the ai.log model
             if (this.modelName === 'ai.log') {
                 // Stricter checks to avoid errors when duplicating tabs
                 if (!this.$buttons || typeof this.$buttons !== 'object' || !this.$buttons.length) {
                     return;
                 }
-                
-                // Check that $buttons has jQuery methods
-                if (typeof this.$buttons.prepend !== 'function') {
-                    return;
-                }
-                
-                var self = this;
-                
-                // Avoid duplicates by removing the previous button
-                this.$buttons.find('.o_mcp_log_delete_button').remove();
-                
-                var $deleteButton = $('<button>', {
-                    class: 'btn btn-primary o_mcp_log_delete_button',
-                    type: 'button',
-                    text: 'Clear History',
-                    title: 'Deletes the oldest logs, keeping the most recent ones. Can delete all or keep the N newest.',
-                    click: function() {
-                        self._onDeleteMenuClick();
-                    }
-                });
-                
-                try {
-                    this.$buttons.prepend($deleteButton);
-                } catch (e) {
-                    console.warn('Error adding the Clear History button:', e);
-                }
 
-                // Operations button
+                var self = this;
+
                 this.$buttons.find('.o_mcp_log_ops_button').remove();
                 var $opsBtn = $('<button>', {
                     type: 'button',
@@ -159,83 +132,7 @@ odoo.define('pns_ai_mcp.mcp_log_tree', function (require) {
                 return false;
             });
         },
-        
-        _onDeleteMenuClick: function() {
-            this.do_action('pns_ai_mcp.action_ai_log_delete_menu_window');
-        },
     });
-
-    // Intercept display_notification with next, to reload the logs view
-    ActionManager.include({
-        _executeClientAction: function (action, options) {
-            var self = this;
-            
-            var result = this._super.apply(this, arguments);
-            
-            // If it is display_notification with a reloading next, close the wizard and reload the logs view
-            if (action && action.tag === 'display_notification' && action.params && action.params.next) {
-                if (action.params.next.tag === 'reload') {
-                    // Close the active wizard and reload the logs view
-                    if (result && typeof result.then === 'function') {
-                        result.then(function() {
-                            // Close active dialogs (wizards)
-                            if (self._dialogs && Array.isArray(self._dialogs)) {
-                                var i = self._dialogs.length - 1;
-                                while (i >= 0) {
-                                    var dialog = self._dialogs[i];
-                                    if (dialog && typeof dialog.close === 'function') {
-                                        try {
-                                            dialog.close();
-                                        } catch (e) {
-                                            console.warn('Error closing dialog:', e);
-                                        }
-                                        break;
-                                    }
-                                    i--;
-                                }
-                            }
-
-                            // Find and reload the logs controllers
-                            if (self._controllers && Array.isArray(self._controllers)) {
-                                for (var j = 0; j < self._controllers.length; j++) {
-                                    var controller = self._controllers[j];
-                                    if (controller && controller.modelName === 'ai.log' && typeof controller.reload === 'function') {
-                                        try {
-                                            controller.reload();
-                                        } catch (e) {
-                                            console.warn('Error reloading controller:', e);
-                                        }
-                                    }
-                                }
-                            }
-
-                            // Also reload the current controller if it is a logs one
-                            try {
-                                var currentController = self.getCurrentController && self.getCurrentController();
-                                if (currentController && currentController.modelName === 'ai.log' && typeof currentController.reload === 'function') {
-                                    currentController.reload();
-                                }
-                            } catch (e) {
-                                console.warn('Error getting/reloading the current controller:', e);
-                            }
-                        });
-                    } else {
-                        try {
-                            var currentController = self.getCurrentController && self.getCurrentController();
-                            if (currentController && currentController.modelName === 'ai.log' && typeof currentController.reload === 'function') {
-                                currentController.reload();
-                            }
-                        } catch (e) {
-                            console.warn('Error getting/reloading the current controller:', e);
-                        }
-                    }
-                }
-            }
-            
-            return result;
-        },
-    });
-
 
     return {};
 });

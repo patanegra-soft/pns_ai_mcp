@@ -951,10 +951,13 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
         # hybrid AI only if there is a ``param_schema`` + unresolved free text.
         # Minimal continuity: HTML card with no rows + invocation without args
         # (or flag ``__await_skill_args__``) → the next message without a slash
-        # resumes that skill (args = text). Help never waits.
+        # resumes that skill (args = text); if the text fills none of its
+        # parameters, the skill is released and the text is a normal turn.
+        # Help never waits.
         # On resume, the skill gets back its ``__skill_state__`` from the previous
         # round. An explicit slash starts from scratch (no inherited state).
         resumed_state = {}
+        resumed = False
         command = self._parse_slash_command(message)
         if command is None and prior_active_skill_code:
             reply = (message or '').strip()
@@ -963,6 +966,7 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
                 if pending:
                     from .skill_runtime import skill_state_from_params
                     command = (prior_active_skill_code, reply)
+                    resumed = True
                     resumed_state = skill_state_from_params(
                         prior_active_skill_params,
                     )
@@ -1009,6 +1013,7 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
             provider_id=provider_id,
             resumed_state=resumed_state,
             session_id=session_id,
+            resumed=resumed,
         )
         if _stop:
             return
@@ -1178,8 +1183,13 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
             provider_id,
             resumed_state,
             session_id,
+            resumed=False,
     ):
-        """Slash command turn: help, axis commands, skill code or prompt. Returns (stop, message)."""
+        """Slash command turn: help, axis commands, skill code or prompt. Returns (stop, message).
+
+        ``resumed``: the user typed no slash; the text came in as the reply to a
+        skill that was waiting for arguments.
+        """
         if command is not None:
             cmd, args = command
             from .skill_help import is_skills_list_command
@@ -1408,6 +1418,26 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
                                 'param normalization skipped for %s: %s',
                                 slash, exc,
                             )
+                    if (
+                        resumed
+                        and isinstance(norm_params, dict)
+                        and norm_params.get('_skill_args_reject')
+                    ):
+                        # The reply fills none of the waiting skill's
+                        # parameters: it is a new question, not an answer.
+                        # Release the skill so it does not ask again forever.
+                        self._mcp_log(
+                            operation_type='read',
+                            tool_name='skill_args_release',
+                            prompt_data={'skill': slash, 'arguments': args},
+                            result_summary=(
+                                'Reply is not an argument of %s; skill released'
+                                % slash
+                            )[:480],
+                            request_type='tool',
+                        )
+                        yield {'event': 'active_skill', 'code': None, 'params': {}}
+                        return False, message
                     if (
                         isinstance(norm_params, dict)
                         and norm_params.get('_skill_args_reject')

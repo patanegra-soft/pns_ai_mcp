@@ -22,7 +22,7 @@ values, exactly like it only sees a closed vocabulary of CRUD verbs.
 """
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-from odoo.addons.pns_base.utils.compat import user_has_group
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION, user_has_group
 
 
 class AiTrustedAction(models.Model):
@@ -74,10 +74,15 @@ class AiTrustedAction(models.Model):
     )
     active = fields.Boolean(default=True)
 
-    _sql_constraints = [
-        ('code_uniq', 'unique(code)',
-         'A trusted action with this code is already registered.'),
-    ]
+    if ODOO_VERSION >= 19:
+        _code_uniq = models.Constraint(
+            'unique(code)',
+            'A trusted action with this code is already registered.',
+        )
+    else:
+        _sql_constraints = [
+            ('code_uniq', 'unique(code)', 'A trusted action with this code is already registered.'),
+        ]
 
     @api.model
     def _get(self, code):

@@ -22,6 +22,7 @@ from markupsafe import Markup
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 from ..utils import mcp_ui
 from ..utils.copy_code import next_copy_code
@@ -356,9 +357,15 @@ class ExternalAPIServer(models.Model):
         ),
     )
 
-    _sql_constraints = [
-        ('code_unique', 'UNIQUE(code)', 'Server code must be unique.'),
-    ]
+    if ODOO_VERSION >= 19:
+        _code_unique = models.Constraint(
+            'UNIQUE(code)',
+            'Server code must be unique.',
+        )
+    else:
+        _sql_constraints = [
+            ('code_unique', 'UNIQUE(code)', 'Server code must be unique.'),
+        ]
 
     def copy(self, default=None):
         """Duplicate with a free ``code`` so UNIQUE(code) does not abort Action Duplicate."""

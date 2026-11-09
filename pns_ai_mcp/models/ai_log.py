@@ -6,7 +6,7 @@
 from odoo import models, fields, api, SUPERUSER_ID, _
 from odoo.tools import html_escape
 from ..utils import mcp_ui
-from ..utils.compat import test_is_running
+from ..utils.compat import read_sums, test_is_running
 from ..utils.import_export_guard import ensure_ai_admin
 from ..utils.portable_io import export_record_dict
 import json
@@ -948,8 +948,6 @@ class AILog(models.Model):
         """
         from datetime import timedelta
 
-        from odoo.osv import expression
-
         from ..utils.display_currency import get_display_currency
         from ..utils.usage_display import format_usage_chip
 
@@ -970,14 +968,10 @@ class AILog(models.Model):
                 ('primitive', '=', 'llm'),
                 ('timestamp', '>=', since),
             ]
-        merged = expression.AND([base, exclude])
-        groups = self.read_group(merged, ['total_tokens', 'cost_usd'], [])
-        total_tokens = 0
-        cost_usd = 0.0
-        if groups:
-            row = groups[0]
-            total_tokens = int(row.get('total_tokens') or 0)
-            cost_usd = float(row.get('cost_usd') or 0.0)
+        merged = base + exclude
+        sums = read_sums(self, merged, ['total_tokens', 'cost_usd'])
+        total_tokens = int(sums['total_tokens'])
+        cost_usd = float(sums['cost_usd'])
         usage = {}
         if total_tokens:
             usage['total_tokens'] = total_tokens

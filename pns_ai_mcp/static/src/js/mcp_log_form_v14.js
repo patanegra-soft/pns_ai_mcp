@@ -9,7 +9,6 @@ odoo.define('pns_ai_mcp.mcp_log_form', function (require) {
 
     var FormController = require('web.FormController');
     var FormRenderer = require('web.FormRenderer');
-    var Notification = require('web.Notification');
     var core = require('web.core');
 
     var _t = core._t;
