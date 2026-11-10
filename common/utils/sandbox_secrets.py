@@ -18,6 +18,21 @@ import re
 
 SANDBOX_CURSOR_FLAG = '_pns_ai_sandbox'
 
+# Every denial the sandbox guard raises starts with this. The engine tells it
+# apart from a real ACL denial: the code names a column it must leave out,
+# so the model may fix the code and run again.
+SECRET_DENIED_PREFIX = 'RelaxAICode cannot read '
+SECRET_DENIED_HINT = (
+    ' [HINT] This is a code fix, not a permission: name the columns you '
+    'need instead of looping over _fields, or drop this one. Then run '
+    'again. Never look for another way to read this value.'
+)
+
+
+def is_secret_read_denial(message):
+    """True when *message* is the sandbox guard's own denial, not an ACL one."""
+    return str(message or '').startswith(SECRET_DENIED_PREFIX)
+
 _SECRET_WORDS = frozenset({
     'password', 'passwd', 'pass', 'pwd', 'secret', 'token', 'apikey',
 })

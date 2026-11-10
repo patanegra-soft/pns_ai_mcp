@@ -2,6 +2,31 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.979_owl2-3.1.979_owl3-3.1.979 (2026-11-10)
+
+- A skill's result can be worked on in the next turn. After `/sales` (or any skill drawn on the server), "now for 2025" or "make a report with this data" used to find nothing: the skill left neither its rows nor its code in the session, and the chat even dropped the dataset of the turn before. The skill now leaves both, like any query does, with the same size cap. Works for the painted table and for the report mode.
+
+## owl1-3.1.978_owl2-3.1.978_owl3-3.1.978 (2026-11-09)
+
+- A secret column no longer ends the turn. When the model's code touched a credential column by accident (for example by looping over every field of a task, which includes its portal `access_token`), the guard's refusal was treated like a permission denial and the chat stopped with that message. It now goes back to the model as a code fix with a hint (name the columns, leave that one out) and the code runs again. The value is still never read; real permission denials still stop the turn.
+
+## owl1-3.1.977_owl2-3.1.977_owl3-3.1.977 (2026-11-09)
+
+- Odoo 19 and 20 install and update again. The record rule of 3.1.975 (`shared_user_ids`) crashed on those series with `Invalid domain: can't adapt type 'OrderedSet'`: the newer domain engine hands the user ids as a set, and the search only expected a list. Any iterable works now.
+
+## owl1-3.1.976_owl2-3.1.976_owl3-3.1.976 (2026-11-09)
+
+- Odoo 14 installs and updates again. The Spanish catalog of 3.1.975 had four entries without the module comment Odoo 14 demands when it loads translations, so the registry failed to load (`translate.py ... 'NoneType' object has no attribute 'groups'`). Fixed catalog, owl1, owl2 and owl3. The *Required groups* label of trusted actions is back; the skill and context field is *Shared with groups*.
+
+## owl1-3.1.975_owl2-3.1.975_owl3-3.1.975 (2026-11-09)
+
+- Skills and contexts can be shared with groups. The owner ticks the groups on the form (*Shared with groups*): members see and use it; the owner keeps editing it. With no owner and no groups, everyone with access to the agent uses it. Contexts get the field now; on skills it existed as *Required groups* and only ruled the slash menu, so a skill shared with a group was still hidden from its members in the list. One rule now, on the record rule, the search and the prompt: owner, member, or open.
+- A context shared with a group goes into the prompt of its members only, not into the agent's shared cache.
+
+## owl1-3.1.974_owl2-3.1.974_owl3-3.1.974 (2026-11-09)
+
+- An AI administrator can change the owner of a skill, or clear it. The form showed the field locked for everyone; the model already allowed it. Cleared: everyone with access to the agent sees and runs the skill. Another user: only that user. Writers still cannot touch the owner.
+
 ## owl1-3.1.973_owl2-3.1.973_owl3-3.1.973 (2026-11-09)
 
 - Banners (Apps store, README and site) show the seven supported series, 14.0 to 20.0; the old ones still said 14 and 19. Images only.

@@ -114,6 +114,26 @@ def test_the_sandbox_cursor_carries_the_flag():
     assert 'setattr(cr, SANDBOX_CURSOR_FLAG, True)' in helpers
 
 
+def test_the_guard_denial_goes_back_to_the_model_as_a_code_fix():
+    """One secret column must not end the turn: the model drops it and runs again."""
+    guard = addon_file('models', 'sandbox_secret_read.py').read_text(encoding='utf-8')
+    assert '_COLUMN_DENIED = SECRET_DENIED_PREFIX + (' in guard
+    assert '_PARAM_DENIED = SECRET_DENIED_PREFIX + (' in guard
+    assert 'Do not retry another way' not in guard
+    assert ss.is_secret_read_denial(
+        ss.SECRET_DENIED_PREFIX + 'project.task.access_token: it holds a credential'
+    )
+    assert not ss.is_secret_read_denial('You are not allowed to access this document')
+    assert not ss.is_secret_read_denial(None)
+    failures = addon_file('controllers', 'relaxaicode_failures.py').read_text(encoding='utf-8')
+    secret_branch = failures.split('is_secret_read_denial(error_msg)', 1)[1].split('# ACL / business denials', 1)[0]
+    assert 'retryable=True' in secret_branch
+    assert 'SECRET_DENIED_HINT' in secret_branch
+    assert 'looping over _fields' in ss.SECRET_DENIED_HINT
+    # The guard branch runs before the ACL stop.
+    assert failures.index('is_secret_read_denial(error_msg)') < failures.index('# ACL / business denials')
+
+
 def test_rows_with_a_secret_column_are_open_to_the_sandbox():
     closed = v_base.RELAXAICODE_CREDENTIAL_MODELS
     for model in ('ai.provider', 'ai.provider.model', 'ai.agent',

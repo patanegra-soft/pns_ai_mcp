@@ -155,6 +155,34 @@ def all_tabular_rows(result):
     return first_tabular_rows(result)
 
 
+def skill_result_events(code_body, payload, max_bytes=0):
+    """The ``query_code`` / ``query_data`` events of a skill result.
+
+    A skill resolved outside the tool loop (fast-path HTML, report handoff)
+    leaves the session what a successful ``relaxaicode`` leaves: the code
+    that made the table and its rows. The next turn then gets them as
+    ``prior_query_code`` and ``previous_result``, so "now for 2025" after a
+    skill narrows the same data instead of starting over. Same byte cap as
+    the tool loop (0 = none); over it, only the code travels.
+    """
+    import json
+
+    if isinstance(code_body, str) and code_body.strip():
+        yield {'event': 'query_code', 'code': code_body}
+    try:
+        rows = all_tabular_rows(payload)
+    except Exception:
+        rows = None
+    if not (isinstance(rows, list) and rows):
+        return
+    try:
+        size = len(json.dumps(rows, default=str, ensure_ascii=False).encode('utf-8'))
+    except Exception:
+        return
+    if not max_bytes or max_bytes <= 0 or size <= max_bytes:
+        yield {'event': 'query_data', 'data': list(rows)}
+
+
 def previous_result_envelope(rows):
     """``{'data': rows}``, plus ``tables`` when the rows came from several tables."""
     envelope = {'data': rows}

@@ -450,7 +450,11 @@ class AIAgent(models.Model):
 
 
     def _shared_contexts_for_cache(self):
-        """Module/import contexts cached on the agent (not user-owned).
+        """Contexts everyone gets, cached on the agent: no owner and no groups.
+
+        A context with an owner or shared with groups is per user and goes
+        in ``_user_owned_contexts_for_user`` instead; the cache is one text
+        for all users and must not carry it.
 
         When domain-index inject is ON, contexts whose code/base_code is in
         the composed domain index are excluded from the always-on cache and
@@ -461,7 +465,9 @@ class AIAgent(models.Model):
             self._get_effective_contexts().filtered('active')
             | self._system_contexts()
         )
-        shared = effective.filtered(lambda c: not c.owner_id)
+        shared = effective.filtered(
+            lambda c: not c.owner_id and not c.required_group_ids
+        )
         indexed = self._indexed_domain_codes_for_cache()
         if not indexed:
             return shared
@@ -526,13 +532,18 @@ class AIAgent(models.Model):
         return '%s%s' % (base, tail) if base else tail
 
     def _user_owned_contexts_for_user(self, active_user=None):
+        """Contexts this user gets that are not in the shared cache.
+
+        Owned by someone, or shared with groups: the user sees them when
+        they are the owner or a member (``knowledge_ownership``).
+        """
         self.ensure_one()
         user = active_user or self.env.user
         Context = self.env['ai.context']
-        user_owned = self._get_effective_contexts().filtered(
-            lambda c: c.active and c.owner_id,
+        per_user = self._get_effective_contexts().filtered(
+            lambda c: c.active and (c.owner_id or c.required_group_ids),
         )
-        return Context.filter_visible_for_user(user_owned, user=user)
+        return Context.filter_visible_for_user(per_user, user=user)
 
     def _build_shared_content(self, user_locale=None):
         self.ensure_one()
