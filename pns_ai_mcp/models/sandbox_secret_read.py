@@ -26,6 +26,7 @@ from odoo.exceptions import AccessError
 from odoo.addons.pns_base.utils.compat import ODOO_VERSION
 
 from ..utils.sandbox_secrets import (
+    SECRET_DENIED_PREFIX,
     cached_setting_params,
     field_is_secret,
     sandbox_cursor,
@@ -33,17 +34,20 @@ from ..utils.sandbox_secrets import (
     secret_param_key,
 )
 
-_COLUMN_DENIED = (
-    "RelaxAICode cannot read %s.%s: it holds a credential (key, password or "
+# The engine recognises the prefix (``is_secret_read_denial``) and hands
+# the error back to the model as a code fix instead of ending the turn.
+_COLUMN_DENIED = SECRET_DENIED_PREFIX + (
+    "%s.%s: it holds a credential (key, password or "
     "token), which only a person handles. The rest of the row is readable: "
     "leave this column out of fields, domains, order and group by, and say "
-    "that the assistant does not read it. Do not retry another way."
+    "that the assistant does not read it. Do not look for another way to "
+    "read it."
 )
-_PARAM_DENIED = (
-    "RelaxAICode cannot read the system parameter %r: its key names a "
+_PARAM_DENIED = SECRET_DENIED_PREFIX + (
+    "the system parameter %r: its key names a "
     "credential, which only a person handles. Other parameters are readable "
     "one by one (get_param(key) or record.value); say that the assistant "
-    "does not read this one. Do not retry another way."
+    "does not read this one. Do not look for another way to read it."
 )
 
 
