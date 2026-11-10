@@ -2,6 +2,13 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.980_owl2-3.1.980_owl3-3.1.980 (2026-11-10)
+
+Store listing only; the module code is the one of 3.1.979.
+
+- The module is now named "PNS AI Engine — MCP Server", so the Odoo Apps card says what it is next to the other MCP servers.
+- New Odoo Apps cover: icon, headline and one line of facts (free, Apache 2.0, Odoo Community 14.0 to 20.0). The previous cover carried a paragraph and the series chips, unreadable at the size of the store grid.
+
 ## owl1-3.1.979_owl2-3.1.979_owl3-3.1.979 (2026-11-10)
 
 - A skill's result can be worked on in the next turn. After `/sales` (or any skill drawn on the server), "now for 2025" or "make a report with this data" used to find nothing: the skill left neither its rows nor its code in the session, and the chat even dropped the dataset of the turn before. The skill now leaves both, like any query does, with the same size cap. Works for the painted table and for the report mode.
