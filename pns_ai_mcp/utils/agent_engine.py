@@ -1714,6 +1714,12 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
                                 'code': None,
                                 'params': {},
                             }
+                            # The skill's rows stay in the session for the
+                            # next turn (a later relaxaicode in the loop
+                            # replaces them, as in any turn).
+                            yield from self._skill_result_events(
+                                skill.code_body, pres,
+                            )
                             # Fall through to the LLM provider loop.
                         elif boot_diag.get('bootstrap_error'):
                             yield {
@@ -1803,6 +1809,11 @@ class AgentEngine(DiscoveryMixin, SkillsMixin, PresentationMixin, ToolLoopMixin,
                                 'code': None,
                                 'params': {},
                             }
+                        # Leave the session what a tool-loop query leaves:
+                        # the code and the rows, for the next turn.
+                        yield from self._skill_result_events(
+                            skill.code_body, _pres_fp,
+                        )
                         yield self._done_event(
                             session_id, agent_code=agent_code,
                             provider=provider, provider_id=provider_id,

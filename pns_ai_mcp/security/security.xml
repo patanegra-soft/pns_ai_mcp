@@ -21,11 +21,11 @@
              RECORD RULES (ir.rule)
              ============================================================ -->
 
-        <!-- Contexts: visibility for all users with read access -->
+        <!-- Contexts: owner, member of a shared group, or open row (knowledge_ownership) -->
         <record id="ai_context_user_read_rule" model="ir.rule">
-            <field name="name">AI Context: module or own</field>
+            <field name="name">AI Context: open, shared or own</field>
             <field name="model_id" ref="pns_ai_mcp.model_ai_context"/>
-            <field name="domain_force">['|', ('owner_id', '=', False), ('owner_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('owner_id', '=', user.id), ('shared_user_ids', 'in', [user.id]), '&amp;', ('owner_id', '=', False), ('required_group_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -37,7 +37,7 @@
         <record id="ai_context_writer_read_rule" model="ir.rule">
             <field name="name">AI Context: Writer read visibility</field>
             <field name="model_id" ref="pns_ai_mcp.model_ai_context"/>
-            <field name="domain_force">['|', ('owner_id', '=', False), ('owner_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('owner_id', '=', user.id), ('shared_user_ids', 'in', [user.id]), '&amp;', ('owner_id', '=', False), ('required_group_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_ai_writer'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -113,11 +113,11 @@
             <field name="perm_unlink" eval="True"/>
         </record>
 
-        <!-- Skills: visibility for all users with read access -->
+        <!-- Skills: owner, member of a shared group, or open row (knowledge_ownership) -->
         <record id="ai_skill_user_read_rule" model="ir.rule">
-            <field name="name">AI Skill: module or own</field>
+            <field name="name">AI Skill: open, shared or own</field>
             <field name="model_id" ref="model_ai_skill"/>
-            <field name="domain_force">['|', ('owner_id', '=', False), ('owner_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('owner_id', '=', user.id), ('shared_user_ids', 'in', [user.id]), '&amp;', ('owner_id', '=', False), ('required_group_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -129,7 +129,7 @@
         <record id="ai_skill_writer_read_rule" model="ir.rule">
             <field name="name">AI Skill: Writer read visibility</field>
             <field name="model_id" ref="model_ai_skill"/>
-            <field name="domain_force">['|', ('owner_id', '=', False), ('owner_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('owner_id', '=', user.id), ('shared_user_ids', 'in', [user.id]), '&amp;', ('owner_id', '=', False), ('required_group_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('group_ai_writer'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
@@ -161,7 +161,7 @@
         <record id="ai_skill_param_cache_user_rule" model="ir.rule">
             <field name="name">AI Skill Param Cache: read shared and own skills</field>
             <field name="model_id" ref="model_ai_skill_param_cache"/>
-            <field name="domain_force">['|', ('skill_id.owner_id', '=', False), ('skill_id.owner_id', '=', user.id)]</field>
+            <field name="domain_force">['|', '|', ('skill_id.owner_id', '=', user.id), ('skill_id.shared_user_ids', 'in', [user.id]), '&amp;', ('skill_id.owner_id', '=', False), ('skill_id.required_group_ids', '=', False)]</field>
             <field name="groups" eval="[(4, ref('base.group_user'))]"/>
             <field name="perm_read" eval="True"/>
             <field name="perm_write" eval="False"/>
