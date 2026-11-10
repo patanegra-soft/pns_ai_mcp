@@ -47,7 +47,7 @@
                         <field name="active"/>
                         <field name="show_in_slash"/>
                         <field name="required_group_ids" widget="many2many_tags"/>
-                        <field name="owner_id" readonly="1" groups="pns_ai_mcp.group_ai_admin"/>
+                        <field name="owner_id" groups="pns_ai_mcp.group_ai_admin"/>
                         <field name="is_system" readonly="1"/>
                         <field name="rel_path" readonly="1"/>
                     </group>

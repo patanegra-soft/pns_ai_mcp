@@ -109,7 +109,9 @@
                                    attrs="{'readonly': [('context_type', '=', 'core')]}"/>
                             <field name="context_type"/>
                             <field name="agent_ids" widget="many2many_tags" attrs="{'readonly': [('context_type', '=', 'core')]}"/>
-                            <field name="owner_id" readonly="1" groups="pns_ai_mcp.group_ai_admin"/>
+                            <field name="owner_id" groups="pns_ai_mcp.group_ai_admin"/>
+                            <field name="required_group_ids" widget="many2many_tags"
+                                   attrs="{'readonly': [('context_type', '=', 'core')]}"/>
                             <field name="locale"
                                    attrs="{'readonly': [('context_type', '=', 'core')]}"/>
                             <field name="base_code" readonly="1"

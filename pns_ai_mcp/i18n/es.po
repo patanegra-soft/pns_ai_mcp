@@ -7983,8 +7983,8 @@ msgstr "Nombre técnico del módulo que envió este fichero. Vacío = no lo sell
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_context__owner_id
-msgid "User who owns this context. Empty for module/import knowledge."
-msgstr "Usuario dueño de este contexto. Vacío en conocimiento de módulo/importación."
+msgid "User who owns this context: only that user gets it in the prompt, plus the groups it is shared with. Empty: everyone with access to the agent. An AI administrator can pick another user or clear it."
+msgstr "Usuario dueño de este contexto: solo ese usuario lo recibe en el prompt, más los grupos con los que se comparte. Vacío: todos los que acceden al agente. Un administrador de IA puede elegir otro usuario o dejarlo vacío."
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_context__content_size_bytes
@@ -8128,8 +8128,8 @@ msgstr "Portable path within the cognitive tree, umbrella-agnostic (e.g. skills/
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_skill__owner_id
-msgid "User who owns this skill. Empty for module/import skills."
-msgstr "Usuario dueño de esta habilidad. Vacío en habilidades de módulo/importación."
+msgid "User who owns this skill: only that user sees and runs it. Empty: everyone with access to the agent. An AI administrator can pick another user or clear it."
+msgstr "Usuario dueño de esta skill: solo ese usuario la ve y la ejecuta. Vacío: todos los que acceden al agente. Un administrador de IA puede elegir otro usuario o dejarlo vacío."
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_trusted_action__code
@@ -9558,8 +9558,8 @@ msgstr "Orígenes web extra autorizados a llamar a /mcp desde un navegador, uno 
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_skill__required_group_ids
-msgid "Groups of which the user must have at least one to see this skill in the slash menu and to run it. Empty = any user who can use the agent."
-msgstr "Grupos de los que el usuario debe tener al menos uno para ver esta skill en el menú / y para ejecutarla. Vacío = cualquier usuario que pueda usar el agente."
+msgid "Members of these groups see and run this skill, besides its owner. Empty with no owner: everyone who can use the agent. Empty with an owner: only the owner."
+msgstr "Los miembros de estos grupos ven y ejecutan esta skill, además de su dueño. Vacío y sin dueño: todos los que pueden usar el agente. Vacío y con dueño: solo el dueño."
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_provider__spend_cap_usd
@@ -10412,3 +10412,30 @@ msgstr "Si está marcado, cada rol toma los ajustes y los proveedores del archiv
 #: model:ir.model,name:pns_ai_mcp.model_ai_import_provider_roles_wizard
 msgid "Wizard to import provider roles from JSON"
 msgstr "Asistente para importar roles de proveedor desde JSON"
+
+#. module: pns_ai_mcp
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_context__required_group_ids
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_skill__required_group_ids
+msgid "Shared with groups"
+msgstr "Compartido con grupos"
+
+#. module: pns_ai_mcp
+#: model:ir.model.fields,help:pns_ai_mcp.field_ai_context__required_group_ids
+msgid "Members of these groups get this context in their prompt, besides its owner. Empty with no owner: everyone who can use the agent. Empty with an owner: only the owner."
+msgstr "Los miembros de estos grupos reciben este contexto en su prompt, además de su dueño. Vacío y sin dueño: todos los que pueden usar el agente. Vacío y con dueño: solo el dueño."
+
+#. module: pns_ai_mcp
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_context__shared_user_ids
+#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_skill__shared_user_ids
+msgid "Shared with users"
+msgstr "Compartido con usuarios"
+
+#. module: pns_ai_mcp
+#: model:ir.model.fields,help:pns_ai_mcp.field_ai_skill__shared_user_ids
+msgid "Users who may use this skill through its groups. The record rule searches it; it is not stored."
+msgstr "Usuarios que pueden usar esta skill por sus grupos. La regla de registro lo busca; no se guarda."
+
+#. module: pns_ai_mcp
+#: model:ir.model.fields,help:pns_ai_mcp.field_ai_context__shared_user_ids
+msgid "Users who may use this context through its groups. The record rule searches it; it is not stored."
+msgstr "Usuarios que pueden usar este contexto por sus grupos. La regla de registro lo busca; no se guarda."
