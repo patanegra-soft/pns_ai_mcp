@@ -2,6 +2,12 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.981_owl2-3.1.981_owl3-3.1.981 (2026-11-10)
+
+Store listing only; the module code is the one of owl1-3.1.980_owl2-3.1.980_owl3-3.1.980.
+
+- The module is now named "PNS AI Engine — MCP": the store grid cut "MCP Server" in four columns; "server" stays in the summary, which the store search also reads.
+
 ## owl1-3.1.980_owl2-3.1.980_owl3-3.1.980 (2026-11-10)
 
 Store listing only; the module code is the one of 3.1.979.
