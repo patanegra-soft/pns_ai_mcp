@@ -52,6 +52,29 @@ def _exec_error_response(controller, exec_error, code, safe_context, agent_llm,
         )
         return error_response
 
+    # The sandbox guard on a secret column (or parameter) is a code fix,
+    # not a permission: the row stays readable without that column. Hand
+    # it back to the model with the hint so it names the columns and runs
+    # again; the value itself is never read.
+    from odoo.addons.pns_ai_mcp.utils.sandbox_secrets import (
+        SECRET_DENIED_HINT, is_secret_read_denial,
+    )
+    if isinstance(exec_error, AccessError) and is_secret_read_denial(error_msg):
+        error_response = _format_error_response(
+            -32603,
+            error_msg + SECRET_DENIED_HINT,
+            {'error_type': error_type, 'secret_column': True},
+            retryable=True,
+        )
+        _log_relaxaicode_execution(
+            controller, code, error_response,
+            f"{error_type}: {error_msg}",
+            operation_type='read', agent_llm=agent_llm,
+            context_data=context_data,
+            phase=phase, return_mode=return_mode,
+        )
+        return error_response
+
     # ACL / business denials are NOT code bugs — do not ReAct-retry;
     # show the (already translated) reason and stop.
     if isinstance(
