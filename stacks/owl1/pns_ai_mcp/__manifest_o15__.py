@@ -7,8 +7,8 @@
 # template to inherit. The rest matches __manifest__.py.
 
 {
-    'name': 'PNS AI Engine',
-    'version': '3.1.979',
+    'name': 'PNS AI Engine — MCP Server',
+    'version': '3.1.980',
     'category': 'Extra Tools',
     'summary': 'Open-source AI engine and MCP server for Odoo Community 14 to 20: OpenAI, Claude, Ollama or any compatible model, read-only sandbox, every write approved by a person.',
     'description': """
