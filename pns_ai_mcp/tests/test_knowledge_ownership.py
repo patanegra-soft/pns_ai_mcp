@@ -108,6 +108,74 @@ class TestKnowledgeOwnership(TransactionCase):
         self.assertNotIn(private_code, codes_b)
         self.assertNotIn(shared_code, codes_b)
 
+    def test_admin_hands_a_skill_over_or_opens_it_to_everyone(self):
+        """The owner can be changed or cleared by an AI administrator, not by a writer."""
+        Skill = self.env['ai.skill']
+        code = self._code('ownership_handover_skill')
+        skill = Skill.with_user(self.user_a).create({
+            'code': code,
+            'name': 'Handover',
+            'description': 'handover',
+            'content': 'handover skill',
+        })
+        self.assertEqual(skill.owner_id, self.user_a)
+        with self.assertRaises(Exception):
+            skill.with_user(self.user_a).write({'owner_id': self.user_b.id})
+        skill.with_user(self.admin_user).write({'owner_id': self.user_b.id})
+        self.assertEqual(skill.owner_id, self.user_b)
+        self.assertFalse(Skill.with_user(self.user_a).search([('code', '=', code)]))
+        skill.with_user(self.admin_user).write({'owner_id': False})
+        self.assertFalse(skill.owner_id)
+        for user in (self.user_a, self.user_b):
+            self.assertTrue(Skill.with_user(user).search([('code', '=', code)]))
+
+    def test_owner_shares_a_skill_with_a_group(self):
+        """Members of a ticked group see and run the skill; the owner keeps editing it."""
+        Skill = self.env['ai.skill']
+        code = self._code('ownership_shared_group_skill')
+        skill = Skill.with_user(self.user_a).create({
+            'code': code,
+            'name': 'Shared',
+            'description': 'shared',
+            'content': 'shared skill',
+        })
+        self.assertFalse(Skill.with_user(self.user_b).search([('code', '=', code)]))
+        skill.with_user(self.user_a).write({
+            'required_group_ids': [(6, 0, [self.writer_group.id])],
+        })
+        self.assertTrue(Skill.with_user(self.user_b).search([('code', '=', code)]))
+        self.assertTrue(skill.with_user(self.user_b).user_may_run(self.user_b))
+        self.assertTrue(skill.user_may_run(self.user_a))
+        with self.assertRaises(AccessError):
+            skill.with_user(self.user_b).write({'description': 'not mine'})
+        outsider = create_test_user(
+            self.env, prefix='pns_ownership_c', groups=[self.env.ref('base.group_user').id],
+        )
+        self.assertFalse(Skill.with_user(outsider).search([('code', '=', code)]))
+        self.assertFalse(skill.user_may_run(outsider))
+
+    def test_a_context_shared_with_a_group_reaches_only_its_members(self):
+        """Shared contexts leave the agent cache and go per user."""
+        code = self._code('ownership_shared_group_ctx')
+        ctx = self._create_owned_context(
+            self.env(user=self.user_a), code, self.user_a,
+        )
+        ctx.with_user(self.user_a).write({
+            'required_group_ids': [(6, 0, [self.writer_group.id])],
+        })
+        content_b = self.agent.with_user(self.user_b).get_content(
+            user_locale='en_US', active_user=self.user_b,
+        )
+        self.assertIn(code, content_b)
+        outsider = create_test_user(
+            self.env, prefix='pns_ownership_d', groups=[self.env.ref('base.group_user').id],
+        )
+        content_out = self.agent.with_user(outsider).get_content(
+            user_locale='en_US', active_user=outsider,
+        )
+        self.assertNotIn(code, content_out)
+        self.assertNotIn(ctx, self.agent._shared_contexts_for_cache())
+
     def test_admin_can_edit_any_owned_context(self):
         ctx = self._create_owned_context(
             self.env(user=self.user_a), self._code('ownership_admin_edit'),

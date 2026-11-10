@@ -120,6 +120,14 @@ class ToolLoopMixin:
         except (TypeError, ValueError):
             return AGENT_DATASET_CACHE_MAX_BYTES
 
+    def _skill_result_events(self, code_body, payload):
+        """What a skill resolved outside the loop leaves the session (see
+        ``record_delivery_gate.skill_result_events``)."""
+        from .record_delivery_gate import skill_result_events
+        yield from skill_result_events(
+            code_body, payload, self._dataset_cache_max_bytes(),
+        )
+
     def _run_stream_with_provider(self, message, history, session_id, agent_code, provider, prior_query_code=None, prior_query_data=None, screen_context_block=None, images=None, recall_images=None):
         """Single-provider ReAct stream; raises ProviderConnectionError on LLM connection failure."""
         turn = _TurnState()

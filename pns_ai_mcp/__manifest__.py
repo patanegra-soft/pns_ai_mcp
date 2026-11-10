@@ -5,7 +5,7 @@
 
 {
     'name': 'PNS AI Engine',
-    'version': '17.0.3.1.973',
+    'version': '17.0.3.1.979',
     'images': ['static/description/banner_store.png'],
     'category': 'Extra Tools',
     'summary': 'Open-source AI engine and MCP server for Odoo Community 14 to 20: OpenAI, Claude, Ollama or any compatible model, read-only sandbox, every write approved by a person.',
