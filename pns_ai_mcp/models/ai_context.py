@@ -15,6 +15,7 @@ from ..utils.knowledge_ownership import (
     factory_lock_open,
     filter_visible_records,
     ownership_read_domain,
+    search_shared_user_ids,
 )
 from ..utils.orm_domain import (
     alias_name_leaves,
@@ -22,7 +23,7 @@ from ..utils.orm_domain import (
     rewrite_my_locale_domain,
 )
 import logging
-from odoo.addons.pns_base.utils.compat import ODOO_VERSION
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION, GROUP_USERS_FIELD
 
 _logger = logging.getLogger(__name__)
 
@@ -332,8 +333,39 @@ class AIContext(models.Model):
         string='Owner',
         index=True,
         ondelete='set null',
-        help='User who owns this context. Empty for module/import knowledge.',
+        help='User who owns this context: only that user gets it in the '
+             'prompt, plus the groups it is shared with. Empty: everyone '
+             'with access to the agent. An AI administrator can pick another '
+             'user or clear it.',
     )
+    required_group_ids = fields.Many2many(
+        'res.groups',
+        'ai_context_required_group_rel',
+        'context_id',
+        'group_id',
+        string='Shared with groups',
+        help='Members of these groups get this context in their prompt, '
+             'besides its owner. Empty with no owner: everyone who can use '
+             'the agent. Empty with an owner: only the owner.',
+    )
+    shared_user_ids = fields.Many2many(
+        'res.users',
+        string='Shared with users',
+        compute='_compute_shared_user_ids',
+        search='_search_shared_user_ids',
+        help='Users who may use this context through its groups. The record '
+             'rule searches it; it is not stored.',
+    )
+
+    @api.depends('required_group_ids')
+    def _compute_shared_user_ids(self):
+        for ctx in self:
+            ctx.shared_user_ids = ctx.required_group_ids.mapped(GROUP_USERS_FIELD)
+
+    @api.model
+    def _search_shared_user_ids(self, operator, value):
+        return search_shared_user_ids(self, operator, value)
+
     @api.model
     def fields_get(self, allfields=None, attributes=None):
         """Type labels are tokens, never translated."""
