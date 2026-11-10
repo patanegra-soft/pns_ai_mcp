@@ -46,6 +46,7 @@ client already runs. Here the agents live in plain Odoo modules.
 **Knowledge you own**
 - Contexts: the client's words, rules and habits, edited in Odoo.
 - Skills: procedures written once and launched by name. Their tables and charts come from code, not from the AI.
+- A context or a skill has an owner and the groups it is shared with. The owner edits it; members of those groups use it; with no owner and no groups, everyone does. An AI administrator can hand it to another user or open it to all.
 - Export the whole AI setup of one client to a file and import it at the next one.
 
 **An MCP server in the client's Odoo**
@@ -240,6 +241,7 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 **Conocimiento tuyo**
 - Contextos: las palabras, reglas y costumbres del cliente, editadas en Odoo.
 - Skills: procedimientos que se escriben una vez y se lanzan por su nombre. Sus tablas y gráficos salen del código, no de la IA.
+- Un contexto o un skill tiene un dueño y los grupos con los que se comparte. El dueño lo edita; los miembros de esos grupos lo usan; sin dueño y sin grupos, lo usan todos. Un administrador de IA puede pasarlo a otro usuario o abrirlo a todos.
 - Exportas toda la configuración de IA de un cliente a un fichero y la importas en el siguiente.
 
 **Un servidor MCP en el Odoo del cliente**

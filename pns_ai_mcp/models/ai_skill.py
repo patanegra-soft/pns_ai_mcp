@@ -8,12 +8,14 @@ import re
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.addons.pns_base.utils.compat import ODOO_VERSION, USER_ALL_GROUPS_FIELD
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION, GROUP_USERS_FIELD
 from ..utils.knowledge_ownership import (
     apply_create_ownership,
     assert_writer_can_write_records,
     factory_lock_open,
     filter_visible_records,
+    search_shared_user_ids,
+    user_may_use,
 )
 from ..utils.skill_live_code import code_has_frozen_result_rows
 from ..utils.skill_code_prefix import (
@@ -211,10 +213,18 @@ class AISkill(models.Model):
         'ai_skill_required_group_rel',
         'skill_id',
         'group_id',
-        string='Required groups',
-        help='Groups of which the user must have at least one to see this '
-             'skill in the slash menu and to run it. Empty = any user who '
-             'can use the agent.',
+        string='Shared with groups',
+        help='Members of these groups see and run this skill, besides its '
+             'owner. Empty with no owner: everyone who can use the agent. '
+             'Empty with an owner: only the owner.',
+    )
+    shared_user_ids = fields.Many2many(
+        'res.users',
+        string='Shared with users',
+        compute='_compute_shared_user_ids',
+        search='_search_shared_user_ids',
+        help='Users who may use this skill through its groups. The record '
+             'rule searches it; it is not stored.',
     )
     is_system = fields.Boolean(
         string='System skill',
@@ -261,7 +271,9 @@ class AISkill(models.Model):
         string='Owner',
         index=True,
         ondelete='set null',
-        help='User who owns this skill. Empty for module/import skills.',
+        help='User who owns this skill: only that user sees and runs it. '
+             'Empty: everyone with access to the agent. An AI administrator '
+             'can pick another user or clear it.',
     )
     if ODOO_VERSION >= 19:
         _code_uniq = models.Constraint(
@@ -652,12 +664,22 @@ class AISkill(models.Model):
     # Slash invocation (inference host)
     # ------------------------------------------------------------------
     def user_may_run(self, user=None):
-        """True when *user* (default: current) may list and run this skill."""
+        """True when *user* (default: current) may list and run this skill.
+
+        Owner, member of a shared group, or an open skill (no owner, no
+        groups). One rule with the record rule: ``knowledge_ownership``.
+        """
         self.ensure_one()
-        if not self.required_group_ids:
-            return True
-        user = user or self.env.user
-        return bool(set(self.required_group_ids.ids) & set(user[USER_ALL_GROUPS_FIELD].ids))
+        return user_may_use(self, user or self.env.user)
+
+    @api.depends('required_group_ids')
+    def _compute_shared_user_ids(self):
+        for skill in self:
+            skill.shared_user_ids = skill.required_group_ids.mapped(GROUP_USERS_FIELD)
+
+    @api.model
+    def _search_shared_user_ids(self, operator, value):
+        return search_shared_user_ids(self, operator, value)
 
     @api.model
     def list_for_agent(self, agent_code):
