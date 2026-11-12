@@ -3,7 +3,7 @@
 <templates>
 
     <!-- API Key display widget: shows value + copy button -->
-    <t t-name="pns_ai_mcp.MCPApiKeyField">
+    <t t-name="pns_ai_mcp.MCPApiKeyField" owl="1">
         <div class="d-flex align-items-center o_field_mcp_api_key">
             <t t-if="value">
                 <button class="btn btn-sm btn-link p-0 me-2" title="Copy to clipboard" t-on-click.stop="copyToClipboard">
@@ -17,14 +17,14 @@
     </t>
 
     <!-- ISO datetime: fixed YYYY-MM-DDTHH:MM:SS, no locale / relative labels -->
-    <t t-name="pns_ai_mcp.McpIsoDatetimeField">
+    <t t-name="pns_ai_mcp.McpIsoDatetimeField" owl="1">
         <span class="o_mcp_iso_datetime text-monospace">
             <t t-esc="isoValue"/>
         </span>
     </t>
 
     <!-- JSON Compressed widget: compressed single-line + expandable pretty-printed block -->
-    <t t-name="pns_ai_mcp.MCPJsonCompressedWidget">
+    <t t-name="pns_ai_mcp.MCPJsonCompressedWidget" owl="1">
         <div class="mcp_json_container">
             <!-- Compressed line -->
             <div class="d-flex align-items-center" style="width: 100%;">
@@ -55,7 +55,7 @@
     </t>
 
     <!-- Bundle cache: full-width readonly textarea + copy button -->
-    <t t-name="pns_ai_mcp.AgentCacheTextField">
+    <t t-name="pns_ai_mcp.AgentCacheTextField" owl="1">
         <div class="o_field_agent_cache w-100">
             <div t-if="value" class="d-flex justify-content-end mb-1">
                 <button type="button"
@@ -73,7 +73,7 @@
     </t>
 
     <!-- Context Window: plain dropdown (+25%/row) of token sizes -->
-    <t t-name="pns_ai_mcp.ContextWindowComboWidget">
+    <t t-name="pns_ai_mcp.ContextWindowComboWidget" owl="1">
         <t t-if="props.readonly">
             <span class="text-muted"><t t-esc="readonlyLabel"/></span>
         </t>
