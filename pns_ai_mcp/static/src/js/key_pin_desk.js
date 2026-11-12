@@ -8,7 +8,6 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
 import { pnsPatch } from "@pns_base/js/pns_patch";
-import { useService } from "@web/core/utils/hooks";
 import { ListController } from "@web/views/list/list_controller";
 import { FormController } from "@web/views/form/form_controller";
 import { onMounted, onWillUnmount } from "@odoo/owl";
@@ -559,7 +558,7 @@ function bindPinRefresh(controller) {
     if (controller.props.resModel !== "ai.mcp.user") {
         return;
     }
-    const bus = useService("bus_service");
+    const bus = controller.env.services.bus_service;
     const onChanged = () => refreshMcpUsers(controller);
     onMounted(() => {
         subscribe(bus);
