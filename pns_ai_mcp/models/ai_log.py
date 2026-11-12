@@ -717,6 +717,17 @@ class AILog(models.Model):
             return None
         try:
             _logger.info(f"TRACE_MCP: _create_log_entry START - Endpoint: {tool_name}, User: {user_id}")
+            # Odoo 14: every environment of the thread shares one write queue,
+            # and committing the log cursor flushes it. The caller's pending
+            # writes must reach the caller's own transaction first.
+            try:
+                flush_all = getattr(self.env, 'flush_all', None)
+                if flush_all is not None:
+                    flush_all()  # Odoo 16+
+                else:
+                    self.env['base'].flush()  # Odoo 14/15
+            except Exception:
+                _logger.warning("TRACE_MCP: caller's pending writes not flushed", exc_info=True)
             new_cr = self.env.registry.cursor()
             try:
                 env_log = api.Environment(new_cr, SUPERUSER_ID, {})
