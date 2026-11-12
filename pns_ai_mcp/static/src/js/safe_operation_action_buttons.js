@@ -11,7 +11,6 @@ import { Component, xml } from "@odoo/owl";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { _t } from "@web/core/l10n/translation";
 import { patch } from "@web/core/utils/patch";
-import { useService } from "@web/core/utils/hooks";
 import { ListController } from "@web/views/list/list_controller";
 import { FormController } from "@web/views/form/form_controller";
 
@@ -34,7 +33,7 @@ function _reloadSafePlanView(controller) {
 }
 
 function _bindSafePlanBus(controller) {
-    const bus = useService("bus_service");
+    const bus = controller.env.services.bus_service;
     if (!_isSafePlanView(controller)) {
         return;
     }

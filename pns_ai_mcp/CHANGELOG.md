@@ -2,6 +2,13 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.985_owl2-3.1.985_owl3-3.1.985 (2026-11-12)
+
+- Odoo 17: list views open again; the safe-plan buttons asked for the bus in a way Odoo 17 rejects ("methods is not iterable").
+- Odoo 16: the engine's field widgets load again; their screen templates were missing there.
+- Odoo 14: an AI log entry no longer drops the caller's unsaved changes, so the entry is always written.
+- Apps page and README: each Odoo version links to its page on www.patanegra.com.
+
 ## owl1-3.1.981_owl2-3.1.981_owl3-3.1.981 (2026-11-10)
 
 Store listing only; the module code is the one of owl1-3.1.980_owl2-3.1.980_owl3-3.1.980.
