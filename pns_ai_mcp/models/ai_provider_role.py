@@ -14,6 +14,20 @@ archive a role, turn its fallback off or change the colours of its chip,
 nothing else: the name, the help and the order are the module's too, and a
 -u writes them again. The module ships a colour; the database's own one
 lives apart, so the -u does not take it back.
+
+Who decides what:
+
+- The module ships the role and its fallback role (``fallback_id``).
+- This database only archives the role or stops using its fallback role
+  (``use_fallback``).
+- A provider holds a role with a tick on its own form.
+- An agent orders its providers (its failover list). The code asks for a
+  role with ``need=<code>``; the agent never picks the role.
+
+Two different spares, not to be mixed up: the next provider with the same
+role on the agent's list always answers when the first fails. The fallback
+role answers only when nobody holds this role at all. The search lives in
+``ai.execution.engine.get_providers_for_agent``.
 """
 import logging
 import re
@@ -80,18 +94,21 @@ class AiProviderRole(models.Model):
     )
     fallback_id = fields.Many2one(
         'ai.provider.role',
-        string='Fallback',
+        string='Fallback role',
         readonly=True,
         ondelete='set null',
-        help='When no provider holds this role, whoever asks for it is '
-             'served by this one. Empty: nobody.',
+        help='Another role, not another provider. When no provider holds '
+             'this role, whoever asks for it is served by this one. Empty: '
+             'nobody. Providers that hold this same role always take turns '
+             "along the agent's list, with or without a fallback role.",
     )
     use_fallback = fields.Boolean(
-        string='Use the fallback',
+        string='Use the fallback role',
         default=True,
         help='Off: when nobody holds this role, nobody answers, even if '
-             'it has a fallback. The module sets the fallback; this '
-             'database only decides whether to use it.',
+             'it has a fallback role. The next provider with this same '
+             "role on the agent's list still answers. The module sets the "
+             'fallback role; this database only decides whether to use it.',
     )
     module = fields.Char(
         compute='_compute_module',
