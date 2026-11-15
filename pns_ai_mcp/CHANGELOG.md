@@ -2,6 +2,11 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.986_owl2-3.1.986_owl3-3.1.986 (2026-11-15)
+
+- New provider role "Embedding" (a text into a vector), ready for a module that searches documents by meaning. The engine does not use it itself.
+- README: a new section explains the three MCP tools and why three instead of one tool per task.
+
 ## owl1-3.1.985_owl2-3.1.985_owl3-3.1.985 (2026-11-12)
 
 - Odoo 17: list views open again; the safe-plan buttons asked for the bus in a way Odoo 17 rejects ("methods is not iterable").

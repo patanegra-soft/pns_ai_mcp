@@ -65,4 +65,13 @@
         <field name="fallback_id" ref="ai_provider_role_conversation"/>
         <field name="description">Turns a short phrase into the fields of a contract (JSON), such as the arguments of a slash. A small model without reasoning is enough. Nobody holding it: Conversation answers.</field>
     </record>
+    <record id="ai_provider_role_embedding" model="ai.provider.role">
+        <field name="code">embedding</field>
+        <field name="module_bg_color">#d63384</field>
+        <field name="module_fg_color">#ffffff</field>
+        <field name="name">Embedding</field>
+        <field name="sequence">80</field>
+        <field name="accepts">text</field>
+        <field name="description">Turns a text into a vector, so documents are searched by meaning. A chat model cannot do it, so nobody holding it means no search by meaning.</field>
+    </record>
 </odoo>
