@@ -3,9 +3,13 @@
 # Copyright (C) 2026 Patanegra Soft <https://patanegra.com>
 """What a provider is for: a role an agent asks for by its code.
 
-Every role comes from a module's data file. The engine ships its own; a
-module that needs a new one seeds it and asks for it with ``need=<code>``.
-Uninstalling that module takes the role and its ticks with it. A person may
+Every role comes from a module's data file. The engine ships every role
+that names what a model can do (vision, embedding, design…), used or not:
+any module, ours or another vendor's, asks for it with ``need=<code>``.
+Codes are unique, so two modules seeding the same capability could not
+both install. A module seeds only a role that means something to it
+alone, with its own prefix in the code. Uninstalling that module takes
+the role and its ticks with it. A person may
 archive a role, turn its fallback off or change the colours of its chip,
 nothing else: the name, the help and the order are the module's too, and a
 -u writes them again. The module ships a colour; the database's own one
