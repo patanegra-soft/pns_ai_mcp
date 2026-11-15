@@ -10553,8 +10553,8 @@ msgstr "Acepta"
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_provider_role__fallback_id
-msgid "Fallback"
-msgstr "Respaldo"
+msgid "Fallback role"
+msgstr "Rol de respaldo"
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_provider_role__module
@@ -10590,8 +10590,8 @@ msgstr "Lo que tiene que aceptar el modelo. Marcarlo en un modelo cuyo catálogo
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_provider_role__fallback_id
-msgid "When no provider holds this role, whoever asks for it is served by this one. Empty: nobody."
-msgstr "Si ningún proveedor tiene este rol, a quien lo pide lo atiende este otro. Vacío: nadie."
+msgid "Another role, not another provider. When no provider holds this role, whoever asks for it is served by this one. Empty: nobody. Providers that hold this same role always take turns along the agent's list, with or without a fallback role."
+msgstr "Otro rol, no otro proveedor. Si ningún proveedor tiene este rol, a quien lo pide lo atiende este otro. Vacío: nadie. Entre proveedores con este mismo rol se pasa siempre de uno a otro por la lista del agente, con o sin rol de respaldo."
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_provider_role__module
@@ -10727,13 +10727,13 @@ msgstr "Lo tienen"
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_provider_role__use_fallback
-msgid "Use the fallback"
-msgstr "Usar el respaldo"
+msgid "Use the fallback role"
+msgstr "Usar el rol de respaldo"
 
 #. module: pns_ai_mcp
 #: model:ir.model.fields,help:pns_ai_mcp.field_ai_provider_role__use_fallback
-msgid "Off: when nobody holds this role, nobody answers, even if it has a fallback. The module sets the fallback; this database only decides whether to use it."
-msgstr "Desmarcado: si nadie tiene este rol, no responde nadie, aunque tenga respaldo. El respaldo lo fija el módulo; esta base solo decide si se usa."
+msgid "Off: when nobody holds this role, nobody answers, even if it has a fallback role. The next provider with this same role on the agent's list still answers. The module sets the fallback role; this database only decides whether to use it."
+msgstr "Desmarcado: si nadie tiene este rol, no responde nadie, aunque tenga rol de respaldo. El siguiente proveedor con este mismo rol en la lista del agente sí responde. El rol de respaldo lo fija el módulo; esta base solo decide si se usa."
 
 #. module: pns_ai_mcp
 #. odoo-python

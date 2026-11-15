@@ -111,8 +111,9 @@ The natural home of an agent is the Odoo module that needs it: install the modul
 - **No external failover** ends the chain at that provider. Use it on a local model whose data must not go out.
 - A key that reached its monthly spend cap is skipped.
 - An agent with no chain uses every active provider.
+- Nobody at all holds the role: its fallback role answers (Design and Parser fall back to Conversation). That is another role, not another provider. The module sets it; clearing a tick on the role switches it off.
 
-For example: a large model for the conversation, a small one with only Parser, and a local model at the end of the chain as backup.
+For example: a large model for the conversation, a small one with only Parser, and a local model at the end of the chain as the last resort.
 
 ### What it does not do
 
@@ -333,8 +334,9 @@ Lo natural es que un agente venga con el módulo de Odoo que lo necesita: instal
 - **Sin failover externo** corta la cadena en ese proveedor. Sirve para un modelo local cuyos datos no deben salir.
 - Una clave que llegó a su tope de gasto del mes se salta.
 - Un agente sin cadena usa todos los proveedores activos.
+- Si nadie tiene el rol, contesta su rol de respaldo (Diseño y Parser caen en Conversación). Es otro rol, no otro proveedor. Lo fija el módulo; se apaga desmarcando una casilla en el rol.
 
-Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parser, y un modelo local al final de la cadena como respaldo.
+Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parser, y un modelo local al final de la cadena como último recurso.
 
 ### Qué no hace
 

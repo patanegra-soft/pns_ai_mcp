@@ -2,6 +2,11 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.987_owl2-3.1.987_owl3-3.1.987 (2026-11-15)
+
+- Provider roles: "Fallback" is now "Fallback role", and its help says it is another role, not another provider. The next provider with the same role on the agent's list always answers when the first fails.
+- The role list shows the "Use the fallback role" tick only on roles that have one.
+
 ## owl1-3.1.986_owl2-3.1.986_owl3-3.1.986 (2026-11-15)
 
 - New provider role "Embedding" (a text into a vector), ready for a module that searches documents by meaning. The engine does not use it itself.
