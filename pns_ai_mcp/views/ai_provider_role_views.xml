@@ -9,7 +9,8 @@
                 <field name="code"/>
                 <field name="accepts"/>
                 <field name="fallback_id"/>
-                <field name="use_fallback" optional="show"/>
+                <field name="use_fallback" optional="show"
+                       attrs="{'invisible': [('fallback_id', '=', False)]}"/>
                 <field name="module" optional="show"/>
                 <field name="provider_count"/>
                 <field name="active" optional="hide"/>
