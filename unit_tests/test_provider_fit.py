@@ -152,6 +152,7 @@ def test_no_handwritten_role_list_in_the_fit_rule():
 
 
 def test_roles_are_seeded_with_text_tasks_falling_to_conversation():
+    import re
     import xml.etree.ElementTree as ET
     from pathlib import Path
     root = Path(__file__).resolve().parents[1]
@@ -162,9 +163,14 @@ def test_roles_are_seeded_with_text_tasks_falling_to_conversation():
         vals = {f.get('name'): (f.text, f.get('ref')) for f in rec.iter('field')}
         roles[rec.get('id')] = vals
     codes = {vals['code'][0]: xid for xid, vals in roles.items()}
-    assert set(codes) == {
-        'conversation', 'audio', 'vision', 'video', 'decision', 'design', 'parser',
-    }
+    assert len(codes) == len(roles)
+    asked = set()
+    for py in (root / 'common').rglob('*.py'):
+        asked.update(re.findall(
+            r"""(?:need=|_role\(|_has_role\()['"](\w+)['"]""",
+            py.read_text(encoding='utf-8'),
+        ))
+    assert asked and asked <= set(codes)
     fallbacks = {
         vals['code'][0]: vals['fallback_id'][1]
         for vals in roles.values() if 'fallback_id' in vals

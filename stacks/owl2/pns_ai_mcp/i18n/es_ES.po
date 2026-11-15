@@ -9759,6 +9759,11 @@ msgid "Parser"
 msgstr "Parser"
 
 #. module: pns_ai_mcp
+#: model:ai.provider.role,name:pns_ai_mcp.ai_provider_role_embedding
+msgid "Embedding"
+msgstr "Embedding"
+
+#. module: pns_ai_mcp
 #: model:ir.model.fields.selection,name:pns_ai_mcp.selection__ai_provider__protocol__systemone
 msgid "SystemOne (Choice)"
 msgstr "SystemOne (Choice)"
@@ -10648,6 +10653,11 @@ msgstr "Maqueta una página con los datos de un turno. Si nadie lo tiene, respon
 #: model:ai.provider.role,description:pns_ai_mcp.ai_provider_role_parser
 msgid "Turns a short phrase into the fields of a contract (JSON), such as the arguments of a slash. A small model without reasoning is enough. Nobody holding it: Conversation answers."
 msgstr "Convierte una frase corta en los campos de un contrato (JSON), como los argumentos de un slash. Basta un modelo pequeño sin razonamiento. Si nadie lo tiene, responde Conversación."
+
+#. module: pns_ai_mcp
+#: model:ai.provider.role,description:pns_ai_mcp.ai_provider_role_embedding
+msgid "Turns a text into a vector, so documents are searched by meaning. A chat model cannot do it, so nobody holding it means no search by meaning."
+msgstr "Convierte un texto en un vector para buscar documentos por su significado. Un modelo de chat no puede hacerlo: si nadie lo tiene, no se busca por significado."
 
 #. module: pns_ai_mcp
 #: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_provider_role_form

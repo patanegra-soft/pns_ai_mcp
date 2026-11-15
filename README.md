@@ -59,6 +59,24 @@ client already runs. Here the agents live in plain Odoo modules.
 - A plain Odoo module: no external server to run.
 - Same module at every client on a supported series.
 
+### Three tools, open world
+
+An MCP client works with three tools:
+
+- `relaxaicode` reads Odoo. The AI writes a short Python script; it runs in a read-only transaction, with the rights of the person who asked.
+- `safe_plan_request` proposes a change, as a plan.
+- `safe_plan_status` says whether a person approved the plan in Odoo and, once it ran, what it returned.
+
+A server with one tool per task is a closed circuit: one fixed track for each question someone foresaw. Three tools are an open world: the AI sees the whole map of the database and goes where the question takes it.
+
+- **Your own modules count from day one.** A custom field, a community addon, a model nobody foresaw: if it is in the database and the user can read it, so can the AI. Nobody writes a new tool.
+- **One question, one trip.** *Customers who bought in March and still owe more than 1,000* crosses sales, invoices and contacts. With fixed tools that is several calls and gluing the answers together; here it is one script.
+- **A short menu.** The client sends the description of every tool to the model on every turn. Three leave room for the question and the client's contexts; hundreds fill it and give the model more ways to pick the wrong one.
+- **Two doors to guard, not hundreds.** Reading goes through one door: read-only, with the user's rights. Changing Odoo goes through another: a plan that waits for a person. No tool writes on its own.
+- **The same everywhere.** The same three tools on Odoo 14 to 20 and at every client.
+
+The price: the AI has to know Odoo. That is what contexts are for: the client's models, words and rules, edited in Odoo.
+
 ### Agents, roles and chains
 
 **What an agent is.** Anything in Odoo that uses AI: a chat, a voice assistant, an MCP endpoint, a job that runs in the background. In the engine it is a record (*AI Engine → Agents*) with a code, its contexts, its skills and its list of providers.
@@ -83,6 +101,7 @@ The natural home of an agent is the Odoo module that needs it: install the modul
 | Decision | A closed yes or no, with a confidence. Nobody holding it means no. |
 | Design | Lays out a page from the data of a turn. Nobody holding it: Conversation answers. |
 | Parser | A short phrase into fields, such as the arguments of a skill. A small model is enough. Nobody holding it: Conversation answers. |
+| Embedding | A text into a vector, for a module that searches documents by meaning. A chat model cannot do it. The engine ships the role; it does not use it itself. |
 
 **The chain.** Each agent has its own providers, in the order you set. When a turn needs a role, the engine takes the providers of that agent that hold it, in that order. If one fails or stalls, the next one answers.
 
@@ -104,7 +123,7 @@ For example: a large model for the conversation, a small one with only Parser, a
 
 ### Questions
 
-**Is it an MCP server?** It includes one, in the same module. `POST /mcp` speaks Streamable HTTP. `/mcp/sse` with `/mcp/message` is for clients that only speak SSE. `/mcp/<agent>` ties the call to one agent. Three tools: `relaxaicode` (read-only Python against Odoo), `safe_plan_request` (propose a change) and `safe_plan_status` (see whether it was approved).
+**Is it an MCP server?** It includes one, in the same module. `POST /mcp` speaks Streamable HTTP. `/mcp/sse` with `/mcp/message` is for clients that only speak SSE. `/mcp/<agent>` ties the call to one agent. Three tools: `relaxaicode`, `safe_plan_request` and `safe_plan_status` (what each one does and why only three, above in *Three tools, open world*).
 
 **Where do the client's data go?** To the providers you set up, and to the outside addresses and API servers you allow. When Cursor or another MCP client connects, its own model sees what the tools return.
 
@@ -262,6 +281,24 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 - Un módulo de Odoo normal: sin servidor externo que mantener.
 - El mismo módulo en todos los clientes de una versión soportada.
 
+### Tres herramientas, mundo abierto
+
+Un cliente MCP trabaja con tres herramientas:
+
+- `relaxaicode` lee Odoo. La IA escribe un script corto de Python; corre en una transacción de solo lectura, con los permisos de quien preguntó.
+- `safe_plan_request` propone un cambio, como un plan.
+- `safe_plan_status` dice si una persona aprobó el plan en Odoo y, cuando se ejecutó, qué devolvió.
+
+Un servidor con una herramienta por tarea es un circuito cerrado: una pista fija para cada pregunta que alguien previó. Tres herramientas son un mundo abierto: la IA ve el mapa entero de la base de datos y va adonde la lleve la pregunta.
+
+- **Tus módulos cuentan desde el primer día.** Un campo propio, un módulo de la comunidad, un modelo que nadie previó: si está en la base y el usuario puede leerlo, la IA también. Nadie escribe una herramienta nueva.
+- **Una pregunta, un viaje.** *Clientes que compraron en marzo y aún deben más de 1.000* cruza ventas, facturas y contactos. Con herramientas fijas son varias llamadas y pegar las respuestas; aquí es un script.
+- **Un menú corto.** El cliente manda al modelo la descripción de cada herramienta en cada turno. Tres dejan sitio a la pregunta y a los contextos del cliente; cientos lo llenan y le dan al modelo más ocasiones de elegir mal.
+- **Dos puertas que vigilar, no cientos.** Leer pasa por una puerta: solo lectura, con los permisos del usuario. Cambiar Odoo pasa por otra: un plan que espera a una persona. Ninguna herramienta escribe por su cuenta.
+- **Lo mismo en todas partes.** Las mismas tres herramientas de Odoo 14 a 20 y en todos los clientes.
+
+El precio: la IA tiene que saber Odoo. Para eso están los contextos: los modelos, las palabras y las reglas del cliente, editados en Odoo.
+
 ### Agentes, roles y cadenas
 
 **Qué es un agente.** Cualquier cosa de Odoo que use IA: un chat, un asistente de voz, un punto MCP, un trabajo que corre por detrás. En el motor es un registro (*Motor de IA → Agentes*) con un código, sus contextos, sus skills y su lista de proveedores.
@@ -286,6 +323,7 @@ Lo natural es que un agente venga con el módulo de Odoo que lo necesita: instal
 | Decisión | Un sí o un no cerrado, con su confianza. Si nadie lo tiene, es no. |
 | Diseño | Maqueta una página con los datos de un turno. Si nadie lo tiene, contesta Conversación. |
 | Parser | Una frase corta a campos, como los argumentos de un skill. Basta un modelo pequeño. Si nadie lo tiene, contesta Conversación. |
+| Embedding | Un texto a un vector, para un módulo que busque documentos por su significado. Un modelo de chat no puede hacerlo. El motor trae el rol; él no lo usa. |
 
 **La cadena.** Cada agente tiene sus proveedores, en el orden que pongas. Cuando un turno necesita un rol, el motor toma los proveedores de ese agente que lo tienen, en ese orden. Si uno falla o se queda colgado, contesta el siguiente.
 
@@ -307,7 +345,7 @@ Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parse
 
 ### Preguntas
 
-**¿Es un servidor MCP?** Lo incluye, en el mismo módulo. `POST /mcp` habla Streamable HTTP. `/mcp/sse` con `/mcp/message` es para clientes que solo hablan SSE. `/mcp/<agente>` ata la llamada a un agente. Tres herramientas: `relaxaicode` (Python de solo lectura contra Odoo), `safe_plan_request` (proponer un cambio) y `safe_plan_status` (ver si se aprobó).
+**¿Es un servidor MCP?** Lo incluye, en el mismo módulo. `POST /mcp` habla Streamable HTTP. `/mcp/sse` con `/mcp/message` es para clientes que solo hablan SSE. `/mcp/<agente>` ata la llamada a un agente. Tres herramientas: `relaxaicode`, `safe_plan_request` y `safe_plan_status` (qué hace cada una y por qué solo tres, arriba en *Tres herramientas, mundo abierto*).
 
 **¿Adónde van los datos del cliente?** A los proveedores que configures, y a las direcciones de fuera y servidores de API que permitas. Cuando se conecta Cursor u otro cliente MCP, su propio modelo ve lo que devuelven las herramientas.
 
