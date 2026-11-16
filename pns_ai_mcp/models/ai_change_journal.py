@@ -219,6 +219,12 @@ class AiChangeJournal(models.Model):
         extra = [n for n in ('display_name',) if n in recs._fields and n not in names]
         try:
             rows = recs.read(names + extra)
+        except AccessError as exc:
+            _logger.warning(
+                'AI change journal: no read access to %s %s for the snapshot: %s',
+                recs._name, recs.ids, exc,
+            )
+            return [{'id': i} for i in recs.ids]
         except Exception:
             _logger.exception('AI change journal: snapshot read failed on %s', recs._name)
             return [{'id': i} for i in recs.ids]
