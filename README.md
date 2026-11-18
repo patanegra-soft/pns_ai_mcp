@@ -7,9 +7,8 @@
 ## English
 
 **AI inside your Odoo, for consultants.** The AI Engine runs in your client's
-Odoo. Providers, agents, knowledge and approvals are Odoo records, and the
-agents live in plain Odoo modules. Open source, nothing to license. Odoo
-**14.0** to **20.0**.
+Odoo, and its agents live in plain Odoo modules. Its chat is Chatboo
+([`pns_ai_chatboo`](https://github.com/patanegra-soft/pns_ai_chatboo)).
 
 ### The pain
 
@@ -230,9 +229,8 @@ Security: [SECURITY.md](SECURITY.md). Bugs, ideas and questions: [CONTRIBUTING.m
 ![IA dentro de tu Odoo, para consultores](common/static/description/banner_es.png)
 
 **IA dentro de tu Odoo, para consultores.** El Motor de IA corre en el Odoo
-de tu cliente. Proveedores, agentes, conocimiento y aprobaciones son registros
-de Odoo, y los agentes viven en módulos normales de Odoo. Código abierto, nada
-que licenciar. Odoo **14.0** a **20.0**.
+de tu cliente, y sus agentes viven en módulos normales de Odoo. Su chat es
+Chatboo ([`pns_ai_chatboo`](https://github.com/patanegra-soft/pns_ai_chatboo)).
 
 ### El dolor
 
