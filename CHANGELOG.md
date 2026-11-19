@@ -2,6 +2,12 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.996_owl2-3.1.996_owl3-3.1.996 (2026-11-19)
+
+- Spanish: settings help, import and export wizards, errors and selections are translated, and Odoo 16 now loads the Spanish catalogue. The activity log stays in English on purpose.
+- AI lists: each column takes the width of its content and can be hidden; Odoo 15 and 16 no longer cut the name.
+- Importing users: an Odoo user missing from this database is a warning with its login, not a bare detail line.
+
 ## owl1-3.1.988_owl2-3.1.988_owl3-3.1.988 (2026-11-16)
 
 - When the person behind a plan cannot read a record, the change journal notes it as a warning instead of an error. The plan behaves as before.

@@ -99,7 +99,7 @@ def test_ticked_rows_cancel_from_the_menu_the_list_always_shows():
         assert 'records.action_cancel()' in view
         said = (
             root / 'stacks' / stack / 'pns_ai_mcp' / 'i18n'
-            / ('es.po' if stack == 'owl1' else 'es_ES.po')
+            / ('es.po' if stack == 'owl1' else 'es.po')
         ).read_text(encoding='utf-8')
         assert 'action_server_safe_operation_cancel' in said
         assert 'msgstr "Cancelar"' in said

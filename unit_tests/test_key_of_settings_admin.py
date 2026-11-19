@@ -50,7 +50,7 @@ def test_both_imports_drop_the_key_and_keep_the_permissions():
 
 
 def test_the_messages_are_in_every_spanish_catalog():
-    for stack, name in (('owl1', 'es.po'), ('owl2', 'es_ES.po'), ('owl3', 'es_ES.po')):
+    for stack, name in (('owl1', 'es.po'), ('owl2', 'es.po'), ('owl3', 'es.po')):
         po = (_ROOT / 'stacks' / stack / 'pns_ai_mcp' / 'i18n' / name).read_text(encoding='utf-8')
         assert '"Only a Settings administrator can set the API key of another Settings "' in po, stack
         assert '"%s is a Settings administrator: the API key was not imported (only a "' in po, stack

@@ -192,7 +192,7 @@ def test_log_labels_are_unique_english():
 def test_po_keeps_log_result_in_english():
     for rel in (
         ('stacks', 'owl1', 'pns_ai_mcp', 'i18n', 'es.po'),
-        ('stacks', 'owl2', 'pns_ai_mcp', 'i18n', 'es_ES.po'),
+        ('stacks', 'owl2', 'pns_ai_mcp', 'i18n', 'es.po'),
     ):
         po = _read(*rel)
         assert 'msgid "LLM requested tool: %(t)s"' not in po
@@ -209,11 +209,17 @@ def test_po_keeps_log_result_in_english():
         ) in po
         assert (
             'field_ai_log__cost_display\n'
-            '#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_provider_usage_day__cost\n'
             '#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_log_form\n'
             '#: model_terms:ir.ui.view,arch_db:pns_ai_mcp.view_ai_log_tree\n'
             'msgid "Cost"\n'
             'msgstr "Cost"'
+        ) in po
+        # Provider usage is not the log: its Cost is translated.
+        assert (
+            'field_ai_provider_usage_day__cost\n'
+            '#: model:ir.model.fields,field_description:pns_ai_mcp.field_ai_provider_usage_wizard__cost_display\n'
+            'msgid "Cost"\n'
+            'msgstr "Coste"'
         ) in po
 
 
@@ -227,7 +233,7 @@ def test_po_keeps_exempt_ai_log_ui_in_english():
     import re
     for rel in (
         ('stacks', 'owl1', 'pns_ai_mcp', 'i18n', 'es.po'),
-        ('stacks', 'owl2', 'pns_ai_mcp', 'i18n', 'es_ES.po'),
+        ('stacks', 'owl2', 'pns_ai_mcp', 'i18n', 'es.po'),
     ):
         po = _read(*rel)
         blocks = re.split(r'\n\n(?=#\. module)', po)

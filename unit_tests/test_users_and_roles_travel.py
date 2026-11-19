@@ -107,7 +107,7 @@ def test_roles_tools_are_wired_in_every_stack():
 
 
 def test_new_strings_are_in_every_spanish_catalog():
-    for stack, name in (('owl1', 'es.po'), ('owl2', 'es_ES.po'), ('owl3', 'es_ES.po')):
+    for stack, name in (('owl1', 'es.po'), ('owl2', 'es.po'), ('owl3', 'es.po')):
         po = (_ROOT / 'stacks' / stack / 'pns_ai_mcp' / 'i18n' / name).read_text(encoding='utf-8')
         for msgid in (
             'msgid "%s provider role(s) exported."',

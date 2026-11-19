@@ -87,7 +87,7 @@ def test_every_sentence_it_says_is_in_both_spanish_catalogs():
     assert said, 'no sentences found — did the helper stop being named say()?'
     repo = Path(__file__).resolve().parents[1]
     for catalog in ('stacks/owl1/pns_ai_mcp/i18n/es.po',
-                    'stacks/owl2/pns_ai_mcp/i18n/es_ES.po'):
+                    'stacks/owl2/pns_ai_mcp/i18n/es.po'):
         text = (repo / catalog).read_text(encoding='utf-8')
         for sentence in said:
             assert 'msgid "%s"' % sentence in text, (catalog, sentence)

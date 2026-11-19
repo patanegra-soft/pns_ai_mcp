@@ -1,13 +1,20 @@
-/* Styles for the MCP log tree view - avoid horizontal overflow */
-.o_mcp_log_tree,
-.o_mcp_log_tree .o_list_renderer,
+/* Styles for the MCP log tree view. No overflow clip on the renderer: when
+   the columns do not fit, a clip hides the last one, which holds the
+   optional-columns toggler. */
 .o_mcp_log_tree .o_list_table,
 .o_mcp_log_tree table.o_list_table,
 .o_list_view .o_mcp_log_tree .o_list_table {
     table-layout: fixed;
     width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: hidden !important;
+}
+
+.o_mcp_log_tree .o_list_renderer table.o_list_table th.o_list_actions_header,
+.o_mcp_log_tree .o_list_renderer table.o_list_table td.o_list_actions_header {
+    width: 32px !important;
+    min-width: 32px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
 }
 
 /* Selection column width (checkbox) - fixed width to avoid overlap */
@@ -388,7 +395,7 @@
     line-height: 1.4;
     color: #1d1d1d;
     white-space: nowrap;
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 .o_mcp_log_usage_chip:not([hidden]) {
     display: inline-flex;

@@ -21,7 +21,7 @@ def test_the_warning_is_the_probe_and_the_audio_role():
 
 def test_both_stacks_show_it_and_translate_it():
     text = 'This model hears audio as a chat'
-    for stack, po in (('owl1', 'es.po'), ('owl2', 'es_ES.po')):
+    for stack, po in (('owl1', 'es.po'), ('owl2', 'es.po')):
         view = (
             _ROOT / 'stacks' / stack / 'pns_ai_mcp' / 'views' / 'ai_provider_views.xml'
         ).read_text(encoding='utf-8')
