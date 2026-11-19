@@ -388,7 +388,7 @@
     line-height: 1.4;
     color: #1d1d1d;
     white-space: nowrap;
-    margin-left: auto;
+    margin-inline-start: auto;
 }
 .o_mcp_log_usage_chip:not([hidden]) {
     display: inline-flex;
