@@ -149,6 +149,10 @@ class ImportUsersWizard(models.TransientModel):
                 other_errors.append("%s: %s" % (login, e))
                 _logger.error("MCP: error importing user %s: %s", login, e)
 
+        warnings = []
+        if missing_logins:
+            warnings.append(_("Odoo users not found (%s)") % ', '.join(missing_logins))
+
         return self._apply_operation_result(
             view_xmlid='pns_ai_mcp.view_import_users_result_form',
             created=created_count,
@@ -156,8 +160,8 @@ class ImportUsersWizard(models.TransientModel):
             skipped=skipped_count,
             linked=keys_imported_count,
             errors=other_errors,
+            warnings=warnings,
             created_names=created_names,
             updated_names=updated_names,
             skipped_names=skipped_names,
-            detail='\n'.join(missing_logins) if missing_logins else None,
         )
