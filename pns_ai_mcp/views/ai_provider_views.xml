@@ -137,18 +137,18 @@
         <field name="arch" type="xml">
             <tree string="Models" create="false" edit="false" delete="false" class="o_pns_model_picker">
                 <button name="action_select_for_provider" type="object" string="Use" icon="fa-check"/>
-                <field name="maker"/>
-                <field name="title"/>
-                <field name="name"/>
-                <field name="context_label"/>
-                <field name="max_output_label"/>
-                <field name="price_in_label"/>
-                <field name="price_out_label"/>
-                <field name="price_cache_label"/>
-                <field name="modality_label"/>
-                <field name="apt_audio"/>
-                <field name="apt_transcriptions"/>
-                <field name="apt_label"/>
+                <field name="maker" optional="show"/>
+                <field name="title" optional="show"/>
+                <field name="name" optional="show"/>
+                <field name="context_label" optional="show"/>
+                <field name="max_output_label" optional="show"/>
+                <field name="price_in_label" optional="show"/>
+                <field name="price_out_label" optional="show"/>
+                <field name="price_cache_label" optional="show"/>
+                <field name="modality_label" optional="show"/>
+                <field name="apt_audio" optional="show"/>
+                <field name="apt_transcriptions" optional="show"/>
+                <field name="apt_label" optional="show"/>
             </tree>
         </field>
     </record>
