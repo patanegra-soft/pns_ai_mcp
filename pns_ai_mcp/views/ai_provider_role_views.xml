@@ -5,14 +5,14 @@
         <field name="model">ai.provider.role</field>
         <field name="arch" type="xml">
             <tree string="Roles" create="false" delete="false" class="o_pns_list">
-                <field name="chip_html" string="Name" widget="html"/>
-                <field name="code"/>
-                <field name="accepts"/>
-                <field name="fallback_id"/>
+                <field name="chip_html" optional="show" string="Name" widget="html"/>
+                <field name="code" optional="show"/>
+                <field name="accepts" optional="show"/>
+                <field name="fallback_id" optional="show"/>
                 <field name="use_fallback" optional="show"
                        attrs="{'invisible': [('fallback_id', '=', False)]}"/>
                 <field name="module" optional="show"/>
-                <field name="provider_count"/>
+                <field name="provider_count" optional="show"/>
                 <field name="active" optional="hide"/>
             </tree>
         </field>
