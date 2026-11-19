@@ -4,6 +4,7 @@
 """ /create-skill replaces an owned slash; factory/system/other stay blocked. """
 import json
 import uuid
+from unittest.mock import patch
 
 from odoo.exceptions import UserError
 from odoo.tests import tagged, TransactionCase
@@ -30,6 +31,13 @@ class TestSkillCaptureReplace(TransactionCase):
         ICP.set_param(ICP_SKILL_CODE_PREFIX, DEFAULT_SKILL_CODE_PREFIX)
         ICP.set_param(ICP_SKILL_COMMAND_PREFIX, DEFAULT_SKILL_COMMAND_PREFIX)
         ensure_test_agents(self.env)
+        # A test instance may have live providers; the wizard must not call one.
+        no_provider = patch.object(
+            type(self.env['ai.skill.capture.wizard']), '_resolve_param_provider',
+            lambda wiz: wiz.env['ai.provider'],
+        )
+        no_provider.start()
+        self.addCleanup(no_provider.stop)
         self.writer_group = self.env.ref('pns_ai_mcp.group_ai_writer')
         writers = [self.env.ref('base.group_user').id, self.writer_group.id]
         self.user_a = create_test_user(self.env, prefix='pns_capture_a', groups=writers)
