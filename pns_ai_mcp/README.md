@@ -60,7 +60,7 @@ client already runs. Here the agents live in plain Odoo modules.
 
 ### Open-world AI for Odoo
 
-An open-world AI sees the whole map of the system, including what nobody foresaw, and explores it by reading; to change anything, it proposes and a person approves. The opposite is a closed circuit: one tool per task, one fixed track for each question someone foresaw. In Odoo it takes three tools, the ones an MCP client works with:
+An open-world AI sees the whole map of the system, including what nobody foresaw, and explores it by reading; to change anything, it proposes and a person approves. The opposite is a closed circuit: one tool per task, one fixed track for each question someone foresaw. In Odoo it takes three tools, a lightweight MCP server:
 
 - `relaxaicode` reads Odoo. The AI writes a short Python script; it runs in a read-only transaction, with the rights of the person who asked.
 - `safe_plan_request` proposes a change, as a plan.
@@ -68,9 +68,9 @@ An open-world AI sees the whole map of the system, including what nobody foresaw
 
 Against one tool per task:
 
+- **A lightweight MCP.** The client sends the description of every tool to the model on every turn. Three use little context and leave room for complex questions and the client's contexts; hundreds fill it and give the model more ways to pick the wrong one.
 - **Your own modules count from day one.** A custom field, a community addon, a model nobody foresaw: if it is in the database and the user can read it, so can the AI. Nobody writes a new tool.
 - **One question, one trip.** *Customers who bought in March and still owe more than 1,000* crosses sales, invoices and contacts. With fixed tools that is several calls and gluing the answers together; here it is one script.
-- **A short menu.** The client sends the description of every tool to the model on every turn. Three leave room for the question and the client's contexts; hundreds fill it and give the model more ways to pick the wrong one.
 - **Two doors to guard, not hundreds.** Reading goes through one door: read-only, with the user's rights. Changing Odoo goes through another: a plan that waits for a person. No tool writes on its own.
 - **The same everywhere.** The same three tools on Odoo 14 to 20 and at every client.
 
@@ -282,7 +282,7 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 
 ### IA de mundo abierto para Odoo
 
-Una IA de mundo abierto ve el mapa entero del sistema, incluido lo que nadie previó, y lo recorre leyendo; para cambiar algo, propone y una persona aprueba. Lo contrario es el circuito cerrado: una herramienta por tarea, una pista fija para cada pregunta que alguien previó. En Odoo son tres herramientas, las que usa un cliente MCP:
+Una IA de mundo abierto ve el mapa entero del sistema, incluido lo que nadie previó, y lo recorre leyendo; para cambiar algo, propone y una persona aprueba. Lo contrario es el circuito cerrado: una herramienta por tarea, una pista fija para cada pregunta que alguien previó. En Odoo son tres herramientas, un servidor MCP ligero:
 
 - `relaxaicode` lee Odoo. La IA escribe un script corto de Python; corre en una transacción de solo lectura, con los permisos de quien preguntó.
 - `safe_plan_request` propone un cambio, como un plan.
@@ -290,9 +290,9 @@ Una IA de mundo abierto ve el mapa entero del sistema, incluido lo que nadie pre
 
 Frente a una herramienta por tarea:
 
+- **Un MCP ligero.** El cliente manda al modelo la descripción de cada herramienta en cada turno. Tres consumen poco contexto y dejan margen para preguntas complejas y para los contextos del cliente; cientos lo llenan y le dan al modelo más ocasiones de elegir mal.
 - **Tus módulos cuentan desde el primer día.** Un campo propio, un módulo de la comunidad, un modelo que nadie previó: si está en la base y el usuario puede leerlo, la IA también. Nadie escribe una herramienta nueva.
 - **Una pregunta, un viaje.** *Clientes que compraron en marzo y aún deben más de 1.000* cruza ventas, facturas y contactos. Con herramientas fijas son varias llamadas y pegar las respuestas; aquí es un script.
-- **Un menú corto.** El cliente manda al modelo la descripción de cada herramienta en cada turno. Tres dejan sitio a la pregunta y a los contextos del cliente; cientos lo llenan y le dan al modelo más ocasiones de elegir mal.
 - **Dos puertas que vigilar, no cientos.** Leer pasa por una puerta: solo lectura, con los permisos del usuario. Cambiar Odoo pasa por otra: un plan que espera a una persona. Ninguna herramienta escribe por su cuenta.
 - **Lo mismo en todas partes.** Las mismas tres herramientas de Odoo 14 a 20 y en todos los clientes.
 
