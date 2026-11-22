@@ -81,6 +81,60 @@ Against one tool per task:
 
 The price: the AI has to know Odoo. That is what contexts are for: the client's models, words and rules, edited in Odoo.
 
+### One question, one round trip
+
+A round trip is one call from the model to Odoo and its answer. Every trip adds rows to the model's context and seconds to the turn. This is what one real question costs with each kind of MCP server.
+
+**The question.** *Customers with overdue invoices: how much they owe, how many days the oldest one is late, which quotations they still have open and who their salesperson is.* It crosses invoices, quotations and contacts.
+
+**One tool per task.** One tool lists overdue invoices, another reads a customer, another lists quotations. That is at least three calls, often one per customer. The model adds up the amounts and the days itself, from the rows it got back.
+
+**A generic search tool.** Fewer calls: invoices, quotations, customers. The model still joins the three lists and does the sums in its own context, and every row it read is in that context.
+
+**Here.** One call to `relaxaicode` with this script. It ran as written on Odoo 19:
+
+```python
+today = datetime.date.today()
+overdue = env['account.move'].search([
+    ('move_type', '=', 'out_invoice'),
+    ('state', '=', 'posted'),
+    ('payment_state', 'in', ('not_paid', 'partial')),
+    ('invoice_date_due', '<', today),
+])
+rows = []
+for partner in overdue.mapped('commercial_partner_id'):
+    mine = overdue.filtered_domain([('commercial_partner_id', '=', partner.id)])
+    quotes = env['sale.order'].search([
+        ('partner_id', 'child_of', partner.id),
+        ('state', 'in', ('draft', 'sent')),
+    ])
+    rows.append({
+        'id': partner.id,
+        '__model': 'res.partner',
+        'customer': partner.display_name,
+        'overdue': sum(mine.mapped('amount_residual')),
+        'days_late': max((today - d).days for d in mine.mapped('invoice_date_due')),
+        'open_quotes': len(quotes),
+        'quoted': sum(quotes.mapped('amount_total')),
+        'salesperson': partner.user_id.name or '',
+    })
+result = sorted(rows, key=lambda r: r['overdue'], reverse=True)
+```
+
+The joins and sums happen in Odoo. Only one row per customer comes back, and Odoo turns the rows into a table where each name opens the customer. The script reads in a read-only transaction, with the rights of the person who asked: a customer that person cannot see is not in the table.
+
+**Then the change.** *Schedule a call for each salesperson.* The model does not write. It sends `safe_plan_request` with one step per customer:
+
+```json
+{"op": "create", "model": "mail.activity", "values": {
+  "res_model_id": 85, "res_id": 9, "activity_type_id": 2, "user_id": 6,
+  "summary": "Call about overdue invoices", "date_deadline": "2026-12-01"}}
+```
+
+The ids of the model and of the activity type come from a read as well; the same script can fetch them. A person sees the plan in Odoo and confirms it. The steps run together: if one fails, none stays. `safe_plan_status` tells the model whether the plan was confirmed and what it returned.
+
+**What can cost an extra trip.** The sandbox has rules: no imports outside a short list, no `filtered(lambda …)`, only simple sort keys. When a script breaks one, the error says which rule and how to write it, and the model sends it again. That retry is one more trip, and the log shows it.
+
 ### Agents, roles and chains
 
 **What an agent is.** Anything in Odoo that uses AI: a chat, a voice assistant, an MCP endpoint, a job that runs in the background. In the engine it is a record (*AI Engine → Agents*) with a code, its contexts, its skills and its list of providers.
@@ -316,6 +370,60 @@ Frente a una herramienta por tarea:
 - **Lo mismo en todas partes.** Las mismas tres herramientas de Odoo 14 a 20 y en todos los clientes.
 
 El precio: la IA tiene que saber Odoo. Para eso están los contextos: los modelos, las palabras y las reglas del cliente, editados en Odoo.
+
+### Una pregunta, una ida y vuelta
+
+Una ida y vuelta es una llamada del modelo a Odoo y su respuesta. Cada una suma filas al contexto del modelo y segundos al turno. Esto es lo que cuesta una pregunta real con cada tipo de servidor MCP.
+
+**La pregunta.** *Clientes con facturas vencidas: cuánto deben, cuántos días lleva de retraso la más antigua, qué presupuestos tienen abiertos y quién es su comercial.* Cruza facturas, presupuestos y contactos.
+
+**Una herramienta por tarea.** Una herramienta lista las facturas vencidas, otra lee un cliente, otra lista presupuestos. Son tres llamadas como mínimo, a menudo una por cliente. Las sumas de importes y de días las hace el modelo, con las filas que le han llegado.
+
+**Una herramienta genérica de búsqueda.** Menos llamadas: facturas, presupuestos, clientes. Pero el modelo sigue juntando las tres listas y haciendo las sumas en su propio contexto, y cada fila que leyó está en ese contexto.
+
+**Aquí.** Una llamada a `relaxaicode` con este script. Se ejecutó tal cual en Odoo 19:
+
+```python
+today = datetime.date.today()
+overdue = env['account.move'].search([
+    ('move_type', '=', 'out_invoice'),
+    ('state', '=', 'posted'),
+    ('payment_state', 'in', ('not_paid', 'partial')),
+    ('invoice_date_due', '<', today),
+])
+rows = []
+for partner in overdue.mapped('commercial_partner_id'):
+    mine = overdue.filtered_domain([('commercial_partner_id', '=', partner.id)])
+    quotes = env['sale.order'].search([
+        ('partner_id', 'child_of', partner.id),
+        ('state', 'in', ('draft', 'sent')),
+    ])
+    rows.append({
+        'id': partner.id,
+        '__model': 'res.partner',
+        'customer': partner.display_name,
+        'overdue': sum(mine.mapped('amount_residual')),
+        'days_late': max((today - d).days for d in mine.mapped('invoice_date_due')),
+        'open_quotes': len(quotes),
+        'quoted': sum(quotes.mapped('amount_total')),
+        'salesperson': partner.user_id.name or '',
+    })
+result = sorted(rows, key=lambda r: r['overdue'], reverse=True)
+```
+
+Los cruces y las sumas se hacen en Odoo. Solo vuelve una fila por cliente, y Odoo convierte las filas en una tabla donde cada nombre abre la ficha del cliente. El script lee en una transacción de solo lectura, con los permisos de quien preguntó: un cliente que esa persona no puede ver no sale en la tabla.
+
+**Luego, el cambio.** *Prográmale una llamada a cada comercial.* El modelo no escribe. Manda `safe_plan_request` con un paso por cliente:
+
+```json
+{"op": "create", "model": "mail.activity", "values": {
+  "res_model_id": 85, "res_id": 9, "activity_type_id": 2, "user_id": 6,
+  "summary": "Llamar por las facturas vencidas", "date_deadline": "2026-12-01"}}
+```
+
+Los ids del modelo y del tipo de actividad también salen de una lectura; el mismo script puede traerlos. Una persona ve el plan en Odoo y lo confirma. Los pasos se ejecutan juntos: si uno falla, no queda ninguno. `safe_plan_status` le dice al modelo si el plan se confirmó y qué devolvió.
+
+**Qué puede costar una ida y vuelta más.** La caja de arena tiene reglas: nada de imports fuera de una lista corta, nada de `filtered(lambda …)`, solo claves de orden sencillas. Cuando un script rompe una, el error dice cuál y cómo escribirlo, y el modelo lo vuelve a mandar. Ese reintento es una ida y vuelta más, y el registro la muestra.
 
 ### Agentes, roles y cadenas
 
