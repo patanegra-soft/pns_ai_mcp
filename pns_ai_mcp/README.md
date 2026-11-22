@@ -30,17 +30,22 @@ client already runs. Here the agents live in plain Odoo modules.
 - Each agent has its own list of providers, in the order you set.
 - Everything is in the client's database: no second copy somewhere else.
 
-**Providers for each task**
+**Model routing: providers for each task**
 - OpenAI and any OpenAI-compatible endpoint, Anthropic, OpenRouter. A local model (Ollama, LM Studio) on the client's own server works too.
-- Roles per provider: conversation, audio, vision, video, page layout, turning a phrase into a skill's fields, yes-or-no decisions.
+- Roles per provider send each kind of job to its own model: conversation, audio, vision, video, page layout, turning a phrase into a skill's fields, yes-or-no decisions.
 - If one provider fails, the next one in the list answers.
 - The key stays in the client's database, never in the module.
 
 **A sandbox and a person**
 - The code the AI writes reads in a read-only transaction, with the rights of the person who asked.
 - A change to Odoo is a plan that waits for a person to approve it in Odoo.
-- Every call is logged: each user sees their own activity, the administrator sees all of it.
 - Outside addresses only from a whitelist you keep.
+
+**Observability: every call on record**
+- Who asked, when, which provider and model, the prompt, the code the AI ran and what came back.
+- Tokens and cost on each call, grouped by turn and step.
+- Each user sees their own activity, the administrator sees all of it (*AI Engine → Security → Activity*).
+- A monthly cap per provider, in dollars or tokens: a provider that reaches it is skipped.
 
 **Knowledge you own**
 - Contexts: the client's words, rules and habits, edited in Odoo.
@@ -89,7 +94,7 @@ The natural home of an agent is the Odoo module that needs it: install the modul
 
 **Two kinds.** *Inference*: Odoo calls the model, through the agent's providers (a chat, a voice assistant). *Endpoint*: the model is outside and Odoo only serves it (MCP).
 
-**Roles.** A role says what a provider is for. One provider can hold several.
+**Roles.** A role says what a provider is for. One provider can hold several. This is what is usually called *model routing*: here it goes by the kind of job, with a chain of providers as backup, not by a classifier that picks a model for each question.
 
 | Role | What for |
 | :--- | :--- |
@@ -113,6 +118,15 @@ The natural home of an agent is the Odoo module that needs it: install the modul
 - Nobody at all holds the role: its fallback role answers (Design and Parser fall back to Conversation). That is another role, not another provider. The module sets it; clearing a tick on the role switches it off.
 
 For example: a large model for the conversation, a small one with only Parser, and a local model at the end of the chain as the last resort.
+
+### Other names for the same thing
+
+| Common name | Here |
+| :--- | :--- |
+| Model routing | Provider roles and the agent's chain |
+| Failover, fallback | The chain: if one provider fails, the next one answers |
+| LLM observability | The AI log (*Activity*): each call with its prompt, code, result, tokens and cost |
+| Human in the loop | The plan: a change waits for a person to approve it in Odoo |
 
 ### What it does not do
 
@@ -252,17 +266,22 @@ cliente ya tiene. Aquí los agentes viven en módulos normales de Odoo.
 - Cada agente tiene su propia lista de proveedores, en el orden que tú pongas.
 - Todo está en la base de datos del cliente: no hay una segunda copia en otro sitio.
 
-**Proveedores para cada tarea**
+**Enrutamiento de modelos: proveedores para cada tarea**
 - OpenAI y cualquier servicio compatible con OpenAI, Anthropic, OpenRouter. También un modelo local (Ollama, LM Studio) en el propio servidor del cliente.
-- Roles por proveedor: conversación, audio, imagen, vídeo, maquetar una página, pasar una frase a los campos de un skill, decisiones de sí o no.
+- Los roles por proveedor mandan cada tipo de trabajo a su modelo: conversación, audio, imagen, vídeo, maquetar una página, pasar una frase a los campos de un skill, decisiones de sí o no.
 - Si un proveedor falla, responde el siguiente de la lista.
 - La clave se queda en la base de datos del cliente, nunca en el módulo.
 
 **Una caja de arena y una persona**
 - El código que escribe la IA lee en una transacción de solo lectura, con los permisos de quien preguntó.
 - Un cambio en Odoo es un plan que espera a que una persona lo apruebe en Odoo.
-- Cada llamada queda registrada: cada usuario ve su actividad, el administrador la de todos.
 - Direcciones de fuera, solo las de una lista blanca que tú mantienes.
+
+**Observabilidad: cada llamada queda registrada**
+- Quién preguntó, cuándo, con qué proveedor y modelo, el prompt, el código que ejecutó la IA y lo que devolvió.
+- Tokens y coste de cada llamada, agrupados por turno y paso.
+- Cada usuario ve su actividad, el administrador la de todos (*Motor de IA → Seguridad → Activity*).
+- Un tope mensual por proveedor, en dólares o en tokens: el proveedor que lo alcanza se salta.
 
 **Conocimiento tuyo**
 - Contextos: las palabras, reglas y costumbres del cliente, editadas en Odoo.
@@ -311,7 +330,7 @@ Lo natural es que un agente venga con el módulo de Odoo que lo necesita: instal
 
 **Dos tipos.** *Inferencia*: Odoo llama al modelo, con los proveedores del agente (un chat, un asistente de voz). *Endpoint*: el modelo está fuera y Odoo solo le sirve (MCP).
 
-**Roles.** Un rol dice para qué sirve un proveedor. Un proveedor puede tener varios.
+**Roles.** Un rol dice para qué sirve un proveedor. Un proveedor puede tener varios. Es lo que suele llamarse *enrutamiento de modelos* (*model routing*): aquí va por tipo de trabajo, con una cadena de proveedores de respaldo, no por un clasificador que elige modelo para cada pregunta.
 
 | Rol | Para qué |
 | :--- | :--- |
@@ -335,6 +354,15 @@ Lo natural es que un agente venga con el módulo de Odoo que lo necesita: instal
 - Si nadie tiene el rol, contesta su rol de respaldo (Diseño y Parser caen en Conversación). Es otro rol, no otro proveedor. Lo fija el módulo; se apaga desmarcando una casilla en el rol.
 
 Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parser, y un modelo local al final de la cadena como último recurso.
+
+### Otros nombres para lo mismo
+
+| Nombre común | Aquí |
+| :--- | :--- |
+| Enrutamiento de modelos (*model routing*) | Los roles de proveedor y la cadena del agente |
+| *Failover*, *fallback* | La cadena: si un proveedor falla, responde el siguiente |
+| Observabilidad (*LLM observability*) | El registro de IA (*Activity*): cada llamada con su prompt, código, resultado, tokens y coste |
+| Humano en el bucle (*human in the loop*) | El plan: un cambio espera a que una persona lo apruebe en Odoo |
 
 ### Qué no hace
 
