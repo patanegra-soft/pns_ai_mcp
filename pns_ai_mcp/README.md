@@ -74,12 +74,21 @@ An open-world AI sees the whole map of the system, including what nobody foresaw
 Against one tool per task:
 
 - **A lightweight MCP.** The client sends the description of every tool to the model on every turn. Three use little context and leave room for complex questions and the client's contexts; hundreds fill it and give the model more ways to pick the wrong one.
-- **Your own modules count from day one.** A custom field, a community addon, a model nobody foresaw: if it is in the database and the user can read it, so can the AI. Nobody writes a new tool.
 - **One question, one trip.** *Customers who bought in March and still owe more than 1,000* crosses sales, invoices and contacts. With fixed tools that is several calls and gluing the answers together; here it is one script.
 - **Two doors to guard, not hundreds.** Reading goes through one door: read-only, with the user's rights. Changing Odoo goes through another: a plan that waits for a person. No tool writes on its own.
 - **The same everywhere.** The same three tools on Odoo 14 to 20 and at every client.
 
-The price: the AI has to know Odoo. That is what contexts are for: the client's models, words and rules, edited in Odoo.
+### AI the Odoo way
+
+The AI brings no permission system of its own, no data dictionary and no connector to keep in sync. It uses what Odoo already has, in layers:
+
+| What it needs | Where it comes from |
+| :--- | :--- |
+| A place to live | The client's database, as Odoo records: providers, agents, contexts, skills, plans and the log. They have rights and are exported and imported; a module brings them and another can change them, as with any Odoo record. |
+| What the person asking may see | Odoo's own rights: groups, record rules, companies. There are no others. |
+| What is in the database | The live models and fields of every installed module, yours too. No dictionary to update first, and nobody writes a new tool. |
+| Business rules | What Odoo's structure does not say, such as who counts as a good payer or a good customer, goes in a context: text edited in Odoo. No bridge module. |
+| What already worked | A skill: the code of that answer, kept. Next time it barely spends tokens, and it can be exported to the next client. |
 
 ### One question, one round trip
 
@@ -364,12 +373,21 @@ Una IA de mundo abierto ve el mapa entero del sistema, incluido lo que nadie pre
 Frente a una herramienta por tarea:
 
 - **Un MCP ligero.** El cliente manda al modelo la descripción de cada herramienta en cada turno. Tres consumen poco contexto y dejan margen para preguntas complejas y para los contextos del cliente; cientos lo llenan y le dan al modelo más ocasiones de elegir mal.
-- **Tus módulos cuentan desde el primer día.** Un campo propio, un módulo de la comunidad, un modelo que nadie previó: si está en la base y el usuario puede leerlo, la IA también. Nadie escribe una herramienta nueva.
 - **Una pregunta, un viaje.** *Clientes que compraron en marzo y aún deben más de 1.000* cruza ventas, facturas y contactos. Con herramientas fijas son varias llamadas y pegar las respuestas; aquí es un script.
 - **Dos puertas que vigilar, no cientos.** Leer pasa por una puerta: solo lectura, con los permisos del usuario. Cambiar Odoo pasa por otra: un plan que espera a una persona. Ninguna herramienta escribe por su cuenta.
 - **Lo mismo en todas partes.** Las mismas tres herramientas de Odoo 14 a 20 y en todos los clientes.
 
-El precio: la IA tiene que saber Odoo. Para eso están los contextos: los modelos, las palabras y las reglas del cliente, editados en Odoo.
+### IA a la manera de Odoo
+
+La IA no trae un sistema de permisos propio, ni un diccionario de datos, ni un conector que mantener al día. Usa lo que Odoo ya tiene, por capas:
+
+| Qué necesita | De dónde lo saca |
+| :--- | :--- |
+| Un sitio donde vivir | La base de datos del cliente, como registros de Odoo: proveedores, agentes, contextos, skills, planes y el registro. Tienen permisos y se exportan e importan; un módulo los trae y otro puede cambiarlos, como cualquier registro de Odoo. |
+| Qué puede ver quien pregunta | Los permisos de Odoo: grupos, reglas de registro, compañías. No hay otros. |
+| Qué hay en la base | Los modelos y campos vivos de cada módulo instalado, también los tuyos. Sin diccionario que actualizar antes, y sin que nadie escriba una herramienta nueva. |
+| Reglas de negocio | Lo que la estructura de Odoo no dice, como quién cuenta como buen pagador o buen cliente, va en un contexto: texto editado en Odoo. Sin módulo puente. |
+| Lo que ya funcionó | Un skill: el código de esa respuesta, guardado. La próxima vez casi no gasta tokens, y se exporta al siguiente cliente. |
 
 ### Una pregunta, una ida y vuelta
 
