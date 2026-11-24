@@ -120,6 +120,12 @@ class GuardedSandboxEnv(object):
     def __contains__(self, model):
         return model in self._env
 
+    def __iter__(self):
+        return iter(self._env)
+
+    def __len__(self):
+        return len(self._env)
+
     def __getattr__(self, name):
         if blocked_private_attr(name):
             raise AttributeError(
@@ -885,6 +891,24 @@ def build_safe_context(controller, operation_type='read', previous_result=None, 
             return _resolve_field_selection(env, model, name)
 
         safe_context['field_selection'] = field_selection
+    except Exception:
+        pass
+
+    # Model discovery: ir.model is not readable by every user in every series.
+    try:
+        from odoo.addons.pns_ai_mcp.utils.model_discovery import (
+            find_models as _find_models,
+            model_module as _model_module,
+        )
+
+        def find_models(text, limit=10):
+            return _find_models(env, text, limit=limit)
+
+        def model_module(model):
+            return _model_module(env, model)
+
+        safe_context['find_models'] = find_models
+        safe_context['model_module'] = model_module
     except Exception:
         pass
 

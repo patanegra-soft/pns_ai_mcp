@@ -2,6 +2,11 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.999_owl2-3.1.999_owl3-3.1.999 (2026-11-24)
+
+- The AI finds models and reads what their module says about itself (manifest or README) for any internal user, the same on Odoo 14 to 20. Before, on recent Odoo versions a user without admin rights hit an access error when the AI looked up a model it did not know, and the AI retried without finding it.
+- README: the first layer of the knowledge cascade now includes what each module says about itself.
+
 ## owl1-3.1.998_owl2-3.1.998_owl3-3.1.998 (2026-11-24)
 
 - Slash skills link each row of their tables to its record, like the same query does in the chat. Before, a skill whose rows only carried the record id showed plain text. Existing skills benefit without being recreated.
