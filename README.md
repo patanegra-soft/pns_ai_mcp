@@ -80,12 +80,12 @@ Against one tool per task:
 
 ### AI the Odoo way
 
-The AI brings no permission system of its own, no data dictionary and no connector to keep in sync. It uses what Odoo already has, in layers:
+The AI sets up no permission system alongside Odoo's, no data dictionary and no connector to keep in sync. It uses what Odoo already has, in layers:
 
 | What it needs | Where it comes from |
 | :--- | :--- |
 | A place to live | The client's database, as Odoo records: providers, agents, contexts, skills, plans and the log. They have rights and are exported and imported; a module brings them and another can change them, as with any Odoo record. |
-| What the person asking may see | Odoo's own rights: groups, record rules, companies. There are no others. |
+| What the person asking may see and do | Odoo's own rights: groups, record rules, companies. The AI's own rights (administering it, proposing changes, reaching a URL or an API) are Odoo groups too, set on the user's form. |
 | What is in the database | The live models and fields of every installed module, yours too. No dictionary to update first, and nobody writes a new tool. |
 | Business rules | What Odoo's structure does not say, such as who counts as a good payer or a good customer, goes in a context: text edited in Odoo. No bridge module. |
 | What already worked | A skill: the code of that answer, kept. Next time it barely spends tokens, and it can be exported to the next client. |
@@ -379,12 +379,12 @@ Frente a una herramienta por tarea:
 
 ### IA a la manera de Odoo
 
-La IA no trae un sistema de permisos propio, ni un diccionario de datos, ni un conector que mantener al día. Usa lo que Odoo ya tiene, por capas:
+La IA no monta un sistema de permisos paralelo al de Odoo, ni un diccionario de datos, ni un conector que mantener al día. Usa lo que Odoo ya tiene, por capas:
 
 | Qué necesita | De dónde lo saca |
 | :--- | :--- |
 | Un sitio donde vivir | La base de datos del cliente, como registros de Odoo: proveedores, agentes, contextos, skills, planes y el registro. Tienen permisos y se exportan e importan; un módulo los trae y otro puede cambiarlos, como cualquier registro de Odoo. |
-| Qué puede ver quien pregunta | Los permisos de Odoo: grupos, reglas de registro, compañías. No hay otros. |
+| Qué puede ver y hacer quien pregunta | Los permisos de Odoo: grupos, reglas de registro, compañías. Los permisos propios de la IA (administrarla, proponer cambios, salir a una URL o a una API) también son grupos de Odoo, que se asignan en la ficha del usuario. |
 | Qué hay en la base | Los modelos y campos vivos de cada módulo instalado, también los tuyos. Sin diccionario que actualizar antes, y sin que nadie escriba una herramienta nueva. |
 | Reglas de negocio | Lo que la estructura de Odoo no dice, como quién cuenta como buen pagador o buen cliente, va en un contexto: texto editado en Odoo. Sin módulo puente. |
 | Lo que ya funcionó | Un skill: el código de esa respuesta, guardado. La próxima vez casi no gasta tokens, y se exporta al siguiente cliente. |
