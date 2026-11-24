@@ -80,15 +80,15 @@ Against one tool per task:
 
 ### AI the Odoo way
 
-**Install a module and the AI already knows it.** It reads its models, its fields and what it is for from Odoo. No dictionary to write, no connector to maintain.
+**Install a module and the AI already knows it.** It reads its models, its fields and what it is for from Odoo (what is usually called *dynamic introspection*). No dictionary to write, no connector to maintain.
 
 **What Odoo does not know, you tell it once.** Your business rules (who is a good payer, what makes a good customer) go in a context: a text you edit in Odoo.
 
 | Layer | What it knows | Who writes it |
 | :--- | :--- | :--- |
-| 1. Odoo | The installed modules, their models and fields, and what each user can see | Nobody: it is already there |
-| 2. Context | The business rules Odoo does not ship | You, only what is missing |
-| 3. Skill | Answers that already worked, ready to repeat at almost no token cost | Saved from the chat |
+| 1.&nbsp;Odoo | The installed modules, their models and fields, and what each user can see | Nobody: it is already there |
+| 2.&nbsp;Context | The business rules Odoo does not ship | You, only what is missing |
+| 3.&nbsp;Skill | Answers that already worked, ready to repeat at almost no token cost | Saved from the chat |
 
 No parallel permissions: the AI sees what the asking user sees, and its own rights (administering it, proposing changes) are Odoo groups too.
 
@@ -191,6 +191,7 @@ For example: a large model for the conversation, a small one with only Parser, a
 | Common name | Here |
 | :--- | :--- |
 | Model routing | Provider roles and the agent's chain |
+| Dynamic introspection, schema introspection | The AI reads the installed models, fields and modules from Odoo, with no dictionary |
 | Failover, fallback | The chain: if one provider fails, the next one answers |
 | LLM observability | The AI log (*Activity*): each call with its prompt, code, result, tokens and cost |
 | Human in the loop | The plan: a change waits for a person to approve it in Odoo |
@@ -383,15 +384,15 @@ Frente a una herramienta por tarea:
 
 ### IA a la manera de Odoo
 
-**Instalas un módulo y la IA ya lo conoce.** Sus modelos, sus campos y para qué sirve los lee de Odoo. No hay diccionario que escribir ni conector que mantener.
+**Instalas un módulo y la IA ya lo conoce.** Sus modelos, sus campos y para qué sirve los lee de Odoo (lo que suele llamarse *introspección dinámica*). No hay diccionario que escribir ni conector que mantener.
 
 **Lo que Odoo no sabe, se lo cuentas una vez.** Las reglas de tu negocio (quién es buen pagador, qué es un buen cliente) van en un contexto: un texto que editas en Odoo.
 
 | Capa | Qué sabe | Quién la escribe |
 | :--- | :--- | :--- |
-| 1. Odoo | Los módulos instalados, sus modelos y campos, y lo que puede ver cada usuario | Nadie: ya está |
-| 2. Contexto | Las reglas de negocio que Odoo no trae | Tú, solo lo que falta |
-| 3. Skill | Las respuestas que ya funcionaron, listas para repetir casi sin gastar tokens | Se guarda desde el chat |
+| 1.&nbsp;Odoo | Los módulos instalados, sus modelos y campos, y lo que puede ver cada usuario | Nadie: ya está |
+| 2.&nbsp;Contexto | Las reglas de negocio que Odoo no trae | Tú, solo lo que falta |
+| 3.&nbsp;Skill | Las respuestas que ya funcionaron, listas para repetir casi sin gastar tokens | Se guarda desde el chat |
 
 Sin permisos paralelos: la IA ve lo que ve el usuario que pregunta, y sus propios permisos (administrarla, proponer cambios) también son grupos de Odoo.
 
@@ -494,6 +495,7 @@ Por ejemplo: un modelo grande para la conversación, uno pequeño solo con Parse
 | Nombre común | Aquí |
 | :--- | :--- |
 | Enrutamiento de modelos (*model routing*) | Los roles de proveedor y la cadena del agente |
+| Introspección dinámica (*schema introspection*) | La IA lee de Odoo los modelos, campos y módulos instalados, sin diccionario |
 | *Failover*, *fallback* | La cadena: si un proveedor falla, responde el siguiente |
 | Observabilidad (*LLM observability*) | El registro de IA (*Activity*): cada llamada con su prompt, código, resultado, tokens y coste |
 | Humano en el bucle (*human in the loop*) | El plan: un cambio espera a que una persona lo apruebe en Odoo |
