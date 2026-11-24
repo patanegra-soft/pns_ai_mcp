@@ -2,6 +2,11 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.997_owl2-3.1.997_owl3-3.1.997 (2026-11-24)
+
+- AI tables link each row to its record again when the same id also belongs to a record of another company the user cannot open (for example, customers listed from their invoices). Before, the whole table came out without links.
+- README: new sections on the three MCP tools as a light MCP server, one question in one round trip, provider roles as model routing and the AI log as observability.
+
 ## owl1-3.1.996_owl2-3.1.996_owl3-3.1.996 (2026-11-19)
 
 - Spanish: settings help, import and export wizards, errors and selections are translated, and Odoo 16 now loads the Spanish catalogue. The activity log stays in English on purpose.
