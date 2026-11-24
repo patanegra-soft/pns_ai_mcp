@@ -2,6 +2,11 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.1000_owl2-3.1.1000_owl3-3.1.1000 (2026-11-24)
+
+- Module tests: the MCP HTTP tests use their own test user's key, not the admin's. An interrupted run no longer leaves the admin with a random key.
+- README: "AI the Odoo way" opens with the idea (a new module is already known; business rules go in a context) and names it dynamic introspection.
+
 ## owl1-3.1.999_owl2-3.1.999_owl3-3.1.999 (2026-11-24)
 
 - The AI finds models and reads what their module says about itself (manifest or README) for any internal user, the same on Odoo 14 to 20. Before, on recent Odoo versions a user without admin rights hit an access error when the AI looked up a model it did not know, and the AI retried without finding it.
