@@ -2,6 +2,10 @@
 
 What changes for people who use this module, one section per published version, newest first. The heading is the git tag.
 
+## owl1-3.1.998_owl2-3.1.998_owl3-3.1.998 (2026-11-24)
+
+- Slash skills link each row of their tables to its record, like the same query does in the chat. Before, a skill whose rows only carried the record id showed plain text. Existing skills benefit without being recreated.
+
 ## owl1-3.1.997_owl2-3.1.997_owl3-3.1.997 (2026-11-24)
 
 - AI tables link each row to its record again when the same id also belongs to a record of another company the user cannot open (for example, customers listed from their invoices). Before, the whole table came out without links.
