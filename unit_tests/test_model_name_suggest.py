@@ -32,9 +32,10 @@ class TestSuggestModelNames(unittest.TestCase):
         self.assertIn("env['ai.log']", text)
         self.assertIn('SUGGESTED MODELS', text)
 
-    def test_hint_without_suggestions_uses_ir_model_not_registry(self):
+    def test_hint_without_suggestions_uses_find_models_not_ir_model(self):
         text = format_missing_model_hint('no.such.model', [])
-        self.assertIn("env['ir.model']", text)
+        self.assertIn('find_models(', text)
+        self.assertNotIn('ir.model', text)
         self.assertNotIn('env.registry', text)
         self.assertNotIn('sorted(env.registry)', text)
 

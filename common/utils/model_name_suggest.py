@@ -73,8 +73,8 @@ def format_missing_model_hint(wanted, suggestions, *, locale='en_US'):
         )
     else:
         lines.append(
-            "[HINT] No close match among installed models. Verify with "
-            "env['ir.model'].search([]).mapped('model')."
+            "[HINT] No close match among installed models. Search by word "
+            "with find_models('<word>')."
         )
     lines.append(
         f"[OPTIONAL] For business-term → model mappings (invoice, employee…), "

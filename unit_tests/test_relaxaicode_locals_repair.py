@@ -181,8 +181,8 @@ def test_repair_registry_models_ubws_comprehension():
     out, changed = v_repair.repair_registry_models(src)
     assert changed
     assert 'registry' not in out
-    assert "env['ir.model']" in out
-    assert ".mapped('model')" in out
+    assert 'ir.model' not in out
+    assert 'for m in env if' in out
     ok, err, _w = v.validate_relaxaicode_source_ast(out)
     assert ok, err
 
@@ -198,7 +198,8 @@ def test_repair_registry_models_pr1y_for_in():
     out, changed = v_repair.repair_registry_models(src)
     assert changed
     assert 'registry' not in out
-    assert "env['ir.model']" in out
+    assert 'ir.model' not in out
+    assert 'for m in env if' in out
     ok, err, _w = v.validate_relaxaicode_source_ast(out)
     assert ok, err
 
@@ -228,7 +229,9 @@ def test_repair_registry_keys_and_sorted():
     out, changed = v_repair.repair_registry_models(src)
     assert changed
     assert 'registry' not in out
-    assert "env['ir.model']" in out
+    assert 'ir.model' not in out
+    assert 'sorted(list(env))' in out
+    assert 'also = list(env)' in out
     ok, err, _w = v.validate_relaxaicode_source_ast(out)
     assert ok, err
 
@@ -240,7 +243,8 @@ def test_repair_registry_leaves_cursor_banned():
     ok, err, _w = v.validate_relaxaicode_source_ast(out)
     assert not ok
     assert v_base.ast_error_code(err) == 'REGISTRY'
-    assert 'ir.model' in err
+    assert 'find_models' in err
+    assert 'ir.model' not in err
 
 
 def test_unrepaired_registry_has_stable_code():

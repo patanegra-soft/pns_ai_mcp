@@ -132,7 +132,8 @@ def test_dir_and_registry_hints_point_to_orm():
         "result = sorted(env.registry.models.keys())\n"
     )
     assert not good
-    assert 'ir.model' in err
+    assert 'find_models' in err
+    assert 'ir.model' not in err
 
 
 def test_nested_defaultdict_lambda_is_a_bucket_not_a_sort_key():
