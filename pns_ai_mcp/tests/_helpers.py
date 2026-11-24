@@ -214,9 +214,9 @@ def _clear_registry_caches(registry):
         registry.clear_caches()
 
 
-_ADMIN_KEY_FIELDS = (
-    'mcp_api_key_hash', 'mcp_api_key_state', 'mcp_api_key_generated_date',
-)
+# Owner of the HTTP test key. Never a real account: the key is committed, and
+# a run killed halfway (Ctrl+C, timeout) leaves it there with nobody to undo it.
+HTTP_TEST_LOGIN = 'pns_mcp_http_test@mcp.test'
 
 
 AI_PLAN_GROUPS = ('pns_ai_mcp.group_ai_writer', 'pns_ai_mcp.group_ai_admin')
@@ -237,44 +237,46 @@ def revoke_groups(user, xmlids):
         user.write({USER_GROUPS_FIELD: [(3, user.env.ref(x).id) for x in xmlids]})
 
 
-def _write_mcp_http_fixtures(fix_env, api_key):
-    """Put ``api_key`` and the conversational group on admin.
-
-    Returns what admin had before, for ``_restore_admin_key``.
-    """
-    from odoo.addons.pns_ai_mcp.utils.api_key import hash_api_key
+def _http_test_user(fix_env):
+    """The internal user that owns the HTTP test key, created on first use."""
     from odoo.addons.pns_ai_mcp.utils.conversational import GROUP_AI_CONVERSATIONAL
+    Users = fix_env['res.users'].sudo().with_context(active_test=False)
+    user = Users.search([('login', '=', HTTP_TEST_LOGIN)], limit=1)
+    if not user:
+        user = create_test_user(
+            fix_env, login=HTTP_TEST_LOGIN, name='MCP HTTP test',
+        )
+    elif not user.active:
+        user.write({'active': True})
+    grant_groups(user, [GROUP_AI_CONVERSATIONAL])
+    return user
+
+
+def _write_mcp_http_fixtures(fix_env, api_key):
+    """Put ``api_key`` on the HTTP test user. Nobody else's key is touched."""
+    from odoo.addons.pns_ai_mcp.utils.api_key import hash_api_key
     ensure_test_agents(fix_env)
-    test_user = fix_env.ref('base.user_admin')
-    test_user.write({'active': True})
-    key_hash = hash_api_key(api_key)
+    user = _http_test_user(fix_env)
     mcp_user_model = fix_env['ai.mcp.user'].sudo()
-    mcp_user = mcp_user_model.search([('user_id', '=', test_user.id)], limit=1)
-    previous = {
-        'key': {f: mcp_user[f] for f in _ADMIN_KEY_FIELDS} if mcp_user else None,
-    }
+    mcp_user = mcp_user_model.search([('user_id', '=', user.id)], limit=1)
     if not mcp_user:
-        mcp_user = mcp_user_model.create({'user_id': test_user.id})
+        mcp_user = mcp_user_model.create({'user_id': user.id})
     mcp_user.write({
-        'mcp_api_key_hash': key_hash,
+        'mcp_api_key_hash': hash_api_key(api_key),
         'mcp_api_key_state': 'generated',
     })
-    previous['groups_added'] = grant_groups(test_user, [GROUP_AI_CONVERSATIONAL])
-    return previous
 
 
-def _restore_admin_key(fix_env, previous):
-    test_user = fix_env.ref('base.user_admin')
-    revoke_groups(test_user, previous.get('groups_added'))
-    mcp_user = fix_env['ai.mcp.user'].sudo().search(
-        [('user_id', '=', test_user.id)], limit=1,
+def _drop_http_test_key(fix_env):
+    user = fix_env['res.users'].sudo().with_context(active_test=False).search(
+        [('login', '=', HTTP_TEST_LOGIN)], limit=1,
     )
-    if not mcp_user:
+    if not user:
         return
-    if previous.get('key') is None:
-        mcp_user.unlink()
-    else:
-        mcp_user.write(previous['key'])
+    fix_env['ai.mcp.user'].sudo().search([('user_id', '=', user.id)]).write({
+        'mcp_api_key_hash': False,
+        'mcp_api_key_state': 'not_generated',
+    })
 
 
 def _count_active_mcp_key(env, api_key):
@@ -289,8 +291,8 @@ def setup_http_mcp_fixtures(cls, env):
     """MCP API key for HttpCase: commit depending on the Odoo version.
 
     The key is committed (the HTTP worker reads it on another cursor), so it
-    is random per class and ``teardown_http_mcp_fixtures`` gives admin back
-    the key it had.
+    is random per class and belongs to ``HTTP_TEST_LOGIN``, never to a real
+    account. ``teardown_http_mcp_fixtures`` clears it.
     """
     import secrets
     from odoo import api, SUPERUSER_ID
@@ -302,41 +304,38 @@ def setup_http_mcp_fixtures(cls, env):
 
     if ODOO_VERSION <= 14:
         # O14: each test owns its cursor (no savepoint); same one as url_open.
-        fix_env = env(user=SUPERUSER_ID)
-        previous = _write_mcp_http_fixtures(fix_env, api_key)
+        _write_mcp_http_fixtures(env(user=SUPERUSER_ID), api_key)
         env.cr.commit()
     else:
         # O15+: the tests of a class share one cursor with a savepoint each;
         # a commit there drops the savepoints. Separate cursor with commit.
         with env.registry.cursor() as cr:
-            fix_env = api.Environment(cr, SUPERUSER_ID, {})
-            previous = _write_mcp_http_fixtures(fix_env, api_key)
+            _write_mcp_http_fixtures(api.Environment(cr, SUPERUSER_ID, {}), api_key)
             cr.commit()
-    if not hasattr(cls, '_pns_admin_key_backup'):
-        cls._pns_admin_key_backup = previous
+    cls._pns_http_key_written = True
 
     _clear_registry_caches(env.registry)
     found = _count_active_mcp_key(env(user=SUPERUSER_ID), api_key)
     if not found:
         raise AssertionError(
             'MCP test API key not visible after commit (%s). '
-            'Check ai.mcp.user for admin on db %s.' % (api_key, env.cr.dbname)
+            'Check ai.mcp.user of %s on db %s.'
+            % (api_key, HTTP_TEST_LOGIN, env.cr.dbname)
         )
     cls._pns_http_fixtures_done = True
 
 
 def teardown_http_mcp_fixtures(cls):
-    """Give admin back the MCP key it had before ``setup_http_mcp_fixtures``."""
+    """Clear the key ``setup_http_mcp_fixtures`` gave the HTTP test user."""
     from odoo import api, SUPERUSER_ID
     from odoo.modules.registry import Registry
     from odoo.tests.common import get_db_name
-    if not hasattr(cls, '_pns_admin_key_backup'):
+    if not getattr(cls, '_pns_http_key_written', False):
         return
-    previous = cls._pns_admin_key_backup
-    del cls._pns_admin_key_backup
+    del cls._pns_http_key_written
     registry = Registry(get_db_name())
     with registry.cursor() as cr:
-        _restore_admin_key(api.Environment(cr, SUPERUSER_ID, {}), previous)
+        _drop_http_test_key(api.Environment(cr, SUPERUSER_ID, {}))
         cr.commit()
     _clear_registry_caches(registry)
 
