@@ -269,27 +269,25 @@ def _is_env_registry_models(node):
     )
 
 
-def _ir_model_names_expr():
-    """AST for ``env['ir.model'].search([]).mapped('model')``."""
-    ir_model = ast.Subscript(
-        value=ast.Name(id='env', ctx=ast.Load()),
-        slice=ast.Constant(value='ir.model'),
-        ctx=ast.Load(),
-    )
-    search_call = ast.Call(
-        func=ast.Attribute(value=ir_model, attr='search', ctx=ast.Load()),
-        args=[ast.List(elts=[], ctx=ast.Load())],
-        keywords=[],
-    )
+def _env_expr():
+    """AST for ``env``: iterating it yields the model names, like Odoo's."""
+    return ast.Name(id='env', ctx=ast.Load())
+
+
+def _env_model_names_expr():
+    """AST for ``list(env)``.
+
+    Not ``ir.model``: a plain internal user cannot read it from Odoo 17 on.
+    """
     return ast.Call(
-        func=ast.Attribute(value=search_call, attr='mapped', ctx=ast.Load()),
-        args=[ast.Constant(value='model')],
+        func=ast.Name(id='list', ctx=ast.Load()),
+        args=[_env_expr()],
         keywords=[],
     )
 
 
 class _RewriteRegistryModels(ast.NodeTransformer):
-    """Odoo idiom for listing models via registry → ``ir.model``.
+    """Odoo idiom for listing models via registry → the sandbox ``env``.
 
     Rewrites only listing/membership/subscript. ``env.registry.cursor()`` and
     other attrs stay forbidden.
@@ -312,7 +310,7 @@ class _RewriteRegistryModels(ast.NodeTransformer):
             )
         ):
             self.changed = True
-            return _ir_model_names_expr()
+            return _env_model_names_expr()
         if (
             isinstance(func, ast.Name)
             and func.id in _REGISTRY_LISTING_FUNCS
@@ -324,7 +322,7 @@ class _RewriteRegistryModels(ast.NodeTransformer):
             node = ast.copy_location(
                 ast.Call(
                     func=func,
-                    args=[_ir_model_names_expr()],
+                    args=[_env_expr()],
                     keywords=[],
                 ),
                 node,
@@ -335,7 +333,7 @@ class _RewriteRegistryModels(ast.NodeTransformer):
     def visit_Attribute(self, node):
         if _is_env_registry_models(node):
             self.changed = True
-            return _ir_model_names_expr()
+            return _env_expr()
         return self.generic_visit(node)
 
     def visit_Compare(self, node):
@@ -347,33 +345,33 @@ class _RewriteRegistryModels(ast.NodeTransformer):
             and _is_env_registry_attr(node.comparators[0])
         ):
             self.changed = True
-            node.comparators[0] = ast.Name(id='env', ctx=ast.Load())
+            node.comparators[0] = _env_expr()
         return node
 
     def visit_Subscript(self, node):
         node = self.generic_visit(node)
         if _is_env_registry_attr(node.value):
             self.changed = True
-            node.value = ast.Name(id='env', ctx=ast.Load())
+            node.value = _env_expr()
         return node
 
     def visit_comprehension(self, node):
         node = self.generic_visit(node)
         if _is_env_registry_attr(node.iter):
             self.changed = True
-            node.iter = _ir_model_names_expr()
+            node.iter = _env_expr()
         return node
 
     def visit_For(self, node):
         node = self.generic_visit(node)
         if _is_env_registry_attr(node.iter):
             self.changed = True
-            node.iter = _ir_model_names_expr()
+            node.iter = _env_expr()
         return node
 
 
 def repair_registry_models(code):
-    """Rewrite listing/membership of ``env.registry`` → ``ir.model``.
+    """Rewrite listing/membership of ``env.registry`` → the sandbox ``env``.
 
     Typical LLM idiom (UBWS/PR1Y): iterate ``env.registry.models`` or
     ``env.registry`` to discover names. The lock still blocks
@@ -397,7 +395,7 @@ def repair_registry_models(code):
         return ast.unparse(new_tree), True
     except Exception:
         _logger.warning(
-            'repair env.registry→ir.model: ast.unparse failed', exc_info=True,
+            'repair env.registry→env: ast.unparse failed', exc_info=True,
         )
         return code, False
 

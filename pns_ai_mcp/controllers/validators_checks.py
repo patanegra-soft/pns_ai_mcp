@@ -49,7 +49,7 @@ def _dangerous_attr_error(attr):
         return format_ast_error(
             'REGISTRY',
             "Cannot access '%s'. "
-            "Discover models with env['ir.model'].search([('model', 'ilike', '…')]) "
+            "Discover models with find_models('<word>') (or list(env)) "
             "and fields with env['model.name']._fields — never env.registry."
             % attr,
         )
