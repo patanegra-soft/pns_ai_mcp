@@ -4,6 +4,9 @@
 """Which Odoo model each row of a relaxaicode result is: stamp, missing ids, record refs."""
 
 import re
+
+from odoo.addons.pns_base.utils.compat import ODOO_VERSION
+
 from .relaxaicode_rows import (
     _is_technical_model,
     _iter_all_tabular_row_lists,
@@ -165,12 +168,12 @@ def _score_record_fit(env, model, rid, row):
         rec = env[model].browse(rid)
         if not rec.exists():
             return -1
+        dname = _norm_label(rec.display_name or '')
     except Exception:
         return -1
 
     texts, nums = _row_cell_values(row)
     score = 0
-    dname = _norm_label(rec.display_name or '')
     name = ''
     try:
         if 'name' in rec._fields and isinstance(rec.name, str):
@@ -261,7 +264,17 @@ def _model_exists(env, model, rid):
     try:
         if model not in env:
             return False
-        return bool(env[model].browse(rid).exists())
+        rec = env[model].browse(rid).exists()
+        if not rec:
+            return False
+        # exists() ignores record rules: the same id in another company is not
+        # a candidate the user can open.
+        if ODOO_VERSION >= 18:
+            rec.check_access('read')
+        else:
+            rec.check_access_rights('read')
+            rec.check_access_rule('read')
+        return True
     except Exception:
         return False
 
