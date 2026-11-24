@@ -243,6 +243,29 @@ class TestRelaxAICodeModelStamp(TransactionCase):
         )
         self.assertIsNone(result['data'][0].get('__model'))
 
+    def test_a_record_of_another_company_is_not_a_candidate(self):
+        """exists() is not enough: an id the user cannot read takes no link.
+
+        Otherwise the same id in another company's model ties with the real
+        one, reading its name fails and the whole table loses its links.
+        """
+        from odoo.addons.pns_ai_mcp.controllers.relaxaicode_models import (
+            _model_exists,
+        )
+        other = self.env['res.company'].create({'name': 'ACME Other'})
+        hidden = self.env['res.partner'].create({
+            'name': 'ACME Hidden', 'company_id': other.id,
+        })
+        user = self.env['res.users'].create({
+            'name': 'Juan Pérez',
+            'login': 'juan.perez.stamp@example.com',
+            'company_id': self.env.company.id,
+            'company_ids': [(6, 0, [self.env.company.id])],
+        })
+        env = self.env(user=user)
+        self.assertFalse(_model_exists(env, 'res.partner', hidden.id))
+        self.assertTrue(_model_exists(env, 'res.partner', user.partner_id.id))
+
     def test_stamp_from_xmlid_column(self):
         """Cell XML=module.name → unambiguous __model (avoids id ties)."""
         from odoo.addons.pns_ai_mcp.controllers.relaxaicode_rows import (
