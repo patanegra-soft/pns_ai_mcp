@@ -41,6 +41,17 @@ class TestSkillBoxA(TransactionCase):
         cr = opened[0]
         self.assertTrue(getattr(cr, 'closed', getattr(cr, '_closed', False)))
 
+    def test_skill_rows_get_their_model_like_relaxaicode(self):
+        """A row with only ``id`` is stamped, so the slash table links it too."""
+        result, _opened, diag = self._run(
+            "p = env.user.partner_id\n"
+            "result = {'data': [{'id': p.id, 'Cliente': p.name}]}"
+        )
+        self.assertTrue(result, diag)
+        row = result['data'][0]
+        self.assertEqual(row.get('__model'), 'res.partner')
+        self.assertEqual(row.get('id'), self.env.user.partner_id.id)
+
     def test_a_returned_record_is_usable_after_the_box_closes(self):
         result, _opened, diag = self._run("result = {'me': env.user}")
         self.assertTrue(result, diag)
