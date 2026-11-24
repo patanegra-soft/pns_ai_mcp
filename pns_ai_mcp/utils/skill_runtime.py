@@ -216,6 +216,7 @@ def bootstrap_skill_code_body(env, code, arguments='', skill_code='skill',
             compile_sandbox,
         )
         from ..controllers.controller_helpers import open_readonly_env
+        from ..controllers.relaxaicode_outcome import stamp_skill_rows
 
         class _Ctrl(object):
             def __init__(self, _env):
@@ -256,6 +257,7 @@ def bootstrap_skill_code_body(env, code, arguments='', skill_code='skill',
             for key, val in params.items():
                 ctx[key] = val
             exec(compile_sandbox(code, '<skill:%s>' % (skill_code or 'x')), ctx, ctx)
+            stamp_skill_rows(ctx.get('result'), ctx, code, ro_env)
             result = _records_onto(ctx.get('result'), env)
         finally:
             try:
