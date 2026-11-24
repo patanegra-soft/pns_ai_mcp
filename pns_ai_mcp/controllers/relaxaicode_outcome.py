@@ -98,6 +98,56 @@ def _too_large_response(controller, result, code, agent_llm, context_data,
     return None
 
 
+def _stamp_record_rows(controller, result, safe_context, code, env):
+    """Fill the ids the code left out and stamp each row's ``__model``.
+
+    Returns the only model the code names, or None.
+    """
+    # Infer each row's model WITHOUT relying on the LLM setting __model
+    # (fragile): (1) from the live recordsets in the sandbox namespace
+    # (id→real model) and (2) as a hint, from the only model referenced as
+    # env['x'] in the code. This way pictures (URL /web/image) and
+    # clickable links come out deterministically.
+    id_model_map = _infer_id_model_map(safe_context)
+    code_models = _models_from_code(code)
+    single_model = next(iter(code_models)) if len(code_models) == 1 else None
+    candidates = set(code_models)
+    candidates |= _related_models_from_code(code, env, code_models)
+    # Before the stamp: fill the id the LLM left out (links).
+    try:
+        _backfill_missing_record_ids(
+            result,
+            safe_context,
+            env=env,
+            candidate_models=candidates,
+            single_model=single_model,
+        )
+    except Exception as bf_err:
+        _logger.debug('backfill record ids: %s (no-op)', bf_err)
+    _stamp_models(
+        result,
+        id_model_map,
+        single_model=single_model,
+        env=env,
+        candidate_models=candidates,
+        turn_models=_turn_memory_models(controller),
+    )
+    return single_model
+
+
+def stamp_skill_rows(result, safe_context, code, env):
+    """A slash skill's rows get the same model stamp and record refs as relaxaicode."""
+    if not isinstance(result, dict):
+        return
+    try:
+        single_model = _stamp_record_rows(None, result, safe_context, code, env)
+        if not (result.get('__row_links__') is False
+                or result.get('links') is False):
+            _collect_record_refs(result, model_hint=single_model, env=env)
+    except Exception as err:
+        _logger.debug('skill row links: %s (no-op)', err)
+
+
 def _link_and_picture_rows(controller, result, safe_context, code, agent_llm,
                            context_data, phase, return_mode, env):
     """Stamp each row with its model, fill ids, collect record refs, turn base64 into URLs.
@@ -111,11 +161,6 @@ def _link_and_picture_rows(controller, result, safe_context, code, agent_llm,
     # POST-PROCESS PICTURES: base64 → URL /web/image/
     # ============================================================
     if isinstance(result, dict):
-        # Infer each row's model WITHOUT relying on the LLM setting
-        # __model (fragile): (1) from the live recordsets in the sandbox
-        # namespace (id→real model) and (2) as a hint, from the only model
-        # referenced as env['x'] in the code. This way pictures (URL
-        # /web/image) and clickable links come out deterministically.
         _single_model = None
         _env = None
         # User opt-out ("clean table / no links"): the LLM sets
@@ -126,32 +171,9 @@ def _link_and_picture_rows(controller, result, safe_context, code, agent_llm,
         _links_off = (result.get('__row_links__') is False
                       or result.get('links') is False)
         try:
-            _id_model_map = _infer_id_model_map(safe_context)
-            _code_models = _models_from_code(code)
-            _single_model = (
-                next(iter(_code_models)) if len(_code_models) == 1 else None
-            )
             _env = env
-            _candidates = set(_code_models)
-            _candidates |= _related_models_from_code(code, _env, _code_models)
-            # Before the stamp: fill the id the LLM left out (links).
-            try:
-                _backfill_missing_record_ids(
-                    result,
-                    safe_context,
-                    env=_env,
-                    candidate_models=_candidates,
-                    single_model=_single_model,
-                )
-            except Exception as bf_err:
-                _logger.debug('backfill record ids: %s (no-op)', bf_err)
-            _stamp_models(
-                result,
-                _id_model_map,
-                single_model=_single_model,
-                env=_env,
-                candidate_models=_candidates,
-                turn_models=_turn_memory_models(controller),
+            _single_model = _stamp_record_rows(
+                controller, result, safe_context, code, env,
             )
             # Only if there are rows whose label matches a sandbox recordset
             # (a clear missing id). A non-empty index alone is NOT enough:
