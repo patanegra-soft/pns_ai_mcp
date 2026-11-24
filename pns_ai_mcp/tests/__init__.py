@@ -38,3 +38,4 @@ from . import test_server_identity_detection
 from . import test_sandbox_secret_read
 from . import test_one_company_live
 from . import test_key_of_settings_admin
+from . import test_model_discovery_live
