@@ -329,7 +329,7 @@ def _tool_error_response(controller, e):
     if "Invalid leaf" in error_msg:
         field_match = re.search(r"Invalid leaf \('([^']+)'", error_msg)
         field_name = field_match.group(1) if field_match else "unknown"
-        error_msg += f" [HINT] The field '{field_name}' in your domain filter is likely invalid for this model. Verify correct field names with get_context or ir.model.fields."
+        error_msg += f" [HINT] The field '{field_name}' in your domain filter is likely invalid for this model. Verify correct field names with env['<model>']._fields or fields_get()."
 
     # READ ONLY transaction (box A): the ORM tried a side-effect write
     if 'read-only' in error_msg.lower() or error_type == 'ReadOnlySqlTransaction':
