@@ -80,13 +80,17 @@ Against one tool per task:
 
 ### AI the Odoo way
 
-The AI sets up no permission system alongside Odoo's, no data dictionary and no connector to keep in sync. Knowledge falls in a cascade: each layer adds only what the one above does not know, and nothing is written twice.
+**Install a module and the AI already knows it.** It reads its models, its fields and what it is for from Odoo. No dictionary to write, no connector to maintain.
 
-| Layer | What it adds | Who writes it |
+**What Odoo does not know, you tell it once.** Your business rules (who is a good payer, what makes a good customer) go in a context: a text you edit in Odoo.
+
+| Layer | What it knows | Who writes it |
 | :--- | :--- | :--- |
-| 1. Odoo | Rights: groups, record rules, companies; the AI's own rights (administering it, proposing changes, reaching a URL or an API) are Odoo groups too. Structure: the live models and fields of every installed module, with their labels, help texts and values, and what each module says about itself in its manifest or README. Install a new module and the AI understands it at once, with no dictionary to update, for any internal user and on Odoo 14 to 20 alike. | Nobody: it is already there |
-| 2. Context | Business rules, what the structure does not say: who counts as a good payer or a good customer. Text edited in Odoo, no bridge module. | You, and only what is missing |
-| 3. Skill | What already worked: the code of that answer, built on layers 1 and 2 without reasoning them out again. It barely spends tokens. | Saved from the chat |
+| 1. Odoo | The installed modules, their models and fields, and what each user can see | Nobody: it is already there |
+| 2. Context | The business rules Odoo does not ship | You, only what is missing |
+| 3. Skill | Answers that already worked, ready to repeat at almost no token cost | Saved from the chat |
+
+No parallel permissions: the AI sees what the asking user sees, and its own rights (administering it, proposing changes) are Odoo groups too.
 
 All of it lives in the client's database as Odoo records: providers, agents, contexts, skills, plans and the log. They have rights, they are exported to the next client, and a module brings them while another can change them, as with any Odoo record.
 
@@ -379,13 +383,17 @@ Frente a una herramienta por tarea:
 
 ### IA a la manera de Odoo
 
-La IA no monta un sistema de permisos paralelo al de Odoo, ni un diccionario de datos, ni un conector que mantener al día. El conocimiento cae en cascada: cada capa solo añade lo que la anterior no sabe, y nada se escribe dos veces.
+**Instalas un módulo y la IA ya lo conoce.** Sus modelos, sus campos y para qué sirve los lee de Odoo. No hay diccionario que escribir ni conector que mantener.
 
-| Capa | Qué añade | Quién la escribe |
+**Lo que Odoo no sabe, se lo cuentas una vez.** Las reglas de tu negocio (quién es buen pagador, qué es un buen cliente) van en un contexto: un texto que editas en Odoo.
+
+| Capa | Qué sabe | Quién la escribe |
 | :--- | :--- | :--- |
-| 1. Odoo | Permisos: grupos, reglas de registro, compañías; los permisos propios de la IA (administrarla, proponer cambios, salir a una URL o a una API) también son grupos de Odoo. Estructura: los modelos y campos vivos de cada módulo instalado, con sus etiquetas, ayudas y valores, y lo que cada módulo cuenta de sí mismo en su manifiesto o su README. Instalas un módulo nuevo y la IA ya lo entiende, sin diccionario que actualizar, para cualquier usuario interno y igual de Odoo 14 a 20. | Nadie: ya está |
-| 2. Contexto | Las reglas de negocio, lo que la estructura no dice: quién cuenta como buen pagador o buen cliente. Texto editado en Odoo, sin módulo puente. | Tú, y solo lo que falta |
-| 3. Skill | Lo que ya funcionó: el código de esa respuesta, que se apoya en las capas 1 y 2 sin volver a razonarlas. Casi no gasta tokens. | Se guarda desde el chat |
+| 1. Odoo | Los módulos instalados, sus modelos y campos, y lo que puede ver cada usuario | Nadie: ya está |
+| 2. Contexto | Las reglas de negocio que Odoo no trae | Tú, solo lo que falta |
+| 3. Skill | Las respuestas que ya funcionaron, listas para repetir casi sin gastar tokens | Se guarda desde el chat |
+
+Sin permisos paralelos: la IA ve lo que ve el usuario que pregunta, y sus propios permisos (administrarla, proponer cambios) también son grupos de Odoo.
 
 Todo vive en la base de datos del cliente como registros de Odoo: proveedores, agentes, contextos, skills, planes y el registro. Tienen permisos, se exportan al siguiente cliente, y un módulo los trae y otro puede cambiarlos, como cualquier registro de Odoo.
 
